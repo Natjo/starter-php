@@ -1,0 +1,15 @@
+.link {
+    display: inline-flex;
+    align-items: center;
+    gap: .8rem;
+
+    &:hover {
+        text-decoration: underline;
+    }
+
+    &.link-1 {}
+
+    &.link-2 {
+        font-weight: 600;
+    }
+}

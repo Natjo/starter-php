@@ -1,0 +1,83 @@
+html {
+    font-size: 62.5%;
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-1);
+    font-size: 1.6rem;
+    color: var(--color-text);
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+
+    &.hasPopin {
+        height: 100vh;
+        overflow: hidden !important;
+        position: relative;
+        touch-action: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+}
+
+.hero {
+    display: grid;
+    grid-template-columns: var(--layout);
+    --ctr: ctr;
+
+    >* {
+        grid-column: ctr;
+    }
+}
+
+.strate {
+    display: grid;
+    grid-template-columns: var(--layout);
+    align-content: start;
+    --ctr: ctr;
+
+    >* {
+        grid-column: var(--ctr);
+    }
+
+    --mb: var(--margin-md);
+    --pt: var(--margin-md);
+    --pb: var(--margin-md);
+
+    margin-bottom: var(--mb);
+    margin-top: var(--mt, 0);
+
+    &[class*="bg"] {
+        padding-top: var(--pt);
+        padding-bottom: var(--pb);
+    }
+
+
+
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: var(--gap);
+    align-content: start;
+
+    >* {
+        grid-column: 1/-1;
+    }
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}

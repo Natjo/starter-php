@@ -1,0 +1,56 @@
+.autocomplete-field {
+    position: relative;
+
+    label {
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .autocomplete {
+        position: relative;
+
+        input[role="combobox"] {
+            width: 100%;
+            padding: 8px 32px 8px 12px;
+            box-sizing: border-box;
+        }
+
+        svg {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        [role="listbox"] {
+            position: absolute;
+            inset-block-start: 100%;
+            inset-inline-start: 0;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            background: #fff;
+            border: 1px solid #ccc;
+            width: 100%;
+            max-height: 12em;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            z-index: 2;
+
+            &.hidden {
+                display: none;
+            }
+
+            [role="option"] {
+                padding: 8px 12px;
+                cursor: pointer;
+
+                &[aria-selected="true"] {
+                    background-color: #005EA5;
+                    color: #fff;
+                }
+            }
+        }
+    }
+}

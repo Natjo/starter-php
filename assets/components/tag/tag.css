@@ -1,0 +1,13 @@
+.tag{
+    color:var(--color-2);
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-transform: uppercase;
+
+    &[disabled]{
+        pointer-events: none;
+        opacity: 0.5;
+        cursor: not-allowed;
+       
+    }
+}

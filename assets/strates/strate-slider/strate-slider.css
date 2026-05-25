@@ -1,0 +1,12 @@
+.strate-slider {
+    .slider {
+        --nb: 2;
+        grid-column: ctr-sm;
+    }
+
+    .card-news {
+        img {
+            height: 400px
+        }
+    }
+}

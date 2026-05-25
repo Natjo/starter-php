@@ -1,0 +1,21 @@
+@custom-media --breakpoint-sm-up (min-width: 481px);
+@custom-media --breakpoint-md-up (min-width: 841px);
+@custom-media --breakpoint-lg-up (min-width: 1141px);
+@custom-media --breakpoint-xl-up (min-width: 1441px);
+
+@custom-media --breakpoint-sm-down (max-width: 480px);
+@custom-media --breakpoint-md-down (max-width: 840px);
+@custom-media --breakpoint-lg-down (max-width: 1140px);
+@custom-media --breakpoint-xl-down (max-width: 1440px); 
+
+
+/*
+@custom-media --breakpoint-sm-up (min-width: calc(48.1rem * .625));
+@custom-media --breakpoint-md-up (min-width: calc(76.9rem * .625));
+@custom-media --breakpoint-lg-up (min-width: calc(101.1rem * .625));
+@custom-media --breakpoint-xl-up (min-width: calc(147.1rem * .625));
+
+@custom-media --breakpoint-sm-down (max-width: calc(48rem * .625));
+@custom-media --breakpoint-md-down (max-width: calc(76.8rem * .625));
+@custom-media --breakpoint-lg-down (max-width: calc(101rem * .625));
+@custom-media --breakpoint-xl-down (max-width: calc(147rem * .625));*/

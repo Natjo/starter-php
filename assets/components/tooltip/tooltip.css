@@ -1,0 +1,44 @@
+.tooltip {
+    display: inline-block;
+
+    .trigger-button {
+        border-bottom: 1px dotted currentColor;
+        color: var(--color-2);
+        cursor: help;
+        display: inline-flex;
+        font-weight: 700;
+        line-height: 1.2;
+        anchor-name: --my-anchor;
+    }
+
+    .trigger-button:focus-visible {
+        outline-offset: .3rem;
+    }
+
+    .tooltip-content {
+        color: darkblue;
+        background-color: azure;
+        border: 1px solid #dddddd;
+        padding: 10px;
+        border-radius: 10px;
+        font-size: 1rem;
+        position: fixed;
+        position-anchor: --my-anchor;
+        position-area: top;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .3s ease;
+    }
+
+    &:hover .tooltip-content,
+    &:focus-within .tooltip-content {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@supports (position-anchor: --tooltip) {
+    .tooltip {
+        .tooltip-content {}
+    }
+}

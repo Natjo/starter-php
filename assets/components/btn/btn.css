@@ -1,0 +1,60 @@
+.btn {
+    font-size: 1.6rem;
+    font-weight: 600;
+    background-color: var(--color-2);
+    color: #fff;
+    box-sizing: border-box;
+    padding: 1.2em 1.6em;
+    transition: opacity .3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: .8rem;
+    border-radius: .4rem;
+    text-align: center;
+    justify-content: center;
+    line-height: 2rem;
+    text-align: center;
+    white-space: nowrap;
+    transition: background .3s ease;
+
+    &[aria-disabled=true] {
+        opacity: .5;
+    }
+
+    &:hover {
+        background: #0090AA;
+    }
+
+    .icon{
+        height:auto;
+    }
+
+    &:disabled{
+        opacity: .5;
+        pointer-events: none;
+    }
+
+    &.sm{
+        font-size: 80%;
+    }
+
+    &.lg{
+        font-size: 120%;
+    }
+
+}
+
+.btn-1{
+
+}
+
+.btn-2{
+    background: none;
+    color: var(--color-text);
+    border:2px solid var(--color-text);
+    color: var(--color-text);
+    &:hover{
+        background: var(--color-text);
+        color: #fff;
+    }
+}
