@@ -216,7 +216,7 @@ class component
             $data["attributes"] = $attributes;
         }
 
-        get_template_part('assets/components/header', '', $data);
+        get_template_part('assets/components/header/header', null, $data);
     }
     public static function badge($name, $classes = null, $attributes = null)
     {
@@ -415,14 +415,14 @@ class component
             "attributes" => $attributes,
         ]);
     }
-        /**
+    /**
      * @param array<int, array{name:string,value?:string,selected?:bool,disabled?:bool}> $args
      */
     public static function select($args, $label = null, $name = null, $classes = null, $attributes = null)
     {
         if (empty($args) || !is_array($args)) return;
 
-   
+
         get_template_part('assets/components/select/select', null, [
             "args" => $args,
             "label" => $label,
@@ -449,7 +449,7 @@ class component
         ]);
     }
 
-        public static function shares($list, $classes = null)
+    public static function shares($list, $classes = null)
     {
         if (empty($list)) return;
 
@@ -458,6 +458,122 @@ class component
             "classes" => $classes
         ];
 
-        get_template_part('assets/components/shares', '', $args);
+        get_template_part('assets/components/shares/shares', null, $args);
     }
+
+    public static function video($url, $title = "", $poster = null, $autoplay = false, $loop = false, $classes = null, $attributes = null)
+    {
+        if (empty($url)) return;
+
+        if (is_int($poster) || (is_string($poster) && ctype_digit($poster))) {
+            $height = (int) $poster;
+            $poster = null;
+            $style = "height: {$height}px;";
+            $attributes = trim((string) $attributes);
+            $attributes = trim($attributes . ' style="' . esc_attr($style) . '"');
+        }
+
+        get_template_part('assets/components/video/video', '', [
+            "url" => $url,
+            "title" => $title,
+            "poster" => $poster,
+            "autoplay" => $autoplay,
+            "loop" => $loop,
+            "classes" => $classes,
+            "attributes" => $attributes,
+        ]);
+    }
+
+    /**
+     * @param array $rows Tableau de lignes ; chaque ligne est un tableau de colonnes (string ou cellule).
+     *                    La première ligne alimente le <thead>.
+     */
+    public static function table($rows, $classes = null, $attributes = null)
+    {
+        if (!is_array($rows) || empty($rows)) {
+            return;
+        }
+        get_template_part('assets/components/table/table', '', [
+            'rows' => $rows,
+            'classes' => $classes,
+            'attributes' => $attributes,
+        ]);
+    }
+
+    public static function list($items, $card = "news", $classes = null)
+    {
+        if (empty($items)) return;
+
+        if ($card === "news") {
+            $card = "card-news";
+        }
+
+        $args = [
+            "items" => $items,
+            "card" => $card,
+            "classes" => $classes,
+        ];
+        get_template_part('assets/components/list/list', '', $args);
+    }
+
+    public static function image($image, $size = "full", $classes = "", $lazy = true)
+    {
+        if (empty($image)) return;
+
+        get_template_part('assets/components/image/image', '',   [
+            "image" => $image,
+            "size" => $size,
+            "classes" => $classes,
+            "lazy" => $lazy,
+        ]);
+    }
+
+
+    public static function tag($args, $type = "info", $classes = null, $attributes = null)
+    {
+        get_template_part('assets/components/tag/tag', '', [
+            "args" => $args,
+            "type" => $type,
+            "classes" => $classes,
+            "attributes" => $attributes,
+        ]);
+    }
+
+
+    public static function tooltip($label, $content, $classes = null, $attributes = null)
+    {
+        if (empty($label) || empty($content)) return;
+
+        get_template_part('assets/components/tooltip/tooltip', '', [
+            "label" => $label,
+            "content" => $content,
+            "classes" => $classes,
+            "attributes" => $attributes,
+        ]);
+    }
+    public static function search($label = null, $placeholder = null, $button_label = null, $action = null, $classes = null, $attributes = null)
+    {
+        get_template_part('assets/components/search/search', '', [
+            "label" => $label,
+            "placeholder" => $placeholder,
+            "button_label" => $button_label,
+            "action" => $action,
+            "classes" => $classes,
+            "attributes" => $attributes,
+        ]);
+    }
+
+    public static function autocomplete($items, $label, $classes = null, $attributes = null)
+    {
+        if (empty($items) || !is_array($items)) return;
+
+        get_template_part('assets/components/autocomplete/autocomplete', '', [
+            "items" => $items,
+            "label" => $label,
+            "classes" => $classes,
+            "attributes" => $attributes,
+        ]);
+    }
+
+    
 }

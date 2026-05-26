@@ -20,7 +20,7 @@
  *
  * Click extérieur                       → ferme le menu
  */
-export default class Autocomplete {
+class Autocomplete {
     constructor(root) {
         if (!(root instanceof HTMLElement)) return;
         if (root.__autocompleteInstance) return root.__autocompleteInstance;
@@ -302,4 +302,8 @@ export default class Autocomplete {
         this._cleanups = [];
         if (this.root) delete this.root.__autocompleteInstance;
     }
+}
+
+export default function autocomplete(root) {
+    return new Autocomplete(root);
 }

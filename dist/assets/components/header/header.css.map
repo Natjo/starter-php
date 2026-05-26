@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../assets/components/header/header.css"],"names":[],"mappings":"AAAA,kBACI,YAAa,CACb,UACJ","file":"header.css","sourcesContent":[".component-header {\n    display: grid;\n    gap: 1.6rem;\n}\n"]}

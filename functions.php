@@ -1,5 +1,50 @@
 <?php
 
+if (!function_exists('__')) {
+    function __($text, $domain = null)
+    {
+        return $text;
+    }
+}
+
+if (!function_exists('esc_attr')) {
+    function esc_attr($text)
+    {
+        return htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+if (!function_exists('esc_html')) {
+    function esc_html($text)
+    {
+        return htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+if (!function_exists('esc_url')) {
+    function esc_url($url)
+    {
+        return htmlspecialchars((string) $url, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+if (!function_exists('wp_kses_post')) {
+    function wp_kses_post($html)
+    {
+        return (string) $html;
+    }
+}
+
+if (!function_exists('sanitize_html_class')) {
+    function sanitize_html_class($class, $fallback = '')
+    {
+        $class = preg_replace('/[^A-Za-z0-9_-]/', '-', (string) $class);
+        $class = trim((string) $class, '-');
+
+        return $class !== '' ? $class : (string) $fallback;
+    }
+}
+
 function component($name, array $args = [])
 {
     get_template_part("assets/components/{$name}/{$name}", null, $args);
@@ -177,4 +222,25 @@ function options($classes, $args = [])
 
         return 'class="' . $classes . $marginBottom . $marginTop . $background . $paddingTop . $paddingBottom . $container . '"' . $id;
     }
+}
+
+function youtube_id_from_url($url)
+{
+    $parts = parse_url($url);
+
+    if (isset($parts['query'])) {
+        parse_str($parts['query'], $qs);
+        if (isset($qs['v'])) {
+            return $qs['v'];
+        } else if (isset($qs['vi'])) {
+            return $qs['vi'];
+        }
+    }
+
+    if (isset($parts['path'])) {
+        $path = explode('/', trim($parts['path'], '/'));
+        return $path[count($path) - 1];
+    }
+
+    return "";
 }

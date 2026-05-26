@@ -16,7 +16,7 @@
  */
 const AUTOPLAY_DELAY_MS = 600;
 
-export default class Video {
+class Video {
     constructor(root) {
         if (!(root instanceof HTMLElement)) return;
         if (root.__videoInstance) return root.__videoInstance;
@@ -73,4 +73,8 @@ export default class Video {
         }
         if (this.root) delete this.root.__videoInstance;
     }
+}
+
+export default function video(root) {
+    return new Video(root);
 }
