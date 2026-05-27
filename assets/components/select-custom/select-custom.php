@@ -41,7 +41,7 @@ $initial_label = !empty($selected_names) ? implode(', ', $selected_names) : $lab
 $root_class = 'select-custom' . ($classes !== '' ? ' ' . $escAttr($classes) : '');
 ?>
 
-<div class="<?= $root_class ?>" data-module="components/select-custom/select-custom" data-placeholder="<?= $escAttr($label) ?>"<?= $attributes !== '' ? ' ' . $attributes : '' ?>>
+<div class="<?= $root_class ?>" data-module="components/select-custom" data-placeholder="<?= $escAttr($label) ?>"<?= $attributes !== '' ? ' ' . $attributes : '' ?>>
     <button
         role="combobox"
         id="<?= $escAttr($btn_id) ?>"

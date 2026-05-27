@@ -95,7 +95,7 @@ $trigger_extra = $trigger_classes !== "" ? " " . $trigger_classes : "";
     id="<?= $escAttr($id) ?>"
     class="dialog<?= $escAttr($classes) ?>"
     data-dialog
-    data-module="components/dialog/dialog"
+    data-module="components/dialog"
     aria-label="<?= $escAttr($aria_label) ?>"
     aria-describedby="<?= $escAttr($content_id) ?>"
     <?= $attributes ?>>

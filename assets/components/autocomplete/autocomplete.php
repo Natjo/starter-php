@@ -18,7 +18,7 @@ $menu_id = "autocomplete-options--" . $input_id;
 $root_class = "autocomplete-field" . ($classes !== "" ? " " . esc_attr($classes) : "");
 ?>
 
-<div class="<?= $root_class ?>" data-module="components/autocomplete/autocomplete"<?= $attributes !== "" ? " " . $attributes : "" ?>>
+<div class="<?= $root_class ?>" data-module="components/autocomplete"<?= $attributes !== "" ? " " . $attributes : "" ?>>
     <?php if ($label !== "") : ?>
         <label for="<?= esc_attr($input_id) ?>"><?= esc_html($label) ?></label>
     <?php endif ?>

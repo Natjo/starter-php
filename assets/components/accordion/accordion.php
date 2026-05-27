@@ -7,7 +7,7 @@ $attributes = !empty($args["attributes"]) ? " " . (string) $args["attributes"] :
 if (empty($items)) return;
 ?>
 
-<div class="accordion<?= $classes ?>"<?= $attributes ?> data-module="components/accordion/accordion">
+<div class="accordion<?= $classes ?>"<?= $attributes ?> data-module="components/accordion" data-context="@visible true">
     <?php foreach ($items as $index => $item) :
         $uniqid = uniqid();
         $title = htmlspecialchars((string) ($item["title"] ?? ""), ENT_QUOTES, "UTF-8");

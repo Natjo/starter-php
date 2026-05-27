@@ -63,7 +63,7 @@ if (empty($keys)) {
 
 
 
-<div class="shares<?= esc_attr($classes) ?>" data-context="@visible true" data-module="components/shares/shares">
+<div class="shares<?= esc_attr($classes) ?>" data-context="@visible true" data-module="components/shares">
     <div class="title"><?= __("Partager l’article", 'lsd_lang') ?></div>
 
     <ul class="list">

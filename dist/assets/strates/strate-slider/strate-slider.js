@@ -1,1 +1,1 @@
-import Slider from"../../components/slider/slider.js";export default(function(el){var slider=el.querySelector(".slider");if(!slider)return;var myslider=new Slider(slider);myslider.add()});
+import Slider from"../../components/slider/slider.js";export default el=>{const slider=el.querySelector(".slider");if(!slider)return;const myslider=new Slider(slider);myslider.add()};

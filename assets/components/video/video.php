@@ -18,6 +18,7 @@ $urls = array_values(array_filter(array_map(function ($u) {
     $u = trim((string) $u);
     if ($u === "") return "";
     if (is_numeric($u)) {
+        if (!function_exists('wp_get_attachment_url')) return "";
         $resolved = wp_get_attachment_url((int) $u);
         if ($resolved) return $resolved;
     }
@@ -28,7 +29,7 @@ if (empty($urls)) return;
 $url = $urls[0];
 
 if ($poster !== "" && is_numeric($poster)) {
-    $resolved_poster = wp_get_attachment_url((int) $poster);
+    $resolved_poster = function_exists('wp_get_attachment_url') ? wp_get_attachment_url((int) $poster) : "";
     $poster = $resolved_poster ? $resolved_poster : "";
 }
 

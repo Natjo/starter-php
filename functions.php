@@ -47,18 +47,18 @@ if (!function_exists('sanitize_html_class')) {
 
 function component($name, array $args = [])
 {
-    get_template_part("assets/components/{$name}/{$name}", null, $args);
+    get_template_part("components/{$name}/{$name}", null, $args);
 }
 
 function hero($name, array $args = [])
 {
-    get_template_part("assets/heros/hero-{$name}/hero-{$name}", null, $args);
+    get_template_part("heros/hero-{$name}/hero-{$name}", null, $args);
 }
 
 function strate($name, array $args = [])
 {
     $name = str_replace('-', '_', $name);
-    get_template_part("assets/strates/strate-{$name}/strate-{$name}", null, $args);
+    get_template_part("strates/strate-{$name}/strate-{$name}", null, $args);
 }
 
 
@@ -117,7 +117,7 @@ function dist_scripts()
     foreach (dist_files('js') as $file) {
         if (
             $file === 'app.js'
-            || str_starts_with($file, 'plugins/')
+            || str_starts_with($file, 'vendors/')
             || str_starts_with($file, 'common/')
             || str_starts_with($file, 'components/')
             || str_starts_with($file, 'heros/')
@@ -139,13 +139,32 @@ function get_template_part($slug, $name = null, array $args = [])
     $slug = trim($slug, '/');
     $slug = preg_replace('#\.php$#', '', $slug);
 
-    $templates = [];
+    $slugs = [$slug];
+    $basename = basename($slug);
 
-    if ($name !== null) {
-        $templates[] = "{$slug}-{$name}.php";
+    if (!str_contains($slug, '/')) {
+        $slugs[] = "{$slug}/{$basename}";
     }
 
-    $templates[] = "{$slug}.php";
+    if (!str_starts_with($slug, 'common/')) {
+        $slugs[] = 'common/' . $slug;
+
+        if (!str_contains($slug, '/')) {
+            $slugs[] = "common/{$slug}/{$basename}";
+        }
+    }
+
+    $slugs = array_values(array_unique($slugs));
+
+    $templates = [];
+
+    foreach ($slugs as $template_slug) {
+        if ($name !== null) {
+            $templates[] = "{$template_slug}-{$name}.php";
+        }
+
+        $templates[] = "{$template_slug}.php";
+    }
 
     $directories = [
         APP_ROOT,

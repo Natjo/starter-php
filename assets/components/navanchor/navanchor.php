@@ -30,7 +30,7 @@ $label = !empty($args["label"]) ? $args["label"] : $translate("Table des matièr
 if (empty($items)) return;
 ?>
 
-<nav class="navanchor menu-navigation<?= $classes ?>" data-module="components/navanchor/navanchor" aria-label="<?= $escAttr($label) ?>"<?= $attributes !== "" ? " " . $attributes : "" ?>>
+<nav class="navanchor menu-navigation<?= $classes ?>" data-module="components/navanchor" aria-label="<?= $escAttr($label) ?>"<?= $attributes !== "" ? " " . $attributes : "" ?>>
     <p class="navanchor-title"><?= $escHtml($label) ?></p>
     <ul>
         <?php foreach ($items as $i => $item) :

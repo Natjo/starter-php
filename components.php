@@ -10,7 +10,7 @@ class component
 
         if (empty($args["title"])) return;
 
-        get_template_part('assets/components/title/title', null, [
+        get_template_part('components/title/title', null, [
             "hx"      => $hx,
             "title"   => $args["title"],
             "classes" => $classes ?? "",
@@ -36,7 +36,7 @@ class component
         }
         if (empty($text)) return;
 
-        get_template_part('assets/components/text/text', null, [
+        get_template_part('components/text/text', null, [
             "text" => $text,
             "classes" => $classes ?? "",
             "attributes" => $attributes ?? "",
@@ -56,7 +56,7 @@ class component
             $mobileSize = "full";
         }
 
-        get_template_part('assets/components/picture/picture', null, [
+        get_template_part('components/picture/picture', null, [
             "images" => is_array($args) ? ($args["images"] ?? $args) : $args,
             "classes" => $classes,
             "lazy" => $lazy,
@@ -71,7 +71,7 @@ class component
     {
         if (empty($name)) return;
 
-        get_template_part("assets/cards/{$name}/{$name}", null, is_array($args) ? $args : []);
+        get_template_part("cards/{$name}/{$name}", null, is_array($args) ? $args : []);
     }
 
     public static function slider($items, $card = "card-news", $classes = null, $navigation = true, $pagination = true, $label = "")
@@ -83,7 +83,7 @@ class component
             $items = [$items];
         }
 
-        get_template_part('assets/components/slider/slider', null, [
+        get_template_part('components/slider/slider', null, [
             "items" => $items,
             "card" => $card,
             "classes" => $classes ?? "",
@@ -113,7 +113,7 @@ class component
         if (empty($link) && empty($name)) return;
         if (!empty($link) && empty($link["title"])) return;
 
-        get_template_part('assets/components/btn/btn', null, [
+        get_template_part('components/btn/btn', null, [
             "name" => $name,
             "link" => $link,
             "classes" => $classes ?? ($args["classes"] ?? ""),
@@ -126,7 +126,7 @@ class component
     {
         if (empty($name)) return;
 
-        get_template_part('assets/components/icon', '', [
+        get_template_part('components/icon', '', [
             "name" => $name,
             "width" =>  $width,
             "height" =>  $height,
@@ -158,7 +158,7 @@ class component
 
         if (empty($link["title"])) return;
 
-        get_template_part('assets/components/link/link', null, [
+        get_template_part('components/link/link', null, [
             "link" => $link,
             "classes" => $classes ?? ($args["classes"] ?? ""),
             "icon" => $icon ?? ($args["icon"] ?? null),
@@ -179,7 +179,7 @@ class component
 
         if (empty($args["text"]) && empty($args["quote"])) return;
 
-        get_template_part('assets/components/quote/quote', null, [
+        get_template_part('components/quote/quote', null, [
             "quote" => $args,
             "classes" => $classes,
             "attributes" => $attributes,
@@ -195,7 +195,7 @@ class component
             $items = [$items];
         }
 
-        get_template_part('assets/components/accordion/accordion', null, [
+        get_template_part('components/accordion/accordion', null, [
             "items" => $items,
             "classes" => $classes ?? "",
             "attributes" => $attributes ?? ""
@@ -216,7 +216,7 @@ class component
             $data["attributes"] = $attributes;
         }
 
-        get_template_part('assets/components/header/header', null, $data);
+        get_template_part('components/header/header', null, $data);
     }
     public static function badge($name, $classes = null, $attributes = null)
     {
@@ -237,7 +237,7 @@ class component
             "attributes" => $attributes,
         ];
 
-        get_template_part('assets/components/badge/badge', null, $args);
+        get_template_part('components/badge/badge', null, $args);
     }
 
     /**
@@ -268,7 +268,7 @@ class component
             ($t[2] !== null && trim((string) $t[2]) !== "") ? trim((string) $t[2]) : null,
         ];
 
-        get_template_part('assets/components/dialog/dialog', null, [
+        get_template_part('components/dialog/dialog', null, [
             "content" => $content,
             "trigger" => $trigger,
             "classes" => $classes,
@@ -335,7 +335,7 @@ class component
             unset($field_args['data_patternmismatch']);
         }
 
-        get_template_part('assets/components/form/form', null, [
+        get_template_part('components/form/form', null, [
             'type' => $type,
             'label' => $label,
             'name' => $name,
@@ -389,7 +389,7 @@ class component
             "label" => $label,
         ];
 
-        get_template_part('assets/components/navanchor/navanchor', null, $args);
+        get_template_part('components/navanchor/navanchor', null, $args);
     }
 
     public static function picto($name, $type = "", $size = "", $classes = null, $attributes = null)
@@ -407,7 +407,7 @@ class component
 
         if (empty($name)) return;
 
-        get_template_part('assets/components/picto/picto', null, [
+        get_template_part('components/picto/picto', null, [
             "name" => $name,
             "type" => $type,
             "size" => $size,
@@ -423,7 +423,7 @@ class component
         if (empty($args) || !is_array($args)) return;
 
 
-        get_template_part('assets/components/select/select', null, [
+        get_template_part('components/select/select', null, [
             "args" => $args,
             "label" => $label,
             "name" => $name,
@@ -440,7 +440,7 @@ class component
         if (empty($args) || !is_array($args)) return;
 
 
-        get_template_part('assets/components/select-custom/select-custom', null, [
+        get_template_part('components/select-custom/select-custom', null, [
             "args" => $args,
             "label" => $label,
             "multi" => $multi,
@@ -458,22 +458,14 @@ class component
             "classes" => $classes
         ];
 
-        get_template_part('assets/components/shares/shares', null, $args);
+        get_template_part('components/shares/shares', null, $args);
     }
 
     public static function video($url, $title = "", $poster = null, $autoplay = false, $loop = false, $classes = null, $attributes = null)
     {
         if (empty($url)) return;
 
-        if (is_int($poster) || (is_string($poster) && ctype_digit($poster))) {
-            $height = (int) $poster;
-            $poster = null;
-            $style = "height: {$height}px;";
-            $attributes = trim((string) $attributes);
-            $attributes = trim($attributes . ' style="' . esc_attr($style) . '"');
-        }
-
-        get_template_part('assets/components/video/video', '', [
+        get_template_part('components/video/video', '', [
             "url" => $url,
             "title" => $title,
             "poster" => $poster,
@@ -493,7 +485,7 @@ class component
         if (!is_array($rows) || empty($rows)) {
             return;
         }
-        get_template_part('assets/components/table/table', '', [
+        get_template_part('components/table/table', '', [
             'rows' => $rows,
             'classes' => $classes,
             'attributes' => $attributes,
@@ -513,14 +505,14 @@ class component
             "card" => $card,
             "classes" => $classes,
         ];
-        get_template_part('assets/components/list/list', '', $args);
+        get_template_part('components/list/list', '', $args);
     }
 
     public static function image($image, $size = "full", $classes = "", $lazy = true)
     {
         if (empty($image)) return;
 
-        get_template_part('assets/components/image/image', '',   [
+        get_template_part('components/image/image', '',   [
             "image" => $image,
             "size" => $size,
             "classes" => $classes,
@@ -531,7 +523,7 @@ class component
 
     public static function tag($args, $type = "info", $classes = null, $attributes = null)
     {
-        get_template_part('assets/components/tag/tag', '', [
+        get_template_part('components/tag/tag', '', [
             "args" => $args,
             "type" => $type,
             "classes" => $classes,
@@ -544,7 +536,7 @@ class component
     {
         if (empty($label) || empty($content)) return;
 
-        get_template_part('assets/components/tooltip/tooltip', '', [
+        get_template_part('components/tooltip/tooltip', '', [
             "label" => $label,
             "content" => $content,
             "classes" => $classes,
@@ -553,7 +545,7 @@ class component
     }
     public static function search($label = null, $placeholder = null, $button_label = null, $action = null, $classes = null, $attributes = null)
     {
-        get_template_part('assets/components/search/search', '', [
+        get_template_part('components/search/search', '', [
             "label" => $label,
             "placeholder" => $placeholder,
             "button_label" => $button_label,
@@ -567,7 +559,7 @@ class component
     {
         if (empty($items) || !is_array($items)) return;
 
-        get_template_part('assets/components/autocomplete/autocomplete', '', [
+        get_template_part('components/autocomplete/autocomplete', '', [
             "items" => $items,
             "label" => $label,
             "classes" => $classes,

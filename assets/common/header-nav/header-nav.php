@@ -1,11 +1,25 @@
 <?php
 $args = isset($args) && is_array($args) ? $args : [];
+$args = [
+    "brand" => "Mon projet",
+    "pages" => [
+        [
+            "title" => "Accueil",
+            "url" => "/",
+        ],
+        [
+            "title" => "Components",
+            "url" => "/components",
+        ],
+    ],
+];
+
 $pages = !empty($args["pages"]) && is_array($args["pages"]) ? $args["pages"] : [];
 $brand = !empty($args["brand"]) ? (string) $args["brand"] : "Site";
 $current = trim(parse_url($_SERVER["REQUEST_URI"] ?? "/", PHP_URL_PATH), "/");
 ?>
 
-<header class="header-nav" data-module="common/header-nav/header-nav">
+<header class="header-nav" data-module="common/header-nav">
     <a class="header-nav-brand" href="/"><?= htmlspecialchars($brand, ENT_QUOTES, "UTF-8") ?></a>
 
     <?php if (!empty($pages)) : ?>
