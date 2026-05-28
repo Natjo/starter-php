@@ -19,6 +19,8 @@ const legacyFromCss = 'styles.css';
 const toCss = 'styles.css';
 const excludedCopyDirs = new Set(['common', 'components', 'heros', 'modules', 'strates']);
 const importAliases = {
+    'common': path.join(src, 'common'),
+    '@common': path.join(src, 'common'),
     '@components': path.join(src, 'components'),
     '@vendors': path.join(src, 'vendors'),
 };
@@ -61,6 +63,7 @@ const isCopiedDirFile = file => {
 
 const isVendorFile = file => topLevelDir(file) === 'vendors';
 const isStylesSourceFile = file => topLevelDir(file) === 'styles';
+const isJsFile = file => path.extname(file) === '.js';
 
 const outputPath = file => path.join(dist, path.relative(src, file));
 
@@ -109,7 +112,7 @@ const babelAliasPlugin = () => ({
 const appBundlePlugin = {
     name: 'app-bundle',
     setup(build) {
-        build.onResolve({ filter: /^@[^/]+(\/.*)?$/ }, args => {
+        build.onResolve({ filter: /^(common|@[^/]+)(\/.*)?$/ }, args => {
             const resolved = resolveAliasImport(args.path);
             if (!resolved) return null;
 
@@ -212,6 +215,7 @@ async function compileJs(file) {
             platform: 'browser',
             target: ['es2020'],
             minify: true,
+            drop: [],
             plugins: [appBundlePlugin],
         });
         display(toPosix(path.relative(src, file)), 'update');
@@ -234,6 +238,10 @@ async function compileJs(file) {
     fs.ensureDirSync(path.dirname(out));
     fs.writeFileSync(out, result.code || '');
     display(toPosix(path.relative(src, file)), 'update');
+}
+
+async function compileAppJs() {
+    await compileJs(path.join(src, 'app.js'));
 }
 
 function copyStatic(file) {
@@ -343,6 +351,7 @@ async function rebuild(file, evt = 'update') {
 
         if (path.extname(absoluteFile) === '.js') {
             await compileJs(absoluteFile);
+            await compileAppJs();
             return;
         }
 
@@ -359,6 +368,10 @@ async function rebuild(file, evt = 'update') {
 
     if (path.extname(absoluteFile) === '.css') {
         await compileAppCss();
+    }
+
+    if (isJsFile(absoluteFile) && path.resolve(absoluteFile) !== path.join(src, 'app.js')) {
+        await compileAppJs();
     }
 }
 

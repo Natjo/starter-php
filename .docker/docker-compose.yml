@@ -22,3 +22,15 @@ services:
       - php
     restart: unless-stopped
     entrypoint: /bin/bash -c 'cat /tmp/default.template | sed "s/\\\$$domain/${DOMAIN}/g" > /etc/nginx/conf.d/default.conf && nginx -g "daemon off;"'
+
+  node:
+    image: node:22-alpine
+    working_dir: /var/www/html
+    volumes:
+      - ..:/var/www/html
+      - node_modules:/var/www/html/node_modules
+    command: sh -c "npm ci && npm run dev"
+    restart: unless-stopped
+
+volumes:
+  node_modules:

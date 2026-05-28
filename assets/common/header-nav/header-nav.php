@@ -19,7 +19,7 @@ $brand = !empty($args["brand"]) ? (string) $args["brand"] : "Site";
 $current = trim(parse_url($_SERVER["REQUEST_URI"] ?? "/", PHP_URL_PATH), "/");
 ?>
 
-<header class="header-nav" data-module="common/header-nav">
+<header class="header-nav">
     <a class="header-nav-brand" href="/"><?= htmlspecialchars($brand, ENT_QUOTES, "UTF-8") ?></a>
 
     <?php if (!empty($pages)) : ?>

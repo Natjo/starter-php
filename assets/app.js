@@ -1,4 +1,6 @@
 import Lenis from "@vendors/lenis/lenis";
+import HeaderNav from "@common/header-nav";
+HeaderNav();
 
 const lenis = new Lenis({
     autoRaf: false,
@@ -18,8 +20,8 @@ const moduleCandidates = moduleName => {
     const last = parts[parts.length - 1];
 
     return [
-        moduleName,
         last ? `${moduleName}/${last}` : null,
+        moduleName,
     ].filter(Boolean);
 };
 
