@@ -1,8 +1,8 @@
-<footer>
-footer
+<footer id="footer">
+    footer
 </footer>
 
-    <script type="module" src="<?= htmlspecialchars(dist_asset_url('app.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-<?php dist_scripts(); ?>
+<script type="module" src="<?= esc_url(dist_versioned_asset_url('app.js')) ?>"></script>
 </body>
+
 </html>

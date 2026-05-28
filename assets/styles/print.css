@@ -1,65 +1,69 @@
-body {
-    width: auto;
-    margin: auto;
-    font-family: serif;
-    font-size: 12pt;
-    opacity: .4;
-}
+@media print {
 
-p,
-blockquote {
-    orphans: 3;
-    /* pas de ligne seule en bas */
-    widows: 3;
-    /* pas de ligne seule en haut */
-}
 
-blockquote,
-ul,
-ol {
-    page-break-inside: avoid;
-    /* pas de coupure dans ces élements */
-}
+    body {
+        width: auto;
+        margin: auto;
+        font-family: serif;
+        font-size: 12pt;
+        opacity: .4;
+    }
 
-h1 {
-    page-break-before: always;
-    /* chaque titre commence sur une nouvelle page */
-}
+    p,
+    blockquote {
+        orphans: 3;
+        /* pas de ligne seule en bas */
+        widows: 3;
+        /* pas de ligne seule en haut */
+    }
 
-h1,
-h2,
-h3,
-caption {
-    page-break-after: avoid;
-    /* pas de saut après ces éléments */
-}
+    blockquote,
+    ul,
+    ol {
+        page-break-inside: avoid;
+        /* pas de coupure dans ces élements */
+    }
 
-a {
-    color: #000 !important;
-    text-decoration: underline !important;
-}
+    h1 {
+        page-break-before: always;
+        /* chaque titre commence sur une nouvelle page */
+    }
 
-a[href]:after {
-    content: " (" attr(href) ")";
-    /* affichage des URL des liens */
-}
+    h1,
+    h2,
+    h3,
+    caption {
+        page-break-after: avoid;
+        /* pas de saut après ces éléments */
+    }
 
-#header {
-    position: relative;
-}
+    a {
+        color: #000 !important;
+        text-decoration: underline !important;
+    }
 
-.btn-nav {
-    display: none;
-}
+    a[href]:after {
+        content: " (" attr(href) ")";
+        /* affichage des URL des liens */
+    }
 
-#footer {
-    display: none;
-}
+    #header {
+        position: relative;
+    }
 
-article {
-    padding-bottom: 50px;
-}
+    .btn-nav {
+        display: none;
+    }
 
-main {
-    padding-top: 0px;
+    #footer {
+        display: none;
+    }
+
+    article {
+        padding-bottom: 50px;
+    }
+
+    main {
+        padding-top: 0px;
+    }
 }

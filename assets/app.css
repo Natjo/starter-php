@@ -1,6 +1,35 @@
+/*
+ critical css
+*/
 @import "styles/reset.css";
 @import "styles/variables.css";
 @import "styles/layout.css";
 @import "styles/fonts.css";
 @import "styles/classes.css";
 @import "styles/rte.css";
+
+/*
+bundle common/vendors/strates
+*/
+@import "common/header-nav/header-nav.css";
+@import "common/footer/footer.css";
+@import "vendors/lenis/lenis.css";
+@import "styles/print.css";
+@import "strates/strate-slider/strate-slider.css";
+@import "strates/strate-text/strate-text.css";
+@import "strates/strate-text_image/strate-text_image.css";
+
+/*
+bundle components
+*/
+@import "components/slider/slider.css";
+@import "components/tag/tag.css";
+@import "components/title/title.css";
+@import "components/btn/btn.css";
+@import "components/link/link.css";
+@import "components/list/list.css";
+
+
+/*
+bundle modules
+*/

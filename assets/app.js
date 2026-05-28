@@ -14,6 +14,7 @@ function raf(time) {
 requestAnimationFrame(raf);
 
 const modules = document.querySelectorAll('[data-module]');
+const moduleVersions = __MODULE_VERSIONS__;
 
 const moduleCandidates = moduleName => {
     const parts = moduleName.split('/').filter(Boolean);
@@ -39,6 +40,12 @@ const importModule = async moduleName => {
             if (dir === 'strates') modulePath = `./strates/${file}.js`;
 
             if (modulePath) {
+                const version = moduleVersions[modulePath.replace(/^\.\//, '')];
+
+                if (version) {
+                    modulePath = `${modulePath}?v=${version}`;
+                }
+
                 return await import(modulePath);
             }
 

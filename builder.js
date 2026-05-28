@@ -1,5 +1,6 @@
 const fs = require('fs-extra');
 const path = require('path');
+const crypto = require('crypto');
 const postcss = require('postcss');
 const cssCustomMedia = require('postcss-custom-media');
 const postcssGlobalData = require('@csstools/postcss-global-data');
@@ -16,7 +17,14 @@ const src = path.join(root, 'assets');
 const dist = path.join(root, 'dist', 'assets');
 const fromCss = 'app.css';
 const legacyFromCss = 'styles.css';
-const toCss = 'styles.css';
+const criticalCss = 'critical.css';
+const cssBundles = {
+    common: 'common.css',
+    components: 'components.css',
+    modules: 'modules.css',
+};
+const cssManifestFile = 'css-bundles.json';
+const bundledCssSourceDirs = new Set([...Object.keys(cssBundles), 'vendors', 'strates']);
 const excludedCopyDirs = new Set(['common', 'components', 'heros', 'modules', 'strates']);
 const importAliases = {
     'common': path.join(src, 'common'),
@@ -25,7 +33,16 @@ const importAliases = {
     '@vendors': path.join(src, 'vendors'),
 };
 let appCssImports = new Set();
+let criticalCssImports = new Set();
+let bundledCssImports = new Set();
+let cssManifest = {
+    bundles: {},
+    bundledFiles: [],
+    fileBundles: {},
+};
 const rebuildTimers = new Map();
+let fullBuildTimer = null;
+let sourceSnapshot = new Map();
 const shouldWatch = process.argv.includes('--watch');
 
 const processor = postcss([
@@ -51,6 +68,8 @@ const isAppCss = file => {
     return path.resolve(file) === path.resolve(source);
 };
 
+const isAppJs = file => path.resolve(file) === path.join(src, 'app.js');
+
 const topLevelDir = file => {
     const relative = toPosix(path.relative(src, file));
     return relative.split('/')[0];
@@ -64,8 +83,20 @@ const isCopiedDirFile = file => {
 const isVendorFile = file => topLevelDir(file) === 'vendors';
 const isStylesSourceFile = file => topLevelDir(file) === 'styles';
 const isJsFile = file => path.extname(file) === '.js';
+const isCssFile = file => path.extname(file) === '.css';
 
 const outputPath = file => path.join(dist, path.relative(src, file));
+
+const bundleGroupForRelativeCss = file => {
+    const dir = file.split('/')[0];
+
+    if (dir === 'vendors') return 'common';
+    if (dir === 'strates') return 'common';
+    if (file === 'styles/print.css') return 'common';
+    if (cssBundles[dir]) return dir;
+
+    return null;
+};
 
 const resolveAliasImport = specifier => {
     const alias = Object.keys(importAliases).find(name => specifier === name || specifier.startsWith(`${name}/`));
@@ -93,6 +124,43 @@ const relativeImport = (from, to) => {
     return relative.startsWith('.') ? relative : `./${relative}`;
 };
 
+const fileHash = file => crypto
+    .createHash('md5')
+    .update(fs.readFileSync(file))
+    .digest('hex')
+    .slice(0, 10);
+
+const stripQuery = specifier => specifier.split('?')[0].split('#')[0];
+
+const resolveJsImport = (from, specifier) => resolveAliasImport(specifier) || resolveRelativeJsImport(from, specifier);
+
+const resolveRelativeJsImport = (from, specifier) => {
+    if (!specifier.startsWith('.')) return null;
+
+    const cleanSpecifier = stripQuery(specifier);
+    const target = path.resolve(path.dirname(from), cleanSpecifier);
+    const candidates = [
+        target,
+        `${target}.mjs`,
+        `${target}.js`,
+        path.join(target, 'index.mjs'),
+        path.join(target, 'index.js'),
+        path.join(target, `${path.basename(target)}.mjs`),
+        path.join(target, `${path.basename(target)}.js`),
+    ];
+
+    return candidates.find(candidate => fs.existsSync(candidate) && fs.statSync(candidate).isFile()) || null;
+};
+
+const jsVersionHash = file => {
+    const compiled = outputPath(file);
+    const versionedFile = fs.existsSync(compiled) ? compiled : file;
+
+    return fileHash(versionedFile);
+};
+
+const versionedImport = (from, to) => `${relativeImport(from, to)}?v=${jsVersionHash(to)}`;
+
 const babelAliasPlugin = () => ({
     visitor: {
         'ImportDeclaration|ExportNamedDeclaration|ExportAllDeclaration'(babelPath, state) {
@@ -100,10 +168,10 @@ const babelAliasPlugin = () => ({
 
             if (!source) return;
 
-            const resolved = resolveAliasImport(source.value);
+            const resolved = resolveJsImport(state.file.opts.filename, source.value);
 
             if (resolved) {
-                source.value = relativeImport(state.file.opts.filename, resolved);
+                source.value = versionedImport(state.file.opts.filename, resolved);
             }
         },
     },
@@ -152,15 +220,44 @@ async function runPostcss(css, from, to) {
     }
 }
 
+const rewriteCssUrls = (css = '', fromFile, toFile) => {
+    const sourceDir = path.dirname(fromFile);
+    const outputDir = path.dirname(toFile);
+
+    return css.replace(/url\((["']?)([^"')]+)\1\)/g, (match, quote, url) => {
+        const trimmed = url.trim();
+
+        if (/^(?:[a-z]+:|\/\/|#|data:)/i.test(trimmed)) {
+            return match;
+        }
+
+        const sourceRelative = path.resolve(sourceDir, trimmed);
+        const rootRelative = path.resolve(src, trimmed);
+        const absolute = fs.existsSync(sourceRelative) ? sourceRelative : rootRelative;
+        const asset = absolute.startsWith(src) ? path.join(dist, path.relative(src, absolute)) : absolute;
+        const relative = toPosix(path.relative(outputDir, asset));
+        const rewritten = relative.startsWith('.') ? relative : `./${relative}`;
+
+        return `url(${quote}${rewritten}${quote})`;
+    });
+};
+
 function inlineImports(css = '') {
     return css.replace(/^\s*@import\s+["']([^"']+)["']\s*;?/igm, (match, importedFile) => {
+        const normalized = toPosix(path.normalize(importedFile));
+
+        if (!normalized.startsWith('styles/') || normalized === 'styles/print.css') {
+            return '';
+        }
+
         const importedPath = path.resolve(src, importedFile);
 
         if (!fs.existsSync(importedPath)) {
             throw new Error(`Import CSS introuvable : ${importedFile}`);
         }
 
-        return `${fs.readFileSync(importedPath, 'utf8')}\n`;
+        const out = path.join(dist, criticalCss);
+        return `${rewriteCssUrls(fs.readFileSync(importedPath, 'utf8'), importedPath, out)}\n`;
     });
 }
 
@@ -174,6 +271,54 @@ function collectImports(css = '') {
     return new Set(imports);
 }
 
+function resolveCssImport(importedFile) {
+    const normalized = toPosix(path.normalize(importedFile));
+    const target = path.resolve(src, normalized.replace(/\/\*{1,2}$/, ''));
+    const candidates = [
+        target,
+        `${target}.css`,
+        path.join(target, `${path.basename(target)}.css`),
+        path.join(target, 'index.css'),
+    ];
+    const file = candidates.find(candidate => fs.existsSync(candidate) && fs.statSync(candidate).isFile());
+
+    if (file) return [file];
+
+    if (fs.existsSync(target) && fs.statSync(target).isDirectory()) {
+        return getFiles(target).filter(candidate => isCssFile(candidate)).sort();
+    }
+
+    throw new Error(`Import CSS introuvable : ${importedFile}`);
+}
+
+function collectBundleImports(imports) {
+    const files = [];
+
+    imports.forEach(importedFile => {
+        if (!bundleGroupForRelativeCss(importedFile)) return;
+
+        files.push(...resolveCssImport(importedFile));
+    });
+
+    return new Set(files.map(file => toPosix(path.relative(src, file))));
+}
+
+function writeCssManifest() {
+    cssManifest.bundledFiles = [...bundledCssImports].sort();
+    cssManifest.fileBundles = {};
+
+    cssManifest.bundledFiles.forEach(file => {
+        const group = bundleGroupForRelativeCss(file);
+
+        if (group) {
+            cssManifest.fileBundles[file] = group;
+        }
+    });
+
+    fs.ensureDirSync(dist);
+    fs.writeJsonSync(path.join(dist, cssManifestFile), cssManifest, { spaces: 2 });
+}
+
 async function compileAppCss() {
     const file = sourceAppCss();
 
@@ -184,16 +329,29 @@ async function compileAppCss() {
 
     const source = fs.readFileSync(file, 'utf8');
     appCssImports = collectImports(source);
+    criticalCssImports = new Set([...appCssImports].filter(importedFile => importedFile.startsWith('styles/') && importedFile !== 'styles/print.css'));
+    bundledCssImports = collectBundleImports(appCssImports);
+    cssManifest = {
+        bundles: {},
+        bundledFiles: [],
+        fileBundles: {},
+    };
     const css = inlineImports(source);
 
-    await runPostcss(css, file, path.join(dist, toCss));
-    display(`${path.basename(file)} -> ${toCss}`, 'update');
+    await runPostcss(css, file, path.join(dist, criticalCss));
+    display(`${path.basename(file)} -> ${criticalCss}`, 'update');
 }
 
 async function compileCss(file) {
     const rel = toPosix(path.relative(src, file));
 
-    if (isAppCss(file) || isStylesSourceFile(file) || path.basename(file) === legacyFromCss || appCssImports.has(rel)) return;
+    if (
+        isAppCss(file)
+        || isStylesSourceFile(file)
+        || bundledCssImports.has(rel)
+        || path.basename(file) === legacyFromCss
+        || criticalCssImports.has(rel)
+    ) return;
 
     await runPostcss(
         fs.readFileSync(file, 'utf8'),
@@ -203,10 +361,97 @@ async function compileCss(file) {
     display(toPosix(path.relative(src, file)), 'update');
 }
 
+async function compileCssBundle(name) {
+    const outputFile = cssBundles[name];
+
+    if (!outputFile) return;
+
+    const out = path.join(dist, outputFile);
+    const files = [...bundledCssImports]
+        .filter(file => bundleGroupForRelativeCss(file) === name)
+        .map(file => path.join(src, file))
+        .filter(file => fs.existsSync(file) && isCssFile(file))
+        .sort();
+
+    if (files.length === 0) {
+        if (fs.existsSync(out)) fs.removeSync(out);
+        if (fs.existsSync(`${out}.map`)) fs.removeSync(`${out}.map`);
+        delete cssManifest.bundles[name];
+        return;
+    }
+
+    const css = files
+        .map(file => rewriteCssUrls(fs.readFileSync(file, 'utf8'), file, out))
+        .join('\n');
+
+    await runPostcss(css, path.join(src, `${name}.css`), out);
+    cssManifest.bundles[name] = outputFile;
+
+    files.forEach(file => {
+        const compiled = outputPath(file);
+
+        if (fs.existsSync(compiled)) fs.removeSync(compiled);
+        if (fs.existsSync(`${compiled}.map`)) fs.removeSync(`${compiled}.map`);
+    });
+
+    display(`${name} -> ${outputFile}`, 'update');
+}
+
+async function compileCssBundles() {
+    for (const name of Object.keys(cssBundles)) {
+        await compileCssBundle(name);
+    }
+
+    writeCssManifest();
+}
+
+async function compileCssInBundledDirs() {
+    for (const dir of bundledCssSourceDirs) {
+        const fullDir = path.join(src, dir);
+
+        if (!fs.existsSync(fullDir)) continue;
+
+        for (const file of getFiles(fullDir)) {
+            if (isCssFile(file)) {
+                await compileCss(file);
+            }
+        }
+    }
+}
+
+async function compileCssBundleForFile(file) {
+    const relative = toPosix(path.relative(src, file));
+    const group = bundleGroupForRelativeCss(relative);
+
+    if (!group) return;
+
+    await compileCssBundle(group);
+}
+
+async function compileCssAfterAppCssChange() {
+    await compileAppCss();
+    await compileCssBundles();
+    await compileCssInBundledDirs();
+}
+
+async function compileCssAfterStylesChange(file) {
+    copyStatic(file);
+
+    const relative = toPosix(path.relative(src, file));
+
+    await compileAppCss();
+
+    if (bundledCssImports.has(relative)) {
+        await compileCssBundleForFile(file);
+    }
+}
+
 async function compileJs(file) {
     const out = outputPath(file);
 
-    if (path.resolve(file) === path.join(src, 'app.js')) {
+    if (isAppJs(file)) {
+        const moduleVersions = moduleVersionMap();
+
         await esbuild.build({
             entryPoints: [file],
             outfile: out,
@@ -216,6 +461,9 @@ async function compileJs(file) {
             target: ['es2020'],
             minify: true,
             drop: [],
+            define: {
+                __MODULE_VERSIONS__: JSON.stringify(moduleVersions),
+            },
             plugins: [appBundlePlugin],
         });
         display(toPosix(path.relative(src, file)), 'update');
@@ -242,6 +490,102 @@ async function compileJs(file) {
 
 async function compileAppJs() {
     await compileJs(path.join(src, 'app.js'));
+}
+
+function jsImportSpecifiers(file) {
+    const source = fs.readFileSync(file, 'utf8');
+    const specifiers = [];
+    const importExportPattern = /(?:import|export)\s+(?:[^'"]*?\s+from\s*)?["']([^"']+)["']/g;
+
+    for (const match of source.matchAll(importExportPattern)) {
+        specifiers.push(match[1]);
+    }
+
+    return specifiers;
+}
+
+function jsDependencies(file) {
+    return jsImportSpecifiers(file)
+        .map(specifier => resolveJsImport(file, specifier))
+        .filter(Boolean)
+        .map(dependency => path.resolve(dependency));
+}
+
+function sourceJsFiles() {
+    return getFiles(src)
+        .filter(file => isJsFile(file))
+        .filter(file => !isAppJs(file))
+        .filter(file => !isVendorFile(file));
+}
+
+async function compileAllJsModules() {
+    const files = sourceJsFiles().map(file => path.resolve(file));
+    const fileSet = new Set(files);
+    const visited = new Set();
+
+    async function visit(file) {
+        if (visited.has(file)) return;
+
+        visited.add(file);
+
+        for (const dependency of jsDependencies(file)) {
+            if (fileSet.has(dependency)) {
+                await visit(dependency);
+            }
+        }
+
+        await compileJs(file);
+    }
+
+    for (const file of files) {
+        await visit(file);
+    }
+}
+
+function jsImportersOf(targetFile) {
+    const target = path.resolve(targetFile);
+
+    return sourceJsFiles()
+        .map(file => path.resolve(file))
+        .filter(file => file !== target)
+        .filter(file => jsDependencies(file).includes(target));
+}
+
+async function compileJsImporters(file, visited = new Set()) {
+    const target = path.resolve(file);
+
+    if (visited.has(target)) return;
+    visited.add(target);
+
+    for (const importer of jsImportersOf(target)) {
+        await compileJs(importer);
+        await compileJsImporters(importer, visited);
+    }
+}
+
+async function compileJsWithDependents(file) {
+    await compileJs(file);
+    await compileJsImporters(file);
+    await compileAppJs();
+}
+
+function moduleVersionMap() {
+    const versions = {};
+    const moduleRoots = ['common', 'components', 'heros', 'modules', 'strates'];
+
+    moduleRoots.forEach(rootDir => {
+        const directory = path.join(dist, rootDir);
+
+        if (!fs.existsSync(directory)) return;
+
+        getFiles(directory).forEach(file => {
+            if (!isJsFile(file)) return;
+
+            versions[toPosix(path.relative(dist, file))] = fileHash(file);
+        });
+    });
+
+    return versions;
 }
 
 function copyStatic(file) {
@@ -274,6 +618,14 @@ async function compileJsInDir(dir) {
     }
 }
 
+async function compileCssInDir(dir) {
+    for (const file of getFiles(dir)) {
+        if (isCssFile(file)) {
+            await compileCss(file);
+        }
+    }
+}
+
 async function compileFile(file) {
     if (isIgnored(file) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) return;
     if (isVendorFile(file)) return;
@@ -302,16 +654,38 @@ function getFiles(dir) {
     });
 }
 
+function snapshotSourceFiles() {
+    const snapshot = new Map();
+
+    if (!fs.existsSync(src)) return snapshot;
+
+    for (const file of getFiles(src)) {
+        if (isIgnored(file)) continue;
+
+        const stat = fs.statSync(file);
+        snapshot.set(path.resolve(file), `${stat.mtimeMs}:${stat.size}`);
+    }
+
+    return snapshot;
+}
+
 async function build() {
     fs.ensureDirSync(dist);
     syncCopiedDirs();
 
     await compileAppCss();
+    await compileCssBundles();
 
     for (const file of getFiles(src)) {
-        if (isCopiedDirFile(file) && path.extname(file) !== '.js') continue;
+        if (isAppCss(file)) continue;
+        if (isAppJs(file)) continue;
+        if (isJsFile(file)) continue;
+        if (isCopiedDirFile(file) && path.extname(file) !== '.js' && !isCssFile(file)) continue;
         await compileFile(file);
     }
+
+    await compileAllJsModules();
+    await compileAppJs();
 }
 
 async function rebuild(file, evt = 'update') {
@@ -321,14 +695,28 @@ async function rebuild(file, evt = 'update') {
     if (!exists) {
         const out = outputPath(absoluteFile);
         if (fs.existsSync(out)) fs.removeSync(out);
-        await compileAppCss();
+        if (fs.existsSync(`${out}.map`)) fs.removeSync(`${out}.map`);
+        if (isCssFile(absoluteFile) && bundledCssSourceDirs.has(topLevelDir(absoluteFile))) {
+            await compileCssBundleForFile(absoluteFile);
+        }
+        if (isAppCss(absoluteFile) || isStylesSourceFile(absoluteFile)) {
+            await compileAppCss();
+        }
+        if (isJsFile(absoluteFile) && !isAppJs(absoluteFile)) {
+            await compileJsImporters(absoluteFile);
+            await compileAppJs();
+        }
         display(toPosix(path.relative(src, absoluteFile)), 'remove');
         return;
     }
 
+    if (isAppCss(absoluteFile)) {
+        await compileCssAfterAppCssChange();
+        return;
+    }
+
     if (isStylesSourceFile(absoluteFile)) {
-        copyStatic(absoluteFile);
-        await compileAppCss();
+        await compileCssAfterStylesChange(absoluteFile);
         return;
     }
 
@@ -337,9 +725,20 @@ async function rebuild(file, evt = 'update') {
             copyStatic(absoluteFile);
             if (!isVendorFile(absoluteFile)) {
                 await compileJsInDir(absoluteFile);
+                await compileCssInDir(absoluteFile);
+                await compileAppJs();
             }
         }
 
+        if (bundledCssSourceDirs.has(topLevelDir(absoluteFile))) {
+            await compileCssBundleForFile(absoluteFile);
+        }
+
+        return;
+    }
+
+    if (bundledCssImports.has(toPosix(path.relative(src, absoluteFile)))) {
+        await compileCssBundleForFile(absoluteFile);
         return;
     }
 
@@ -350,16 +749,16 @@ async function rebuild(file, evt = 'update') {
         }
 
         if (path.extname(absoluteFile) === '.js') {
-            await compileJs(absoluteFile);
-            await compileAppJs();
+            await compileJsWithDependents(absoluteFile);
+            return;
+        }
+
+        if (path.extname(absoluteFile) === '.css') {
+            await compileCss(absoluteFile);
             return;
         }
 
         copyStatic(absoluteFile);
-
-        if (path.extname(absoluteFile) === '.css') {
-            await compileAppCss();
-        }
 
         return;
     }
@@ -367,10 +766,15 @@ async function rebuild(file, evt = 'update') {
     await compileFile(absoluteFile);
 
     if (path.extname(absoluteFile) === '.css') {
-        await compileAppCss();
+        const relative = toPosix(path.relative(src, absoluteFile));
+
+        if (bundledCssImports.has(relative)) {
+            await compileCssBundleForFile(absoluteFile);
+        }
     }
 
-    if (isJsFile(absoluteFile) && path.resolve(absoluteFile) !== path.join(src, 'app.js')) {
+    if (isJsFile(absoluteFile) && !isAppJs(absoluteFile)) {
+        await compileJsImporters(absoluteFile);
         await compileAppJs();
     }
 }
@@ -378,6 +782,13 @@ async function rebuild(file, evt = 'update') {
 function scheduleRebuild(evt, file) {
     const absoluteFile = path.isAbsolute(file) ? file : path.join(root, file);
     const key = path.resolve(absoluteFile);
+
+    if (fs.existsSync(absoluteFile) && fs.statSync(absoluteFile).isFile()) {
+        const stat = fs.statSync(absoluteFile);
+        sourceSnapshot.set(key, `${stat.mtimeMs}:${stat.size}`);
+    } else {
+        sourceSnapshot.delete(key);
+    }
 
     clearTimeout(rebuildTimers.get(key));
     rebuildTimers.set(key, setTimeout(() => {
@@ -388,6 +799,48 @@ function scheduleRebuild(evt, file) {
                 console.error(error.message);
             });
     }, 75));
+}
+
+function scheduleFullBuild(reason = 'watch') {
+    clearTimeout(fullBuildTimer);
+    fullBuildTimer = setTimeout(() => {
+        fullBuildTimer = null;
+        build()
+            .then(() => display(reason, 'update'))
+            .catch(error => {
+                display(reason, 'error');
+                console.error(error.message);
+            });
+    }, 300);
+}
+
+function startPollingRescan() {
+    sourceSnapshot = snapshotSourceFiles();
+
+    setInterval(() => {
+        const nextSnapshot = snapshotSourceFiles();
+
+        for (const [file, signature] of nextSnapshot) {
+            const previousSignature = sourceSnapshot.get(file);
+
+            if (!previousSignature) {
+                scheduleRebuild('add', file);
+                continue;
+            }
+
+            if (previousSignature !== signature) {
+                scheduleRebuild('update', file);
+            }
+        }
+
+        for (const file of sourceSnapshot.keys()) {
+            if (!nextSnapshot.has(file)) {
+                scheduleRebuild('remove', file);
+            }
+        }
+
+        sourceSnapshot = nextSnapshot;
+    }, 1000);
 }
 
 build()
@@ -401,17 +854,34 @@ build()
                 ignoreInitial: true,
                 usePolling: true,
                 interval: 150,
+                binaryInterval: 300,
+                awaitWriteFinish: {
+                    stabilityThreshold: 250,
+                    pollInterval: 100,
+                },
                 ignored: [
                     '**/.DS_Store',
                     '**/node_modules/**',
                     path.join(dist, '**'),
                 ],
             })
-            .on('all', scheduleRebuild)
+            .on('add', file => scheduleRebuild('add', file))
+            .on('change', file => scheduleRebuild('update', file))
+            .on('unlink', file => scheduleRebuild('remove', file))
+            .on('addDir', directory => {
+                scheduleRebuild('add', directory);
+                scheduleFullBuild('addDir');
+            })
+            .on('unlinkDir', directory => {
+                scheduleRebuild('remove', directory);
+                scheduleFullBuild('unlinkDir');
+            })
             .on('error', error => {
                 display('watch', 'error');
                 console.error(error.message);
             });
+
+        startPollingRescan();
     })
     .catch(error => {
         display('build', 'error');
