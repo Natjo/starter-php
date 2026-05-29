@@ -1,9 +1,10 @@
-.badge{
+.badge {
+    border: 1px solid var(--color-2);
     color:inherit;
+    display: inline-block;
     font-size: 1.4rem;
     font-weight: 600;
-    text-transform: uppercase;
-    border:1px solid var(--color-2);
-    display:inline-block;
+    line-height: 1;
     padding: 5px;
+    text-transform: uppercase;
 }

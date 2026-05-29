@@ -4,8 +4,18 @@
 $args = component::args($args ?? null);
 
 $items = !empty($args["items"]) && is_array($args["items"]) ? $args["items"] : [];
+$items = array_values(array_filter(array_map(static function ($item) {
+    if (!is_array($item)) return null;
+
+    $value = isset($item["value"]) && is_scalar($item["value"]) ? trim((string) $item["value"]) : "";
+    $name = isset($item["name"]) && is_scalar($item["name"]) ? trim((string) $item["name"]) : "";
+    $alt = isset($item["alt"]) && is_scalar($item["alt"]) ? trim((string) $item["alt"]) : "";
+
+    return $value !== "" && $name !== "" ? ["value" => $value, "name" => $name, "alt" => $alt] : null;
+}, $items)));
 $label = isset($args["label"]) ? (string) $args["label"] : "";
-$name = !empty($args["name"]) ? (string) $args["name"] : "autocomplete";
+$name = !empty($args["name"]) ? preg_replace('/[^a-zA-Z0-9_\-\[\]]/', '', trim((string) $args["name"])) : "autocomplete";
+$name = $name !== "" ? $name : "autocomplete";
 $placeholder = isset($args["placeholder"]) ? (string) $args["placeholder"] : __("Sélectionner", "starterkit");
 $classes = component::classes("autocomplete-field", $args["classes"] ?? "");
 $attributes = component::attributes($args["attributes"] ?? []);
@@ -26,10 +36,9 @@ $menu_id = "autocomplete-options--" . $input_id;
     <select name="<?= esc_attr($name) ?>" aria-hidden="true" tabindex="-1" class="sr-only">
         <option value=""><?= esc_html($placeholder) ?></option>
         <?php foreach ($items as $item) :
-            $value = isset($item["value"]) ? (string) $item["value"] : "";
-            $itemName = isset($item["name"]) ? (string) $item["name"] : "";
-            $alt = isset($item["alt"]) ? (string) $item["alt"] : "";
-            if ($itemName === "" || $value === "") continue;
+            $value = $item["value"];
+            $itemName = $item["name"];
+            $alt = $item["alt"];
         ?>
             <option value="<?= esc_attr($value) ?>"<?= $alt !== "" ? ' data-alt="' . esc_attr($alt) . '"' : "" ?>><?= esc_html($itemName) ?></option>
         <?php endforeach ?>
@@ -43,7 +52,9 @@ $menu_id = "autocomplete-options--" . $input_id;
             autocomplete="off"
             autocapitalize="none"
             aria-autocomplete="list"
+            aria-controls="<?= esc_attr($menu_id) ?>"
             aria-owns="<?= esc_attr($menu_id) ?>"
+            placeholder="<?= esc_attr($placeholder) ?>"
             aria-expanded="false">
 
         <?php component::icon('caret', 13, 8); ?>

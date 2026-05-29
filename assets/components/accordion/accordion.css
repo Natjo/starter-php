@@ -10,14 +10,18 @@
         align-items: center;
         gap: 1rem;
 
-        
+        &:focus-visible {
+            outline: 2px solid currentColor;
+            outline-offset: 2px;
+        }
+
         .accordion-caret {
             border-bottom: 2px solid currentColor;
             border-right: 2px solid currentColor;
             flex: 0 0 .9rem;
             height: .9rem;
-            rotate: 45deg;
-            transition: rotate .25s ease;
+            transform: rotate(45deg);
+            transition: transform .25s ease;
             width: .9rem;
         }
 
@@ -25,7 +29,7 @@
             background-color: #ccc;
 
             .accordion-caret {
-                rotate: 225deg;
+                transform: rotate(225deg);
             }
         }
     }
@@ -58,6 +62,13 @@
             margin-left: calc(-1 * var(--ctr-offset));
             margin-right: calc(-1 * var(--ctr-offset));
             width: calc(100% + 2 * var(--ctr-offset));
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .summary .accordion-caret,
+        .details-content {
+            transition: none;
         }
     }
 }

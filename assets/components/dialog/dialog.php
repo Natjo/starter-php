@@ -1,61 +1,38 @@
 <?php
 $args = component::args($args ?? null);
-$escAttr = function ($value) {
-    if (function_exists("esc_attr")) {
-        return esc_attr($value);
-    }
-
-    return htmlspecialchars((string) $value, ENT_QUOTES, "UTF-8");
-};
-$escHtml = function ($value) {
-    if (function_exists("esc_html")) {
-        return esc_html($value);
-    }
-
-    return htmlspecialchars((string) $value, ENT_QUOTES, "UTF-8");
-};
-$safeHtml = function ($value) {
-    if (function_exists("wp_kses_post")) {
-        return wp_kses_post($value);
-    }
-
-    return (string) $value;
-};
-$translate = function ($text) {
-    if (function_exists("__")) {
-        return __($text, "starterkit");
-    }
-
-    return $text;
-};
 $uniqueId = function ($prefix = "") {
     if (function_exists("wp_unique_id")) {
         return wp_unique_id($prefix);
     }
 
-    return $prefix . bin2hex(random_bytes(4));
+    return uniqid($prefix);
 };
 
 $content = isset($args["content"]) ? (string) $args["content"] : "";
+$title = isset($args["title"]) && is_scalar($args["title"]) ? trim((string) $args["title"]) : "";
 $trigger_cfg = isset($args["trigger"]) && is_array($args["trigger"]) ? array_values($args["trigger"]) : ["btn", null, null];
 $trigger_cfg = array_pad($trigger_cfg, 3, null);
 $type = isset($trigger_cfg[0]) && strtolower((string) $trigger_cfg[0]) === "link" ? "link" : "btn";
 $trigger_label = ($trigger_cfg[1] !== null && trim((string) $trigger_cfg[1]) !== "")
     ? trim((string) $trigger_cfg[1])
-    : $translate("Open dialog");
+    : __("Open dialog", "starterkit");
 $trigger_classes = ($trigger_cfg[2] !== null && trim((string) $trigger_cfg[2]) !== "")
     ? trim((string) $trigger_cfg[2])
     : "";
 $classes = component::classes("dialog", $args["classes"] ?? "");
 $attributes = component::attributes($args["attributes"] ?? []);
 
-$close_label = $translate("Close");
+$close_label = __("Close", "starterkit");
 $id = "";
 
 if ($content === "") return;
 if ($id === "") $id = $uniqueId("dialog-");
+$title_id = $id . "-title";
 $content_id = $id . "-content";
-$aria_label = $trigger_label !== "" ? $trigger_label : $translate("Dialog");
+$aria_label = $trigger_label !== "" ? $trigger_label : __("Dialog", "starterkit");
+$aria = $title !== ""
+    ? ' aria-labelledby="' . esc_attr($title_id) . '"'
+    : ' aria-label="' . esc_attr($aria_label) . '"';
 
 $trigger_extra = $trigger_classes !== "" ? " " . $trigger_classes : "";
 ?>
@@ -64,14 +41,14 @@ $trigger_extra = $trigger_classes !== "" ? " " . $trigger_classes : "";
     <?php
     $dialog_link = [
         "title" => $trigger_label,
-        "url" => "#",
+        "url" => "#" . $id,
         "target" => "",
     ];
     $link_classes = trim("dialog-trigger" . $trigger_extra);
     $link_attributes = sprintf(
         ' role="button" data-dialog-id="%s" aria-haspopup="dialog" aria-controls="%s" aria-expanded="false"',
-        $escAttr($id),
-        $escAttr($id)
+        esc_attr($id),
+        esc_attr($id)
     );
     component::link($dialog_link, $link_classes ?: null, null, $link_attributes);
     ?>
@@ -83,28 +60,31 @@ $trigger_extra = $trigger_classes !== "" ? " " . $trigger_classes : "";
         $btn_classes,
         [],
         'type="button"
-        data-dialog-id="' . $escAttr($id) . '"
+        data-dialog-id="' . esc_attr($id) . '"
         aria-haspopup="dialog"
-        aria-controls="' . $escAttr($id) . '"
+        aria-controls="' . esc_attr($id) . '"
         aria-expanded="false"'
     );
     ?>
 <?php endif; ?>
 
 <dialog
-    id="<?= $escAttr($id) ?>"
+    id="<?= esc_attr($id) ?>"
     class="<?= $classes ?>"
     data-dialog
     data-module="components/dialog"
-    aria-label="<?= $escAttr($aria_label) ?>"
-    aria-describedby="<?= $escAttr($content_id) ?>"<?= $attributes ?>>
+    <?= $aria ?><?= $attributes ?>>
     <div class="dialog-inner">
-        <div id="<?= $escAttr($content_id) ?>" class="dialog-content">
-            <?= $safeHtml($content) ?>
+        <?php if ($title !== "") : ?>
+            <h2 id="<?= esc_attr($title_id) ?>" class="dialog-title"><?= esc_html($title) ?></h2>
+        <?php endif; ?>
+
+        <div id="<?= esc_attr($content_id) ?>" class="dialog-content">
+            <?= starter_kses_post($content) ?>
         </div>
         <form method="dialog" class="dialog-actions">
             <button type="submit" class="dialog-close" value="close" data-dialog-close>
-                <?= $escHtml($close_label) ?>
+                <?= esc_html($close_label) ?>
             </button>
         </form>
     </div>

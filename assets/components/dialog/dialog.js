@@ -35,6 +35,7 @@ const getFocusableElements = (root) => {
 
 const openDialog = (dialog) => {
     if (!dialog) return;
+    if (isDialogOpen(dialog)) return;
     try {
         if (typeof dialog.showModal === "function") dialog.showModal();
         else dialog.setAttribute("open", "");
@@ -68,6 +69,8 @@ const requestCloseDialog = (dialog, returnValue = "close") => {
 const focusDialogDefault = (dialog) => {
     if (!dialog) return;
     const preferred =
+        dialog.querySelector("[autofocus]") ||
+        dialog.querySelector("[data-dialog-focus]") ||
         dialog.querySelector("[data-dialog-close]") ||
         dialog.querySelector("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])");
     if (preferred && typeof preferred.focus === "function") {
@@ -219,6 +222,10 @@ class Dialog {
                 if (btn instanceof HTMLAnchorElement) {
                     try { event?.preventDefault(); } catch (_) { /* noop */ }
                 }
+                if (btn instanceof HTMLButtonElement && btn.disabled) return;
+                if (btn.getAttribute("aria-disabled") === "true") return;
+                if (isDialogOpen(dialog)) return;
+
                 _lastTriggerByDialog.set(dialog, btn);
                 try { btn.setAttribute("aria-expanded", "true"); } catch (_) { /* noop */ }
                 openDialog(dialog);

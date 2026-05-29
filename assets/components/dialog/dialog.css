@@ -1,18 +1,16 @@
 .dialog {
     width: min(720px, calc(100% - 32px));
     border: none;
-    border-radius: 14px;
+    border-radius: 8px;
     padding: 0;
     box-shadow: 0 18px 60px rgba(0, 0, 0, 0.22);
     opacity: 0;
     transform: translateY(8px) scale(0.98);
-    will-change: opacity, transform;
 }
 
 .dialog::backdrop {
     background: rgba(0, 0, 0, 0.45);
     opacity: 0;
-    will-change: opacity;
 }
 
 .dialog[open] {
@@ -29,10 +27,6 @@
 
 .dialog[data-dialog-closing="1"]::backdrop {
     animation: dialog-backdrop-out 160ms ease-in both;
-}
-
-.dialog-inner {
-    transform: translateZ(0);
 }
 
 .dialog-inner {
@@ -58,25 +52,34 @@
     border: 1px solid rgba(0, 0, 0, 0.15);
     background: #fff;
     cursor: pointer;
+
+    &:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 2px;
+    }
 }
 
 @keyframes dialog-fade-in {
     from {
         opacity: 0;
+        transform: translateY(8px) scale(0.98);
     }
 
     to {
         opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
 
 @keyframes dialog-fade-out {
     from {
         opacity: 1;
+        transform: translateY(0) scale(1);
     }
 
     to {
         opacity: 0;
+        transform: translateY(8px) scale(0.98);
     }
 }
 

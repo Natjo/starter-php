@@ -4,7 +4,7 @@ get_template_part('header-nav', null);
 ?>
 
 <main>
-   <?php
+    <?php
     hero("homepage", [
         "title" => "Components",
         "text" => ""
@@ -12,12 +12,23 @@ get_template_part('header-nav', null);
     ?>
 
     <div class="strate">
-        <?php component::badge("ret") ?>
+        <?php component::btn("ret") ?>
+         <?php component::btn([
+            "link" => [
+                "title" => "test",
+                "url" => "/contact"
+            ]
+         ]) ?>
+    </div>
+
+
+    <div class="strate">
+        <?php component::badge("badge") ?>
     </div>
 
     <div class="strate">
 
-        <?php component::dialog("<p>lorem</p>", ['btn', 'Open dialog', null]); ?>
+        <?php component::dialog("<p>dialog lorem</p>", ['btn', 'Open dialog', null]); ?>
     </div>
     <div class="strate">
 
@@ -155,8 +166,9 @@ get_template_part('header-nav', null);
     </div>
 
     <div class="strate">
-        <?php component::tag('Lorem ipsum dolor sit amet'); ?>
+        <?php component::tag('tag Lorem ipsum dolor sit amet'); ?>
     </div>
+
     <div class="strate">
         <?php component::tooltip('Information', 'Texte d’aide court, affiché au survol et au focus.'); ?>
     </div>

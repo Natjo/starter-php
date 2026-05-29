@@ -121,31 +121,25 @@ class component
 
     public static function btn($args, $classes = null, $icon = [], $attributes = null)
     {
-        if (empty($args)) return;
-
         if (is_string($args)) {
             $args = ["name" => $args];
         }
 
         if (!is_array($args)) return;
 
-        if (!empty($args["button"]) && is_array($args["button"])) {
-            $args = $args["button"];
+        if ($classes !== null) {
+            $args["classes"] = $classes;
         }
 
-        $link = !empty($args["link"]) && is_array($args["link"]) ? $args["link"] : null;
-        $name = !empty($args["name"]) ? $args["name"] : "";
+        if (!empty($icon)) {
+            $args["icon"] = $icon;
+        }
 
-        if (empty($link) && empty($name)) return;
-        if (!empty($link) && empty($link["title"])) return;
+        if ($attributes !== null) {
+            $args["attributes"] = $attributes;
+        }
 
-        get_template_part('components/btn/btn', null, [
-            "name" => $name,
-            "link" => $link,
-            "classes" => $classes ?? ($args["classes"] ?? ""),
-            "icon" => !empty($icon) ? $icon : ($args["icon"] ?? []),
-            "attributes" => $attributes ?? ($args["attributes"] ?? "")
-        ]);
+        get_template_part('components/btn/btn', null, $args);
     }
 
     public static function icon($name, $width, $height, $classes = null)
@@ -212,20 +206,37 @@ class component
         ]);
     }
 
-    public static function accordion($items, $classes = null, $attributes = null)
+    public static function accordion($items, $multiple = false, $classes = null, $attributes = null)
     {
         if (empty($items) || !is_array($items)) return;
 
-        $isList = array_keys($items) === range(0, count($items) - 1);
-        if (!$isList) {
-            $items = [$items];
+        if (!is_bool($multiple)) {
+            $attributes = $classes;
+            $classes = $multiple;
+            $multiple = false;
         }
 
-        get_template_part('components/accordion/accordion', null, [
-            "items" => $items,
-            "classes" => $classes ?? "",
-            "attributes" => $attributes ?? ""
-        ]);
+        $args = isset($items["items"]) && is_array($items["items"]) ? $items : ["items" => $items];
+        $accordion_items = $args["items"];
+
+        $isList = array_keys($accordion_items) === range(0, count($accordion_items) - 1);
+        if (!$isList) {
+            $args["items"] = [$accordion_items];
+        }
+
+        if ($multiple !== null) {
+            $args["multiple"] = (bool) $multiple;
+        }
+
+        if ($classes !== null) {
+            $args["classes"] = $classes;
+        }
+
+        if ($attributes !== null) {
+            $args["attributes"] = $attributes;
+        }
+
+        get_template_part('components/accordion/accordion', null, $args);
     }
     public static function header($args, $classes = null, $attributes = null)
     {
@@ -246,24 +257,21 @@ class component
     }
     public static function badge($name, $classes = null, $attributes = null)
     {
-        if (empty($name)) return;
-
-        if (is_array($name)) {
-            $args = $name;
-            $name = $args["name"] ?? $args["label"] ?? $args["title"] ?? "";
-            $classes = $classes ?? ($args["classes"] ?? null);
-            $attributes = $attributes ?? ($args["attributes"] ?? null);
+        if (is_string($name)) {
+            $name = ["name" => $name];
         }
 
-        if (empty($name)) return;
+        if (!is_array($name)) return;
 
-        $args = [
-            "name" => $name,
-            "classes" => $classes,
-            "attributes" => $attributes,
-        ];
+        if ($classes !== null) {
+            $name["classes"] = $classes;
+        }
 
-        get_template_part('components/badge/badge', null, $args);
+        if ($attributes !== null) {
+            $name["attributes"] = $attributes;
+        }
+
+        get_template_part('components/badge/badge', null, $name);
     }
 
     /**
@@ -271,6 +279,8 @@ class component
      */
     public static function dialog($content, $trigger = ["btn", null, null], $classes = null, $attributes = null)
     {
+        $args = [];
+
         if (is_array($content)) {
             $args = $content;
             $content = $args["content"] ?? "";
@@ -296,6 +306,7 @@ class component
 
         get_template_part('components/dialog/dialog', null, [
             "content" => $content,
+            "title" => $args["title"] ?? null,
             "trigger" => $trigger,
             "classes" => $classes,
             "attributes" => $attributes,
@@ -549,12 +560,34 @@ class component
 
     public static function tag($args, $type = "info", $classes = null, $attributes = null)
     {
-        get_template_part('components/tag/tag', '', [
-            "args" => $args,
-            "type" => $type,
-            "classes" => $classes,
-            "attributes" => $attributes,
-        ]);
+        if (is_string($args)) {
+            $args = ["name" => $args];
+        }
+
+        if (!is_array($args)) return;
+
+        $allowed_types = ["info", "btn", "link"];
+        if (!is_string($type) || !in_array($type, $allowed_types, true)) {
+            if (is_string($type) && trim($type) !== "") {
+                $attributes = $classes;
+                $classes = $type;
+            }
+            $type = "info";
+        }
+
+        if (!isset($args["type"]) || $type !== "info") {
+            $args["type"] = $type;
+        }
+
+        if ($classes !== null) {
+            $args["classes"] = $classes;
+        }
+
+        if ($attributes !== null) {
+            $args["attributes"] = $attributes;
+        }
+
+        get_template_part('components/tag/tag', '', $args);
     }
 
 

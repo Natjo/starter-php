@@ -33,6 +33,9 @@ class Autocomplete {
         this.status = root.querySelector('[role="status"]');
         if (!this.select || !this.textBox || !this.menu) return;
 
+        this.options = this._readOptions();
+        this.maxResults = Number.parseInt(root.dataset.maxResults || "50", 10);
+        if (!Number.isFinite(this.maxResults) || this.maxResults < 1) this.maxResults = 50;
         this.activeOptionId = null;
 
         this._onTextBoxKeyUp = this._onTextBoxKeyUp.bind(this);
@@ -108,13 +111,13 @@ class Autocomplete {
     _onTextBoxType() {
         const value = this.textBox.value.trim();
         if (value.length > 0) {
-            const options = this._getOptions(value.toLowerCase());
+            const options = this._getOptions(value);
             this._buildMenu(options);
             this._showMenu();
             this._updateStatus(options.length);
         } else {
             this._hideMenu();
-            this._updateStatus(0);
+            this._updateStatus(null);
         }
         this._updateSelectBox();
     }
@@ -219,7 +222,7 @@ class Autocomplete {
     _buildMenu(options) {
         const fragment = document.createDocumentFragment();
         const baseId = this.menu.id || "autocomplete-menu";
-        options.forEach((opt, i) => {
+        options.slice(0, this.maxResults).forEach((opt, i) => {
             const li = document.createElement("li");
             li.setAttribute("role", "option");
             li.setAttribute("tabindex", "-1");
@@ -246,6 +249,11 @@ class Autocomplete {
 
     _updateStatus(count) {
         if (!this.status) return;
+        if (count === null) {
+            this.status.textContent = "";
+            return;
+        }
+
         this.status.textContent = count > 0
             ? count + " résultat" + (count > 1 ? "s" : "") + " disponible" + (count > 1 ? "s" : "") + "."
             : "Aucun résultat disponible.";
@@ -254,7 +262,7 @@ class Autocomplete {
     _updateSelectBox() {
         if (!this.select) return;
         const value = this.textBox.value.trim().toLowerCase();
-        const match = Array.from(this.select.options).find((o) => o.text.trim().toLowerCase() === value);
+        const match = this.options.find((option) => option.searchText === value);
         this.select.value = match ? match.value : "";
     }
 
@@ -262,24 +270,37 @@ class Autocomplete {
     // Filtrage des options sources (<select>)
     // ---------------------------------------------------------------------
 
-    _getAllOptions() {
+    _readOptions() {
         return Array.from(this.select.options)
             .filter((o) => o.value.trim().length > 0)
-            .map((o) => ({ text: o.text, value: o.value, alt: o.dataset?.alt || "" }));
+            .map((o) => {
+                const text = o.text.trim();
+                const alt = o.dataset?.alt || "";
+
+                return {
+                    text,
+                    value: o.value,
+                    alt,
+                    searchText: text.toLowerCase(),
+                    searchAlt: alt.toLowerCase(),
+                };
+            });
+    }
+
+    _getAllOptions() {
+        return this.options;
     }
 
     _getOptions(value) {
         const needle = value.toLowerCase();
-        return this._getAllOptions().filter(({ text, alt }) => {
-            const t = text.toLowerCase();
-            const a = (alt || "").toLowerCase();
-            return t.indexOf(needle) > -1 || (a && a.indexOf(needle) > -1);
+        return this.options.filter(({ searchText, searchAlt }) => {
+            return searchText.includes(needle) || (searchAlt && searchAlt.includes(needle));
         });
     }
 
     _isExactMatch(value) {
         const needle = value.toLowerCase();
-        return this._getAllOptions().some(({ text }) => text.toLowerCase() === needle);
+        return this.options.some(({ searchText }) => searchText === needle);
     }
 
     _firstOption() {
