@@ -1,5 +1,5 @@
 <?php
-$args = isset($args) && is_array($args) ? $args : [];
+$args = component::args($args ?? null);
 $escAttr = function ($value) {
     if (function_exists("esc_attr")) {
         return esc_attr($value);
@@ -46,8 +46,8 @@ $trigger_label = ($trigger_cfg[1] !== null && trim((string) $trigger_cfg[1]) !==
 $trigger_classes = ($trigger_cfg[2] !== null && trim((string) $trigger_cfg[2]) !== "")
     ? trim((string) $trigger_cfg[2])
     : "";
-$classes = !empty($args["classes"]) ? " " . (string) $args["classes"] : "";
-$attributes = !empty($args["attributes"]) ? (string) $args["attributes"] : "";
+$classes = component::classes("dialog", $args["classes"] ?? "");
+$attributes = component::attributes($args["attributes"] ?? []);
 
 $close_label = $translate("Close");
 $id = "";
@@ -93,12 +93,11 @@ $trigger_extra = $trigger_classes !== "" ? " " . $trigger_classes : "";
 
 <dialog
     id="<?= $escAttr($id) ?>"
-    class="dialog<?= $escAttr($classes) ?>"
+    class="<?= $classes ?>"
     data-dialog
     data-module="components/dialog"
     aria-label="<?= $escAttr($aria_label) ?>"
-    aria-describedby="<?= $escAttr($content_id) ?>"
-    <?= $attributes ?>>
+    aria-describedby="<?= $escAttr($content_id) ?>"<?= $attributes ?>>
     <div class="dialog-inner">
         <div id="<?= $escAttr($content_id) ?>" class="dialog-content">
             <?= $safeHtml($content) ?>

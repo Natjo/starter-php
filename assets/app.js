@@ -1,22 +1,29 @@
 import Lenis from "@vendors/lenis/lenis";
 import HeaderNav from "@common/header-nav";
+
+const moduleVersions = __MODULE_VERSIONS__;
+const moduleCache = new Map();
+
 HeaderNav();
 
-const lenis = new Lenis({
-    autoRaf: false,
-});
+const versionedModulePath = modulePath => {
+    const version = moduleVersions[modulePath.replace(/^\.\//, '')];
 
-function raf(time) {
-    lenis.raf(time);
-    requestAnimationFrame(raf);
-}
+    return version ? `${modulePath}?v=${version}` : modulePath;
+};
 
-requestAnimationFrame(raf);
+const supportsSmoothScroll = () => {
+    return !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        && window.matchMedia("(pointer: fine)").matches;
+};
 
-const modules = document.querySelectorAll('[data-module]');
-const moduleVersions = __MODULE_VERSIONS__;
+const initLenis = () => {
+    if (!supportsSmoothScroll()) return;
 
-const moduleCandidates = moduleName => {
+    window.lenis = new Lenis({ autoRaf: true });
+};
+
+const moduleCandidates = (moduleName) => {
     const parts = moduleName.split('/').filter(Boolean);
     const last = parts[parts.length - 1];
 
@@ -26,7 +33,7 @@ const moduleCandidates = moduleName => {
     ].filter(Boolean);
 };
 
-const importModule = async moduleName => {
+const importModule = async (moduleName) => {
     let lastError;
 
     for (const candidate of moduleCandidates(moduleName)) {
@@ -40,13 +47,13 @@ const importModule = async moduleName => {
             if (dir === 'strates') modulePath = `./strates/${file}.js`;
 
             if (modulePath) {
-                const version = moduleVersions[modulePath.replace(/^\.\//, '')];
+                modulePath = versionedModulePath(modulePath);
 
-                if (version) {
-                    modulePath = `${modulePath}?v=${version}`;
+                if (!moduleCache.has(modulePath)) {
+                    moduleCache.set(modulePath, import(modulePath));
                 }
 
-                return await import(modulePath);
+                return await moduleCache.get(modulePath);
             }
 
             throw new Error(`Préfixe de module inconnu : ${dir}`);
@@ -58,7 +65,7 @@ const importModule = async moduleName => {
     throw lastError;
 };
 
-const hydrateModule = el => {
+const hydrateModule = (el) => {
     if (el.dataset.moduleHydrated === "true") return;
 
     const moduleName = el.dataset.module;
@@ -79,27 +86,35 @@ const hydrateModule = el => {
         });
 };
 
-const shouldHydrateOnVisible = el => {
-    return (el.dataset.context || "").split(/\s+/).includes("@visible")
-        && (el.dataset.context || "").split(/\s+/).includes("true");
+const shouldHydrateOnVisible = (el) => /\B@visible\s+true\b/.test(el.dataset.context || "");
+
+const initModules = () => {
+    const modules = document.querySelectorAll('[data-module]');
+
+    if (modules.length === 0) return;
+
+    const visibleObserver = "IntersectionObserver" in window
+        ? new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+
+                visibleObserver.unobserve(entry.target);
+                hydrateModule(entry.target);
+            });
+        }, { rootMargin: "200px 0px" })
+        : null;
+
+    modules.forEach((el) => {
+        if (shouldHydrateOnVisible(el)) {
+            if (visibleObserver) {
+                visibleObserver.observe(el);
+                return;
+            }
+        }
+
+        hydrateModule(el);
+    });
 };
 
-const visibleObserver = "IntersectionObserver" in window
-    ? new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-            if (!entry.isIntersecting) return;
-
-            visibleObserver.unobserve(entry.target);
-            hydrateModule(entry.target);
-        });
-    })
-    : null;
-
-modules.forEach(el => {
-    if (shouldHydrateOnVisible(el)) {
-        if (visibleObserver) visibleObserver.observe(el);
-        return;
-    }
-
-    hydrateModule(el);
-});
+initModules();
+initLenis();

@@ -1,6 +1,8 @@
 <?php
 
 /** @var array $args */
+$args = component::args($args ?? null);
+
 // $args["url"] accepte :
 // - une string (URL ou ID média WordPress) → un seul <source>
 // - un tableau d'URLs / IDs → plusieurs <source> avec MIME auto-détecté
@@ -10,8 +12,8 @@ $title = isset($args["title"]) ? trim((string) $args["title"]) : "";
 $poster = isset($args["poster"]) ? trim((string) $args["poster"]) : "";
 $autoplay = !empty($args["autoplay"]);
 $loop = !empty($args["loop"]);
-$classes = isset($args["classes"]) ? trim((string) $args["classes"]) : "";
-$attributes = isset($args["attributes"]) ? trim((string) $args["attributes"]) : "";
+$classes = component::classes("video", $args["classes"] ?? "");
+$attributes = component::attributes($args["attributes"] ?? []);
 
 $urls = is_array($url_input) ? $url_input : [$url_input];
 $urls = array_values(array_filter(array_map(function ($u) {
@@ -71,7 +73,6 @@ if ($is_youtube) {
     $autoplay_src = 'https://player.vimeo.com/video/' . rawurlencode($vid) . '?' . http_build_query($base + ['autoplay' => 1, 'muted' => 1]);
 }
 
-$root_class = "video" . ($classes !== "" ? " " . esc_attr($classes) : "");
 $has_facade = $poster !== "";
 $iframe_title = $title !== "" ? $title : __("Lecteur vidéo", "starterkit");
 $play_label = $title !== ""
@@ -82,7 +83,7 @@ $play_label = $title !== ""
 $hide_tab = $has_facade ? ' tabindex="-1"' : '';
 ?>
 
-<div class="<?= esc_attr($root_class) ?>" data-type="<?= esc_attr($type) ?>" data-autoplay="<?= $autoplay ? "true" : "false" ?>"<?= ($is_youtube || $is_vimeo) ? ' data-autoplay-src="' . esc_attr($autoplay_src) . '"' : '' ?><?= $attributes !== "" ? " " . $attributes : "" ?>>
+<div class="<?= $classes ?>" data-type="<?= esc_attr($type) ?>" data-autoplay="<?= $autoplay ? "true" : "false" ?>"<?= ($is_youtube || $is_vimeo) ? ' data-autoplay-src="' . esc_attr($autoplay_src) . '"' : '' ?><?= $attributes ?>>
     <?php if ($is_youtube || $is_vimeo) : ?>
         <iframe
             src="<?= esc_url($autoplay ? $autoplay_src : $idle_src) ?>"

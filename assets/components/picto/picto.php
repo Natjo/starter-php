@@ -1,5 +1,5 @@
 <?php
-$args = isset($args) && is_array($args) ? $args : [];
+$args = component::args($args ?? null);
 $escAttr = function ($value) {
     if (function_exists("esc_attr")) {
         return esc_attr($value);
@@ -12,13 +12,10 @@ $name = isset($args['name']) ? trim((string) $args['name']) : '';
 if ($name === '') return;
 $type = isset($args['type']) ? trim((string) $args['type']) : '';
 $size = isset($args['size']) ? trim((string) $args['size']) : '';
-$classes = isset($args['classes']) ? trim((string) $args['classes']) : '';
-$attributes = isset($args['attributes']) ? trim((string) $args['attributes']) : '';
-$type_class = $type !== '' ? ' ' . $escAttr($type) : '';
-$size_class = $size !== '' ? ' ' . $escAttr($size) : '';
-$extra_class = $classes !== '' ? ' ' . $escAttr($classes) : '';
+$classes = component::classes('picto', $type, $size, $args['classes'] ?? '');
+$attributes = component::attributes($args['attributes'] ?? []);
 ?>
 
-<div class="picto<?= $type_class . $size_class . $extra_class ?>"<?= $attributes !== '' ? ' ' . $attributes : '' ?>>
+<div class="<?= $classes ?>"<?= $attributes ?>>
     <?php component::icon($name, 24, 24) ?>
 </div>

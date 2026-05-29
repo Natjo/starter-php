@@ -1,5 +1,5 @@
 <?php
-$args = isset($args) && is_array($args) ? $args : [];
+$args = component::args($args ?? null);
 $items = !empty($args["items"]) && is_array($args["items"]) ? $args["items"] : [];
 $isList = empty($items) || array_keys($items) === range(0, count($items) - 1);
 if (!$isList) {
@@ -8,7 +8,7 @@ if (!$isList) {
 $card = !empty($args["card"]) ? (string) $args["card"] : "card-news";
 $navigation  = !empty($args["navigation"]) ? true : false;
 $pagination  = !empty($args["pagination"]) ? true : false;
-$classes     = !empty($args["classes"]) ? " " . $args["classes"] : "";
+$classes     = component::classes("slider", $args["classes"] ?? "");
 $label       = !empty($args["label"]) ? ' aria-label="' . htmlspecialchars((string) $args["label"], ENT_QUOTES, "UTF-8") . '"' : "";
 $slider_id   = function_exists("wp_unique_id") ? "slider-" . wp_unique_id() : "slider-" . uniqid();
 $status_id   = $slider_id . "-status";
@@ -16,7 +16,7 @@ $status_id   = $slider_id . "-status";
 if (empty($items)) return;
 ?>
 
-<div class="slider<?= $classes ?>" role="region" <?= $label ?>>
+<div class="<?= $classes ?>" role="region"<?= $label ?>>
 
     <?php if ($navigation) : ?>
         <div class="slider-navigation" aria-hidden="true">

@@ -1,6 +1,6 @@
 <?php
 /** @var array $args */
-$args = isset($args) && is_array($args) ? $args : [];
+$args = component::args($args ?? null);
 $escAttr = function ($value) {
     if (function_exists('esc_attr')) {
         return esc_attr($value);
@@ -19,16 +19,15 @@ $escHtml = function ($value) {
 $options = isset($args['args']) && is_array($args['args']) ? $args['args'] : [];
 $label = isset($args['label']) ? trim((string) $args['label']) : '';
 $name = isset($args['name']) && trim((string) $args['name']) !== '' ? trim((string) $args['name']) : 'select';
-$classes = isset($args['classes']) ? trim((string) $args['classes']) : '';
-$attributes = isset($args['attributes']) ? trim((string) $args['attributes']) : '';
+$classes = component::classes('select', $args['classes'] ?? '');
+$attributes = component::attributes($args['attributes'] ?? []);
 
 if (empty($options)) return;
 
 $uid = uniqid('select-');
-$root_class = 'select' . ($classes !== '' ? ' ' . $escAttr($classes) : '');
 ?>
 
-<div class="<?= $root_class ?>"<?= $attributes !== '' ? ' ' . $attributes : '' ?>>
+<div class="<?= $classes ?>"<?= $attributes ?>>
     <?php if ($label !== '') : ?>
         <label for="<?= $escAttr($uid) ?>"><?= $escHtml($label) ?></label>
     <?php endif; ?>

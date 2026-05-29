@@ -1,8 +1,8 @@
 <?php
-$args = isset($args) && is_array($args) ? $args : [];
+$args = component::args($args ?? null);
 $items = !empty($args["items"]) && is_array($args["items"]) ? $args["items"] : [];
 $card = !empty($args["card"]) ? (string) $args["card"] : "card-news";
-$classes = !empty($args["classes"]) ? " " . esc_attr($args["classes"]) : "";
+$classes = component::classes("list", $args["classes"] ?? "");
 
 $isList = empty($items) || array_keys($items) === range(0, count($items) - 1);
 if (!$isList) {
@@ -14,7 +14,7 @@ if (empty($items)) {
 }
 ?>
 
-<div class="list<?= $classes ?>">
+<div class="<?= $classes ?>">
     <ul class="list__items" role="list">
         <?php foreach ($items as $item) : ?>
             <li class="list__item">

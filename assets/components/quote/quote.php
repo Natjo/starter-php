@@ -1,19 +1,19 @@
 <?php
+$args = component::args($args ?? null);
 $data = isset($quote) && is_array($quote) ? $quote : [];
 $text = trim((string) ($data["text"] ?? ($data["quote"] ?? "")));
 $author = trim((string) ($data["author"] ?? ""));
 $role = trim((string) ($data["role"] ?? ""));
 $source = trim((string) ($data["source"] ?? ""));
-$classes = isset($classes) ? trim((string) $classes) : "";
-$attributes = isset($attributes) ? trim((string) $attributes) : "";
+$classes = component::classes('quote', $classes ?? '');
+$attributes = component::attributes($attributes ?? []);
 
 if ($text === "") return;
 
 $caption = $role !== '' ? $role : $source;
-$rootClass = 'quote' . ($classes !== '' ? ' ' . htmlspecialchars($classes, ENT_QUOTES, "UTF-8") : '');
 ?>
 
-<figure class="<?= $rootClass ?>"<?= $attributes !== '' ? ' ' . $attributes : '' ?>>
+<figure class="<?= $classes ?>"<?= $attributes ?>>
     <blockquote class="quote-text">
         <?= $text ?>
     </blockquote>

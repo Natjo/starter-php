@@ -176,7 +176,7 @@ if (!function_exists('sg_table_cell_attributes')) {
         }
 
         if (!empty($cell['class'])) {
-            $attrs[] = 'class="' . esc_attr($cell['class']) . '"';
+            $attrs[] = 'class="' . component::classes($cell['class']) . '"';
         }
 
         return $attrs ? ' ' . implode(' ', $attrs) : '';
@@ -217,9 +217,9 @@ if (!function_exists('sg_table_render_rows')) {
     }
 }
 
-$args = isset($args) && is_array($args) ? $args : [];
-$classes = !empty($args['classes']) ? ' ' . esc_attr($args['classes']) : '';
-$attributes = !empty($args['attributes']) ? (string) $args['attributes'] : '';
+$args = component::args($args ?? null);
+$classes = component::classes('table', $args['classes'] ?? '');
+$attributes = component::attributes($args['attributes'] ?? []);
 $rows = !empty($args['rows']) && is_array($args['rows']) ? $args['rows'] : [];
 
 if (empty($rows)) {
@@ -236,7 +236,7 @@ if (empty($head) && empty($body)) {
 
 ?>
 
-<div class="table<?= $classes ?>"<?= $attributes !== '' ? ' ' . $attributes : '' ?>>
+<div class="<?= $classes ?>"<?= $attributes ?>>
     <div class="table__scroll" tabindex="0">
         <table>
             <?php if (!empty($head)) : ?>

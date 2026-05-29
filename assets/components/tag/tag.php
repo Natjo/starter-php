@@ -1,4 +1,6 @@
 <?php
+$args = component::args($args ?? null);
+
 $payload_args = $args["args"] ?? null;
 $type = $args["type"] ?? "info";
 $classes = $args["classes"] ?? null;
@@ -44,8 +46,8 @@ if ($raw_type === "link") {
     if ($name === "") return;
 }
 
-$classes = !empty($classes) ? " " . (string) $classes : "";
-$attributes = !empty($attributes) ? (string) $attributes : "";
+$classes = component::classes("tag", $classes ?? "");
+$attributes = component::attributes($attributes ?? []);
 $target = "";
 if ($raw_type === "link" && $link) {
     $target = !empty($link["target"]) && $link["target"] !== "" ? ' target="_blank"' : "";
@@ -53,15 +55,15 @@ if ($raw_type === "link" && $link) {
 ?>
 
 <?php if ($raw_type === "link" && $link) : ?>
-    <a href="<?= esc_url($link["url"] ?? "") ?>" class="tag<?= esc_attr($classes) ?>" <?= $attributes . $target ?>>
+    <a href="<?= esc_url($link["url"] ?? "") ?>" class="<?= $classes ?>"<?= $attributes . $target ?>>
         <?= esc_html($link["title"] ?? "") ?>
     </a>
 <?php elseif ($raw_type === "btn") : ?>
-    <button type="button" class="tag<?= esc_attr($classes) ?>" <?= $attributes ?>>
+    <button type="button" class="<?= $classes ?>"<?= $attributes ?>>
         <?= esc_html($name) ?>
     </button>
 <?php else : ?>
-    <div class="tag<?= esc_attr($classes) ?>" <?= $attributes ?>>
+    <div class="<?= $classes ?>"<?= $attributes ?>>
         <?= esc_html($name) ?>
     </div>
 <?php endif; ?>

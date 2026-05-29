@@ -1,6 +1,7 @@
 <?php
+$args = component::args($args ?? null);
 $list = isset($args["list"]) ? $args["list"] : [];
-$classes = !empty($args["classes"]) ? " " . (string) $args["classes"] : "";
+$classes = component::classes("shares", $args["classes"] ?? "");
 
 $host = $_SERVER["HTTP_HOST"] ?? "";
 $uri = $_SERVER["REQUEST_URI"] ?? "";
@@ -63,7 +64,7 @@ if (empty($keys)) {
 
 
 
-<div class="shares<?= esc_attr($classes) ?>" data-context="@visible true" data-module="components/shares">
+<div class="<?= $classes ?>" data-context="@visible true" data-module="components/shares">
     <div class="title"><?= __("Partager l’article", 'lsd_lang') ?></div>
 
     <ul class="list">

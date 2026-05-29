@@ -2,45 +2,71 @@
 
 class component
 {
+    public static function args($args, array $defaults = []): array
+    {
+        return array_replace($defaults, is_array($args) ? $args : []);
+    }
+
+    public static function classes(...$classes)
+    {
+        $classes = array_map(static function ($class) {
+            if (is_array($class)) {
+                return implode(' ', array_filter($class, static fn($item) => is_scalar($item)));
+            }
+
+            return $class;
+        }, $classes);
+
+        return esc_attr(sanitize_class_list(implode(' ', array_filter($classes, static fn($class) => $class !== null && $class !== false && $class !== ''))));
+    }
+
+    public static function attributes($attributes)
+    {
+        $attributes = starter_attributes($attributes);
+
+        return $attributes !== '' ? ' ' . $attributes : '';
+    }
+
     public static function title($args, $hx = 2, $classes = null, $attributes = null)
     {
         if (is_string($args)) {
             $args = ["title" => $args];
         }
 
-        if (empty($args["title"])) return;
+        if (!is_array($args)) return;
 
-        get_template_part('components/title/title', null, [
-            "hx"      => $hx,
-            "title"   => $args["title"],
-            "classes" => $classes ?? "",
-            "attributes" => $attributes ?? "",
-        ]);
+        if ($hx !== null) {
+            $args["hx"] = $hx;
+        }
+
+        if ($classes !== null) {
+            $args["classes"] = $classes;
+        }
+
+        if ($attributes !== null) {
+            $args["attributes"] = $attributes;
+        }
+
+        get_template_part('components/title/title', null, $args);
     }
+
     public static function text($args, $classes = null, $attributes = null)
     {
         if (is_string($args)) {
             $args = ["text" => $args];
         }
+
         if (!is_array($args)) return;
 
-        $text = null;
-        if (!empty($args["legend"])) {
-            $text = $args["legend"];
+        if ($classes !== null) {
+            $args["classes"] = $classes;
         }
-        if (!empty($args["text"])) {
-            $text = $args["text"];
-        }
-        if (!empty($args["intro"])) {
-            $text = $args["intro"];
-        }
-        if (empty($text)) return;
 
-        get_template_part('components/text/text', null, [
-            "text" => $text,
-            "classes" => $classes ?? "",
-            "attributes" => $attributes ?? "",
-        ]);
+        if ($attributes !== null) {
+            $args["attributes"] = $attributes;
+        }
+
+        get_template_part('components/text/text', null, $args);
     }
 
     public static function picture($args, $sizes = "full", $classes = "", $lazy = true, $placeholder = false, $breakpoint = 768)

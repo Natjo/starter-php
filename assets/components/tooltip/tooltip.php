@@ -1,18 +1,19 @@
 <?php
 /** @var array $args */
+$args = component::args($args ?? null);
+
 $label = isset($args['label']) ? trim((string) $args['label']) : '';
 $content = isset($args['content']) ? trim((string) $args['content']) : '';
-$classes = isset($args['classes']) ? trim((string) $args['classes']) : '';
-$attributes = isset($args['attributes']) ? trim((string) $args['attributes']) : '';
+$classes = component::classes('tooltip', $args['classes'] ?? '');
+$attributes = component::attributes($args['attributes'] ?? []);
 
 if ($label === '' || $content === '') return;
 
 $uid = uniqid('tooltip-');
 $anchor = '--' . $uid;
-$root_class = 'tooltip' . ($classes !== '' ? ' ' . esc_attr($classes) : '');
 ?>
 
-<span class="<?= $root_class ?>"<?= $attributes !== '' ? ' ' . $attributes : '' ?>>
+<span class="<?= $classes ?>"<?= $attributes ?>>
     <button
         class="trigger-button"
         type="button"

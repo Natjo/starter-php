@@ -1,5 +1,5 @@
 <?php
-$args = isset($args) && is_array($args) ? $args : [];
+$args = component::args($args ?? null);
 $escAttr = function ($value) {
     if (function_exists("esc_attr")) {
         return esc_attr($value);
@@ -23,14 +23,14 @@ $translate = function ($text) {
 };
 
 $items = !empty($args["items"]) && is_array($args["items"]) ? $args["items"] : [];
-$classes = !empty($args["classes"]) ? " " . $escAttr($args["classes"]) : "";
-$attributes = !empty($args["attributes"]) ? (string) $args["attributes"] : "";
+$classes = component::classes("navanchor", "menu-navigation", $args["classes"] ?? "");
+$attributes = component::attributes($args["attributes"] ?? []);
 $label = !empty($args["label"]) ? $args["label"] : $translate("Table des matières");
 
 if (empty($items)) return;
 ?>
 
-<nav class="navanchor menu-navigation<?= $classes ?>" data-module="components/navanchor" aria-label="<?= $escAttr($label) ?>"<?= $attributes !== "" ? " " . $attributes : "" ?>>
+<nav class="<?= $classes ?>" data-module="components/navanchor" aria-label="<?= $escAttr($label) ?>"<?= $attributes ?>>
     <p class="navanchor-title"><?= $escHtml($label) ?></p>
     <ul>
         <?php foreach ($items as $i => $item) :

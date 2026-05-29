@@ -29,10 +29,25 @@ if (!function_exists('esc_url')) {
 }
 
 if (!function_exists('wp_kses_post')) {
+    define('STARTER_WP_KSES_POST_FALLBACK', true);
+
     function wp_kses_post($html)
     {
         return (string) $html;
     }
+}
+
+function starter_kses_post($html)
+{
+    if (function_exists('wp_kses') && function_exists('wp_kses_allowed_html')) {
+        return wp_kses((string) $html, wp_kses_allowed_html('post'));
+    }
+
+    if (function_exists('wp_kses_post') && !defined('STARTER_WP_KSES_POST_FALLBACK')) {
+        return wp_kses_post($html);
+    }
+
+    return strip_tags((string) $html, '<br><strong><b><em><i><span><sup><sub>');
 }
 
 if (!function_exists('sanitize_html_class')) {
@@ -510,11 +525,45 @@ function options($classes, $args = [])
 
 function sanitize_class_list($classes)
 {
+    if (is_array($classes)) {
+        $classes = implode(' ', array_filter($classes, static fn($class) => is_scalar($class)));
+    }
+
     $classes = preg_split('/\s+/', (string) $classes, -1, PREG_SPLIT_NO_EMPTY);
     $classes = array_map('sanitize_html_class', $classes);
     $classes = array_filter($classes, static fn($class) => $class !== '');
 
     return implode(' ', array_unique($classes));
+}
+
+function starter_attributes($attributes)
+{
+    if (is_string($attributes)) {
+        return trim($attributes);
+    }
+
+    if (!is_array($attributes)) {
+        return '';
+    }
+
+    $html = [];
+
+    foreach ($attributes as $name => $value) {
+        $name = strtolower((string) $name);
+
+        if (!preg_match('/^[a-z][a-z0-9_:-]*$/', $name) || $value === null || $value === false) {
+            continue;
+        }
+
+        if ($value === true) {
+            $html[] = esc_attr($name);
+            continue;
+        }
+
+        $html[] = esc_attr($name) . '="' . esc_attr($value) . '"';
+    }
+
+    return implode(' ', $html);
 }
 
 function youtube_id_from_url($url)

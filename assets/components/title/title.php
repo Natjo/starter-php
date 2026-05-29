@@ -1,15 +1,17 @@
 <?php
-$args = isset($args) && is_array($args) ? $args : [];
-$title = !empty($args["title"]) ? (string) $args["title"] : "";
-$level = !empty($args["hx"]) ? (int) $args["hx"] : (!empty($args["level"]) ? (int) $args["level"] : 2);
-$level = max(1, min(6, $level));
-$hx = "h" . $level;
-$classes = !empty($args["classes"]) ? " " . htmlspecialchars((string) $args["classes"], ENT_QUOTES, "UTF-8") : "";
-$attributes = !empty($args["attributes"]) ? (string) $args["attributes"] : "";
+$args = component::args($args ?? null);
+$title = $args["title"] ?? $args["titre"] ?? $args["heading"] ?? $args["headline"] ?? "";
+$title = is_scalar($title) ? (string) $title : "";
 
-if ($title === "") {
-    return;
-}
+if ($title === "") return;
+
+
+$level = max(1, min(6, (int) ($args["hx"] ?? 2)));
+$hx = "h" . $level;
+$classes = component::classes("title", $args["classes"] ?? "");
+$attributes = component::attributes($args["attributes"] ?? []);
+$html = array_key_exists("html", $args) ? (bool) $args["html"] : true;
+$content = $html ? starter_kses_post($title) : esc_html($title);
 ?>
 
-<<?= $hx; ?> class="title<?= htmlspecialchars($classes, ENT_QUOTES, 'UTF-8'); ?>" <?= $attributes ?>><?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></<?= $hx; ?>>
+<<?= $hx ?> class="<?= $classes ?>"<?= $attributes ?>><?= $content ?></<?= $hx ?>>

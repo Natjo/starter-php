@@ -1,13 +1,13 @@
 <?php
-$args = isset($args) && is_array($args) ? $args : [];
+$args = component::args($args ?? null);
 $items = !empty($args["items"]) && is_array($args["items"]) ? $args["items"] : [];
-$classes = !empty($args["classes"]) ? " " . htmlspecialchars((string) $args["classes"], ENT_QUOTES, "UTF-8") : "";
-$attributes = !empty($args["attributes"]) ? " " . (string) $args["attributes"] : "";
+$classes = component::classes("accordion", $args["classes"] ?? "");
+$attributes = component::attributes($args["attributes"] ?? []);
 
 if (empty($items)) return;
 ?>
 
-<div class="accordion<?= $classes ?>"<?= $attributes ?> data-module="components/accordion" data-context="@visible true">
+<div class="<?= $classes ?>"<?= $attributes ?> data-module="components/accordion" data-context="@visible true">
     <?php foreach ($items as $index => $item) :
         $uniqid = uniqid();
         $title = htmlspecialchars((string) ($item["title"] ?? ""), ENT_QUOTES, "UTF-8");

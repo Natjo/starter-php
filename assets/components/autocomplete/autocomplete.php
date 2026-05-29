@@ -1,13 +1,14 @@
 <?php
 /** @var array $args */
 /*https://access42.net/concevoir-un-composant-d-auto-completion-accessible/*/
+$args = component::args($args ?? null);
 
 $items = !empty($args["items"]) && is_array($args["items"]) ? $args["items"] : [];
 $label = isset($args["label"]) ? (string) $args["label"] : "";
 $name = !empty($args["name"]) ? (string) $args["name"] : "autocomplete";
 $placeholder = isset($args["placeholder"]) ? (string) $args["placeholder"] : __("Sélectionner", "starterkit");
-$classes = isset($args["classes"]) ? trim((string) $args["classes"]) : "";
-$attributes = isset($args["attributes"]) ? trim((string) $args["attributes"]) : "";
+$classes = component::classes("autocomplete-field", $args["classes"] ?? "");
+$attributes = component::attributes($args["attributes"] ?? []);
 
 if (empty($items)) return;
 
@@ -15,10 +16,9 @@ $uid = uniqid();
 $input_id = $uid . "-" . sanitize_html_class($name);
 $menu_id = "autocomplete-options--" . $input_id;
 
-$root_class = "autocomplete-field" . ($classes !== "" ? " " . esc_attr($classes) : "");
 ?>
 
-<div class="<?= $root_class ?>" data-module="components/autocomplete"<?= $attributes !== "" ? " " . $attributes : "" ?>>
+<div class="<?= $classes ?>" data-module="components/autocomplete"<?= $attributes ?>>
     <?php if ($label !== "") : ?>
         <label for="<?= esc_attr($input_id) ?>"><?= esc_html($label) ?></label>
     <?php endif ?>

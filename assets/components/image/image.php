@@ -1,5 +1,6 @@
 <?php
 /** @var array $args */
+$args = component::args($args ?? null);
 $input = $args["image"] ?? "";
 $size = $args["size"] ?? "full";
 
@@ -60,7 +61,7 @@ $ext = strtolower((string) pathinfo(parse_url($src, PHP_URL_PATH) ?: $src, PATHI
 $lazy = !empty($args["lazy"]) ? ' loading="lazy"' : "";
 $alt_attr = $alt !== "" ? ' alt="' . esc_attr($alt) . '"' : ' alt=""';
 if ($ext === "svg") $alt_attr = "";
-$classes = !empty($args["classes"]) ? ' class="' . esc_attr($args["classes"]) . '"' : "";
+$classes = !empty($args["classes"]) ? ' class="' . component::classes($args["classes"]) . '"' : "";
 $dims = ($width > 0 ? ' width="' . $width . '"' : '') . ($height > 0 ? ' height="' . $height . '"' : '');
 ?>
 

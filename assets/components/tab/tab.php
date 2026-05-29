@@ -1,6 +1,7 @@
 <?php
-$classes = !empty($args["classes"]) ? " " . esc_attr($args["classes"]) : "";
-$attributes = !empty($args["attributes"]) ? $args["attributes"] : "";
+$args = component::args($args ?? null);
+$classes = component::classes("tabs", $args["classes"] ?? "");
+$attributes = component::attributes($args["attributes"] ?? []);
 $items = !empty($args["items"]) && is_array($args["items"]) ? $args["items"] : [];
 $title = !empty($args["title"]) ? $args["title"] : "";
 
@@ -10,7 +11,7 @@ $uid = uniqid("tabs-");
 $tablist_id = "tablist-{$uid}";
 ?>
 
-<div class="tabs<?= $classes ?>" data-module="components/tab" data-context="@visible true"<?= $attributes !== "" ? " " . $attributes : "" ?>>
+<div class="<?= $classes ?>" data-module="components/tab" data-context="@visible true"<?= $attributes ?>>
     <?php if ($title !== "") : ?>
         <h3 id="<?= esc_attr($tablist_id) ?>" class="tabs-title"><?= esc_html($title) ?></h3>
     <?php endif ?>

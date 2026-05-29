@@ -1,8 +1,8 @@
 <?php
-$args = isset($args) && is_array($args) ? $args : [];
+$args = component::args($args ?? null);
 $link = !empty($args["link"]) && is_array($args["link"]) ? $args["link"] : [];
 $target = !empty($link["target"]) ? ' target="' . htmlspecialchars((string) $link["target"], ENT_QUOTES, "UTF-8") . '"' : '';
-$classes = !empty($args["classes"]) ? htmlspecialchars((string) $args["classes"], ENT_QUOTES, "UTF-8") : "";
+$classes = component::classes("link", $args["classes"] ?? "");
 $iconHtml = "";
 
 if (!empty($args["icon"]) && is_array($args["icon"]) && method_exists("component", "icon")) {
@@ -17,12 +17,12 @@ if (!empty($args["icon"]) && is_array($args["icon"]) && method_exists("component
     component::icon($name, $width, $height);
     $iconHtml = (string) ob_get_clean();
 }
-$attributes = !empty($args["attributes"]) ? " " . (string) $args["attributes"] : "";
+$attributes = component::attributes($args["attributes"] ?? []);
 
 $url = htmlspecialchars((string) ($link["url"] ?? "#"), ENT_QUOTES, "UTF-8");
 $title = htmlspecialchars((string) ($link["title"] ?? ""), ENT_QUOTES, "UTF-8");
 ?>
 
 <?php if ($title !== "") : ?>
-    <a href="<?= $url ?>" class="link <?= $classes ?>"<?= $attributes . $target ?>><span><?= $title ?></span><?= $iconHtml ?></a>
+    <a href="<?= $url ?>" class="<?= $classes ?>"<?= $attributes . $target ?>><span><?= $title ?></span><?= $iconHtml ?></a>
 <?php endif; ?>

@@ -1,6 +1,6 @@
 <?php
 /** @var array $args */
-$args = isset($args) ? $args : [];
+$args = component::args($args ?? null);
 // Accepts:
 // - $args["images"] as ["desktop" => id|path, "mobile" => id|path], scalar, or indexed array
 // - Or directly an id|path as $args itself (backward-friendly)
@@ -26,7 +26,7 @@ $escape = function ($value) {
 
 if (empty($raw["desktop"]) && empty($raw["mobile"])) {
     if ($placeholder) {
-        echo '<picture class="placeholder' . ($classesValue ? " " . $escape($classesValue) : "") . '"></picture>';
+        echo '<picture class="' . component::classes("placeholder", $classesValue) . '"></picture>';
     }
     return;
 }
@@ -86,7 +86,7 @@ $lazy = $lazyFlag ? ' loading="lazy"' : "";
 $priority = $lazy ? ' fetchpriority="low"' : ' fetchpriority="high"';
 $fallback = !empty($desktop) ? $desktop : $mobile;
 $alt = !empty($fallback["alt"]) ? ' alt="' . $escape($fallback["alt"]) . '"' : 'alt=""';
-$classes = $classesValue ? ' class="' . $escape($classesValue) . '"' : "";
+$classes = $classesValue ? ' class="' . component::classes($classesValue) . '"' : "";
 $media = $mobile ? ' media="(min-width:' . $breakpoint . 'px)"' : "";
 $media_mobile = $mobile ? ' media="(max-width:' . ($breakpoint - 1) . 'px)"' : "";
 

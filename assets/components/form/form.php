@@ -1,6 +1,6 @@
 <?php
 /** @var array $args */
-$args = isset($args) && is_array($args) ? $args : [];
+$args = component::args($args ?? null);
 $escAttr = function ($value) {
     if (function_exists('esc_attr')) {
         return esc_attr($value);
@@ -67,8 +67,7 @@ $max = ($type === 'number' && isset($args['max']) && $args['max'] !== '' && $arg
     : null;
 $hint = isset($args['hint']) ? trim((string) $args['hint']) : '';
 $checked = !empty($args['checked']);
-$classes = isset($args['classes']) ? trim((string) $args['classes']) : '';
-$attributes = isset($args['attributes']) ? trim((string) $args['attributes']) : '';
+$attributes = component::attributes($args['attributes'] ?? []);
 $mandatory_msg = isset($args['mandatory']) ? trim((string) $args['mandatory']) : '';
 $data_mandatory_attr = $mandatory_msg !== '' ? ' data-mandatory="' . $escAttr($mandatory_msg) . '"' : '';
 
@@ -79,16 +78,12 @@ $field_describedby = $field_error_id;
 $is_group = in_array($type, ['checkboxes', 'radios'], true);
 $is_single_checkbox = $type === 'checkbox';
 
-$root_class = 'field';
-if ($is_single_checkbox || $type === 'checkboxes') {
-    $root_class .= ' checkbox';
-}
-if ($type === 'radios') {
-    $root_class .= ' radio';
-}
-if ($classes !== '') {
-    $root_class .= ' ' . $escAttr($classes);
-}
+$root_class = component::classes(
+    'field',
+    ($is_single_checkbox || $type === 'checkboxes') ? 'checkbox' : '',
+    $type === 'radios' ? 'radio' : '',
+    $args['classes'] ?? ''
+);
 
 $aria_label = ($label === '' && !$is_group && !$is_single_checkbox) ? ' aria-label="' . $escAttr($name) . '"' : '';
 
@@ -110,7 +105,7 @@ $use_placeholder = $placeholder !== '' && in_array($type, $placeholder_types, tr
 $field_aria = ' aria-describedby="' . $escAttr($field_describedby) . '"';
 ?>
 
-<div class="<?= $root_class ?>"<?= $is_group ? ' role="group" aria-labelledby="' . $escAttr($group_label_id) . '" aria-describedby="' . $escAttr($field_error_id) . '"' : '' ?><?= $is_group ? $data_mandatory_attr : '' ?><?= ($is_group && $required && $type === 'checkboxes') ? ' data-required="true"' : '' ?><?= $attributes !== '' ? ' ' . $attributes : '' ?>>
+<div class="<?= $root_class ?>"<?= $is_group ? ' role="group" aria-labelledby="' . $escAttr($group_label_id) . '" aria-describedby="' . $escAttr($field_error_id) . '"' : '' ?><?= $is_group ? $data_mandatory_attr : '' ?><?= ($is_group && $required && $type === 'checkboxes') ? ' data-required="true"' : '' ?><?= $attributes ?>>
     <?php if ($label !== '' && !$is_single_checkbox) : ?>
         <?php if ($is_group) : ?>
             <label id="<?= $escAttr($group_label_id) ?>"><?= $escHtml($label) ?></label>

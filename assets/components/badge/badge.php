@@ -1,5 +1,5 @@
 <?php
-$args = isset($args) && is_array($args) ? $args : [];
+$args = component::args($args ?? null);
 $escAttr = function ($value) {
     if (function_exists("esc_attr")) {
         return esc_attr($value);
@@ -17,10 +17,10 @@ $escHtml = function ($value) {
 
 $name = !empty($args["name"]) ? trim((string) $args["name"]) : "";
 if ($name === "") return;
-$classes = !empty($args["classes"]) ? " " . (string) $args["classes"] : "";
-$attributes = !empty($args["attributes"]) ? (string) $args["attributes"] : "";
+$classes = component::classes("badge", $args["classes"] ?? "");
+$attributes = component::attributes($args["attributes"] ?? []);
 ?>
 
-<div class="badge<?= $escAttr($classes) ?>" <?= $attributes ?>>
+<div class="<?= $classes ?>"<?= $attributes ?>>
     <?= $escHtml($name) ?>
 </div>
