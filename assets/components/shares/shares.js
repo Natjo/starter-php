@@ -1,11 +1,28 @@
 const COPY_FEEDBACK_DURATION = 1800;
 
+const getSafeShareUrl = (url) => {
+    if (!url) return "";
+
+    try {
+        const parsedUrl = new URL(url, window.location.href);
+        const allowedProtocols = ["http:", "https:", "mailto:"];
+
+        return allowedProtocols.includes(parsedUrl.protocol) ? parsedUrl.href : "";
+    } catch (_) {
+        return "";
+    }
+};
+
 const copyToClipboard = async (text) => {
     if (!text) return false;
 
     if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-        return true;
+        try {
+            await navigator.clipboard.writeText(text);
+            return true;
+        } catch (_) {
+            return false;
+        }
     }
 
     const textarea = document.createElement("textarea");
@@ -29,19 +46,23 @@ const copyToClipboard = async (text) => {
     return copied;
 };
 
-const setCopyFeedback = (button) => {
+const setCopyFeedback = (button, copied) => {
     const status = button.querySelector("[role='status']");
-    const statusText = status?.dataset?.text || "";
+    const statusText = copied
+        ? status?.dataset?.success || ""
+        : status?.dataset?.error || "";
 
     if (status && statusText) {
         status.textContent = statusText;
     }
 
-    button.classList.add("is-copied");
+    button.classList.toggle("is-copied", copied);
+    button.classList.toggle("is-copy-error", !copied);
 
     window.clearTimeout(button.__sharesCopyTimer);
     button.__sharesCopyTimer = window.setTimeout(() => {
         button.classList.remove("is-copied");
+        button.classList.remove("is-copy-error");
 
         if (status) {
             status.textContent = "";
@@ -50,10 +71,11 @@ const setCopyFeedback = (button) => {
 };
 
 const openShareWindow = (url) => {
-    if (!url) return;
+    const safeUrl = getSafeShareUrl(url);
+    if (!safeUrl) return;
 
     window.open(
-        url,
+        safeUrl,
         "_blank",
         "noopener,noreferrer,width=640,height=520"
     );
@@ -63,23 +85,23 @@ export default function shares(root) {
     if (!(root instanceof HTMLElement)) return;
     if (root.__sharesInstance) return;
 
-    const buttons = Array.from(root.querySelectorAll("button[data-type][data-url]"));
+    root.addEventListener("click", async (event) => {
+        const target = event.target instanceof Element ? event.target : null;
+        const button = target?.closest("button[data-type][data-url]");
+        if (!button || !root.contains(button)) return;
 
-    buttons.forEach((button) => {
-        button.addEventListener("click", async () => {
-            const type = button.dataset.type || "";
-            const url = button.dataset.url || "";
+        const type = button.dataset.type || "";
+        const url = button.dataset.url || "";
 
-            if (!url) return;
+        if (!url) return;
 
-            if (type === "copy") {
-                const copied = await copyToClipboard(url);
-                if (copied) setCopyFeedback(button);
-                return;
-            }
+        if (type === "copy") {
+            const copied = await copyToClipboard(url);
+            setCopyFeedback(button, copied);
+            return;
+        }
 
-            openShareWindow(url);
-        });
+        openShareWindow(url);
     });
 
     root.__sharesInstance = true;

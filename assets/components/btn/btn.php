@@ -1,5 +1,5 @@
 <?php
-$args = component::args($args ?? null);
+$args = starter_args($args ?? null);
 
 $payload = null;
 if (!empty($args["button"]) && is_array($args["button"])) {
@@ -9,7 +9,7 @@ if (!empty($args["button"]) && is_array($args["button"])) {
 }
 
 if ($payload !== null) {
-    $args = component::args($payload, [
+    $args = starter_args($payload, [
         "classes" => $args["classes"] ?? "",
         "icon" => $args["icon"] ?? [],
         "attributes" => $args["attributes"] ?? [],

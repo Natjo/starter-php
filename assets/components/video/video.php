@@ -1,7 +1,7 @@
 <?php
 
 /** @var array $args */
-$args = component::args($args ?? null);
+$args = starter_args($args ?? null);
 
 // $args["url"] accepte :
 // - une string (URL ou ID média WordPress) → un seul <source>
@@ -15,8 +15,20 @@ $loop = !empty($args["loop"]);
 $classes = component::classes("video", $args["classes"] ?? "");
 $attributes = component::attributes($args["attributes"] ?? []);
 
+$is_safe_media_url = function (mixed $url): bool {
+    $url = trim((string) $url);
+    if ($url === "" || str_contains($url, "\0")) return false;
+
+    if (str_starts_with($url, "/")) {
+        return !preg_match('#(^|/)\.\.(/|$)#', $url);
+    }
+
+    $scheme = parse_url($url, PHP_URL_SCHEME);
+    return in_array(strtolower((string) $scheme), ["http", "https"], true);
+};
+
 $urls = is_array($url_input) ? $url_input : [$url_input];
-$urls = array_values(array_filter(array_map(function ($u) {
+$urls = array_values(array_filter(array_map(function ($u) use ($is_safe_media_url) {
     $u = trim((string) $u);
     if ($u === "") return "";
     if (is_numeric($u)) {
@@ -24,7 +36,7 @@ $urls = array_values(array_filter(array_map(function ($u) {
         $resolved = wp_get_attachment_url((int) $u);
         if ($resolved) return $resolved;
     }
-    return $u;
+    return $is_safe_media_url($u) ? $u : "";
 }, $urls)));
 
 if (empty($urls)) return;
@@ -34,6 +46,7 @@ if ($poster !== "" && is_numeric($poster)) {
     $resolved_poster = function_exists('wp_get_attachment_url') ? wp_get_attachment_url((int) $poster) : "";
     $poster = $resolved_poster ? $resolved_poster : "";
 }
+$poster = $poster !== "" && $is_safe_media_url($poster) ? $poster : "";
 
 $mime_map = [
     "mp4"  => "video/mp4",
@@ -74,6 +87,8 @@ if ($is_youtube) {
 }
 
 $has_facade = $poster !== "";
+$iframe_src = $has_facade && !$autoplay ? "" : ($autoplay ? $autoplay_src : $idle_src);
+$iframe_data_src = $has_facade && !$autoplay ? ' data-src="' . esc_attr($idle_src) . '"' : '';
 $iframe_title = $title !== "" ? $title : __("Lecteur vidéo", "starterkit");
 $play_label = $title !== ""
     ? sprintf(__("Lire la vidéo : %s", "starterkit"), $title)
@@ -83,10 +98,11 @@ $play_label = $title !== ""
 $hide_tab = $has_facade ? ' tabindex="-1"' : '';
 ?>
 
-<div class="<?= $classes ?>" data-type="<?= esc_attr($type) ?>" data-autoplay="<?= $autoplay ? "true" : "false" ?>"<?= ($is_youtube || $is_vimeo) ? ' data-autoplay-src="' . esc_attr($autoplay_src) . '"' : '' ?><?= $attributes ?>>
+    <div class="<?= $classes ?>" data-type="<?= esc_attr($type) ?>" data-autoplay="<?= $autoplay ? "true" : "false" ?>"<?= ($is_youtube || $is_vimeo) ? ' data-autoplay-src="' . esc_attr($autoplay_src) . '"' : '' ?><?= $attributes ?>>
     <?php if ($is_youtube || $is_vimeo) : ?>
         <iframe
-            src="<?= esc_url($autoplay ? $autoplay_src : $idle_src) ?>"
+            <?= $iframe_src !== "" ? 'src="' . esc_url($iframe_src) . '"' : "" ?>
+            <?= $iframe_data_src ?>
             title="<?= esc_attr($iframe_title) ?>"
             loading="lazy"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -108,12 +124,18 @@ $hide_tab = $has_facade ? ' tabindex="-1"' : '';
             <?php foreach ($urls as $u) : ?>
                 <source src="<?= esc_url($u) ?>" type="<?= esc_attr($detect_mime($u)) ?>">
             <?php endforeach ?>
+            <?= esc_html(__("Votre navigateur ne peut pas lire cette vidéo.", "starterkit")) ?>
         </video>
     <?php endif ?>
 
     <?php if ($has_facade) : ?>
         <button type="button" class="poster" aria-label="<?= esc_attr($play_label) ?>">
-            <img src="<?= esc_url($poster) ?>" alt="">
+            <?php component::image([
+                "image" => $poster,
+                "alt" => "",
+                "lazy" => true,
+                "decoding" => "async",
+            ]); ?>
             <div class="play" aria-hidden="true">
                 <?php component::icon("play", 60, 60) ?>
             </div>

@@ -4,12 +4,6 @@
 
 Ce starterkit met en place un chargement CSS optimisé, basé sur une **collecte des styles utilisés** pendant le rendu PHP.
 
-### Collecte des styles (PHP)
-
-- Les pages utilisent `get_tpl()` en fin de template (`web/wp-content/themes/.../inc/tpl.php`).
-- `header.php` démarre un buffer (`ob_start()`), puis la page est ré-inclus dans le template via `get_tpl()`.
-- Les helpers `hero()` / `strate()` / `component::card()` appellent `addStyle($name, $folder)` pour déclarer les CSS nécessaires.
-
 ### CSS critique inline (head)
 
 Dans `front/methods.php` → `styles()` :
@@ -166,6 +160,5 @@ password: my.cnf password
 shh host: lonsdale-preprod.ovh.bearstech.com  
 ssh user: [le user du projet]  
 ssh key: user key id_rsa  
-
 
 

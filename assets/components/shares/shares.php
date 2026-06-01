@@ -1,49 +1,87 @@
 <?php
-$args = component::args($args ?? null);
+$args = starter_args($args ?? null);
 $list = isset($args["list"]) ? $args["list"] : [];
 $classes = component::classes("shares", $args["classes"] ?? "");
+$attributes = component::attributes($args["attributes"] ?? []);
+$title = !empty($args["title"]) ? (string) $args["title"] : __("Partager l’article", 'lsd_lang');
 
-$host = $_SERVER["HTTP_HOST"] ?? "";
-$uri = $_SERVER["REQUEST_URI"] ?? "";
-$scheme = (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off") ? "https" : "http";
-$url = ($host && $uri) ? "{$scheme}://{$host}{$uri}" : "";
-$urlencode = urlencode($url);
+static $sharesInstance = 0;
+$sharesInstance++;
+$titleId = "shares-title-" . $sharesInstance;
+
+$normalizeUrl = static function (mixed $url): string {
+    if (!is_string($url) || trim($url) === "") {
+        return "";
+    }
+
+    $url = trim($url);
+
+    return filter_var($url, FILTER_VALIDATE_URL) ? $url : "";
+};
+
+$currentUrl = static function () use ($normalizeUrl): string {
+    $host = (string) ($_SERVER["HTTP_HOST"] ?? $_SERVER["SERVER_NAME"] ?? "");
+    $uri = (string) ($_SERVER["REQUEST_URI"] ?? "");
+
+    if ($host === "" || $uri === "") {
+        return "";
+    }
+
+    $hostParts = explode(":", $host, 2);
+    $hostname = strtolower($hostParts[0] ?? "");
+    $port = isset($hostParts[1]) && ctype_digit($hostParts[1]) ? ":" . $hostParts[1] : "";
+
+    if (!filter_var($hostname, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
+        return "";
+    }
+
+    $path = parse_url($uri, PHP_URL_PATH);
+    $query = parse_url($uri, PHP_URL_QUERY);
+    $path = is_string($path) && $path !== "" ? $path : "/";
+    $query = is_string($query) && $query !== "" ? "?" . $query : "";
+    $scheme = (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off") ? "https" : "http";
+
+    return $normalizeUrl($scheme . "://" . $hostname . $port . $path . $query);
+};
+
+$url = $normalizeUrl($args["url"] ?? "") ?: $currentUrl();
+if ($url === "") {
+    return;
+}
+
+$encodedUrl = rawurlencode($url);
+$encodedMailBody = rawurlencode($url);
 
 $catalog = [
     "email" => [
         "name" => "email",
         "icon" => "mail",
-        "url" => "mailto:?body=" . $url,
-        "role" => "link",
-        "label" => __("S'ouvre dans un nouvel onglet: Partager l’article par E-mail", 'lsd_lang'),
+        "url" => "mailto:?body=" . $encodedMailBody,
+        "label" => __("Partager l’article par E-mail", 'lsd_lang'),
     ],
     "copy" => [
         "name" => "copy",
         "icon" => "copy",
         "url" => $url,
-        "role" => "",
         "label" => __("Copier le lien", 'lsd_lang'),
     ],
     "facebook" => [
         "name" => "facebook",
         "icon" => "facebook",
-        "url" => "http://facebook.com/sharer/sharer.php?u=" . $urlencode,
-        "role" => "link",
-        "label" => __("S'ouvre dans un nouvel onglet: Partager l’article sur Facebook", 'lsd_lang'),
+        "url" => "https://www.facebook.com/sharer/sharer.php?u=" . $encodedUrl,
+        "label" => __("Partager l’article sur Facebook", 'lsd_lang'),
     ],
     "x" => [
         "name" => "x",
         "icon" => "x",
-        "url" => "https://www.twitter.com/share?url=" . $urlencode,
-        "role" => "link",
-        "label" => __("S'ouvre dans un nouvel onglet: Partager l’article sur X", 'lsd_lang'),
+        "url" => "https://www.twitter.com/share?url=" . $encodedUrl,
+        "label" => __("Partager l’article sur X", 'lsd_lang'),
     ],
     "whatsapp" => [
         "name" => "whatsapp",
         "icon" => "whatsapp",
-        "url" => "https://wa.me/?text=" . $urlencode,
-        "role" => "link",
-        "label" => __("S'ouvre dans un nouvel onglet: Partager l’article sur whatsapp", 'lsd_lang'),
+        "url" => "https://wa.me/?text=" . $encodedUrl,
+        "label" => __("Partager l’article sur Whatsapp", 'lsd_lang'),
     ],
 ];
 
@@ -64,8 +102,8 @@ if (empty($keys)) {
 
 
 
-<div class="<?= $classes ?>" data-context="@visible true" data-module="components/shares">
-    <div class="title"><?= __("Partager l’article", 'lsd_lang') ?></div>
+<nav class="<?= $classes ?>" aria-labelledby="<?= esc_attr($titleId) ?>" data-context="@visible true" data-module="components/shares"<?= $attributes ?>>
+    <div class="title" id="<?= esc_attr($titleId) ?>"><?= esc_html($title) ?></div>
 
     <ul class="list">
         <?php foreach ($keys as $key) :
@@ -75,24 +113,29 @@ if (empty($keys)) {
             $icon = (string) ($item["icon"] ?? "");
             $share_url = (string) ($item["url"] ?? "");
             if ($name === "" || $icon === "" || $share_url === "") continue;
-            $role = (string) ($item["role"] ?? "");
             $label = (string) ($item["label"] ?? $name);
             $is_copy = $name === "copy";
         ?>
             <li>
                 <button
-                    <?= $role !== "" ? 'role="' . esc_attr($role) . '"' : "" ?>
+                    type="button"
                     data-type="<?= esc_attr($name) ?>"
                     data-url="<?= esc_attr($share_url) ?>"
                 >
                     <?php component::icon($icon, 40, 40); ?>
                     <span class="sr-only"><?= esc_html($label) ?></span>
                     <?php if ($is_copy) : ?>
-                        <span class="sr-only" role="status" data-text="<?= esc_attr(__("Copié", 'lsd_lang')) ?>"></span>
+                        <span
+                            class="sr-only"
+                            role="status"
+                            aria-live="polite"
+                            data-success="<?= esc_attr(__("Copié", 'lsd_lang')) ?>"
+                            data-error="<?= esc_attr(__("Impossible de copier le lien", 'lsd_lang')) ?>"
+                        ></span>
                         <div class="tip" aria-hidden="true"><?= __("Copié", 'lsd_lang') ?></div>
                     <?php endif; ?>
                 </button>
             </li>
         <?php endforeach; ?>
     </ul>
-</div>
+</nav>

@@ -161,10 +161,18 @@ get_template_part('header-nav', null);
             ]
         ], 'news'); ?>
     </div>
+
+  <div class="strate">
+    <h2>Picture</h2>
+     <?php  component::picture(THEME_UPLOADS . "image2.jpg")  ?>
+  </div>
+
     <div class="strate">
         <?php component::image(THEME_ASSETS . "img/63-1400x1024.jpg", 'full'); ?>
     </div>
-
+    <div class="strate">
+        <?php component::image(THEME_UPLOADS . "image1.jpg", '130x87'); ?>
+    </div>
     <div class="strate">
         <?php component::tag('tag Lorem ipsum dolor sit amet'); ?>
     </div>

@@ -22,8 +22,6 @@
     &.lg {
         --size: 4.5rem;
     }
-
-    @media (--breakpoint-md-down) {}
 }
 
 

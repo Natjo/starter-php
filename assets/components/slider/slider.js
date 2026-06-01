@@ -45,7 +45,6 @@ function Slider(slider) {
 
     const api = this;
     const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
-    const pct = () => content.scrollLeft * 100 / (s.contentWidth - s.viewportWidth || 1);
 
     const updateControls = () => {
         btnPrev?.setAttribute("aria-disabled", s.index <= 0);
@@ -173,7 +172,7 @@ function Slider(slider) {
             const dot = document.createElement("button");
             dot.className = "slider-dot" + (i === s.index ? " is-active" : "");
             dot.setAttribute("type", "button");
-            dot.setAttribute("aria-label", `Aller à la diapositive ${i + 1}`);
+            dot.setAttribute("aria-label", `Aller à la diapositive ${i + 1} sur ${expectedSize}`);
             dot.setAttribute("aria-current", i === s.index ? "true" : "false");
             dot.dataset.index = String(i);
             s.dots.push(dot);
@@ -283,10 +282,7 @@ function Slider(slider) {
             return;
         }
 
-        // Vertical intent: ensure the horizontal scroller doesn't swallow the wheel.
-        // If Lenis is active, let it handle the page scroll (so we only prevent default here).
-        const lenisActive = document.documentElement.classList.contains("lenis");
-        if (lenisActive && e.cancelable) e.preventDefault();
+        // Vertical intent: let the event bubble so Lenis can keep scrolling the page.
     };
 
     // ── Touch: prevent Lenis when intent is horizontal ───────────────────────
@@ -373,6 +369,9 @@ function Slider(slider) {
     // ── Public API ───────────────────────────────────────────────────────────
 
     api.add = () => {
+        if (slider.__sliderInstance) return;
+        slider.__sliderInstance = api;
+
         content.scrollTo(0, 0);
         content.setAttribute("tabindex", "0");
        // slider.classList.add("slider");
@@ -380,7 +379,7 @@ function Slider(slider) {
         resize();
         updateAria();
         window.addEventListener("load", resize);
-        content.onpointerdown = startDrag;
+        content.addEventListener("pointerdown", startDrag);
         content.addEventListener("scroll", onScroll, { passive: true });
         content.addEventListener("wheel", onWheel, { passive: false });
         content.addEventListener("touchstart", onTouchStart, { passive: true });
@@ -393,18 +392,20 @@ function Slider(slider) {
         window.addEventListener("resize", onResize, { passive: true });
 
         // #7 — suspend callbacks when slider is off-screen
-        const io = new IntersectionObserver((entries) => {
-            s.visible = entries[0].isIntersecting;
-            if (s.visible) resize();
-        }, { threshold: 0 });
-        io.observe(slider);
-        s._io = io;
+        if ("IntersectionObserver" in window) {
+            const io = new IntersectionObserver((entries) => {
+                s.visible = entries[0].isIntersecting;
+                if (s.visible) resize();
+            }, { threshold: 0 });
+            io.observe(slider);
+            s._io = io;
+        }
     };
 
     api.remove = () => {
        // slider.classList.remove("slider");
        slider.classList.add("inactive");
-        content.onpointerdown = null;
+        content.removeEventListener("pointerdown", startDrag);
         content.removeEventListener("scroll", onScroll);
         content.removeEventListener("wheel", onWheel);
         content.removeEventListener("touchstart", onTouchStart);
@@ -423,6 +424,7 @@ function Slider(slider) {
         if (s.scrollFrame) cancelAnimationFrame(s.scrollFrame);
         if (s.resizeFrame) cancelAnimationFrame(s.resizeFrame);
         s._io?.disconnect();
+        delete slider.__sliderInstance;
         content.classList.remove("grab", "swipe");
         content.style.scrollSnapType = "";
     };

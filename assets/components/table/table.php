@@ -4,14 +4,12 @@ if (!function_exists('sg_table_normalize_cell')) {
     function sg_table_normalize_cell($cell, string $default_tag = 'td'): array
     {
         if (is_array($cell)) {
-            if (!isset($cell['type'])) {
-                $cell['type'] = $default_tag;
-            }
+            $cell['type'] = ($cell['type'] ?? $default_tag) === 'th' ? 'th' : 'td';
             return $cell;
         }
 
         return [
-            'type' => $default_tag,
+            'type' => $default_tag === 'th' ? 'th' : 'td',
             'text' => (string) $cell,
         ];
     }
@@ -128,7 +126,7 @@ if (!function_exists('sg_table_split_rows')) {
     /**
      * @return array{head: array, body: array}
      */
-    function sg_table_split_rows(array $rows): array
+    function sg_table_split_rows(array $rows, bool $has_header = true): array
     {
         $grid = sg_table_normalize_grid($rows);
 
@@ -136,10 +134,11 @@ if (!function_exists('sg_table_split_rows')) {
             return ['head' => [], 'body' => []];
         }
 
-        $head = [sg_table_prepare_header_row($grid[0])];
+        $head = $has_header ? [sg_table_prepare_header_row($grid[0])] : [];
         $body = [];
+        $body_rows = $has_header ? array_slice($grid, 1) : $grid;
 
-        foreach (array_slice($grid, 1) as $row) {
+        foreach ($body_rows as $row) {
             $body[] = sg_table_prepare_body_row($row);
         }
 
@@ -154,25 +153,34 @@ if (!function_exists('sg_table_cell_attributes')) {
     function sg_table_cell_attributes(array $cell): string
     {
         $attrs = [];
+        $scope = (string) ($cell['scope'] ?? '');
 
-        if (($cell['type'] ?? 'td') === 'th' && !empty($cell['scope'])) {
-            $attrs[] = 'scope="' . esc_attr($cell['scope']) . '"';
+        if (($cell['type'] ?? 'td') === 'th' && in_array($scope, ['col', 'row', 'colgroup', 'rowgroup'], true)) {
+            $attrs[] = 'scope="' . esc_attr($scope) . '"';
         }
 
         if (!empty($cell['id'])) {
-            $attrs[] = 'id="' . esc_attr($cell['id']) . '"';
+            $id = sanitize_html_class((string) $cell['id']);
+            if ($id !== '') {
+                $attrs[] = 'id="' . esc_attr($id) . '"';
+            }
         }
 
         if (!empty($cell['headers'])) {
-            $attrs[] = 'headers="' . esc_attr($cell['headers']) . '"';
+            $headers = sanitize_class_list($cell['headers']);
+            if ($headers !== '') {
+                $attrs[] = 'headers="' . esc_attr($headers) . '"';
+            }
         }
 
         if (!empty($cell['colspan'])) {
-            $attrs[] = 'colspan="' . (int) $cell['colspan'] . '"';
+            $colspan = min(100, max(1, (int) $cell['colspan']));
+            $attrs[] = 'colspan="' . $colspan . '"';
         }
 
         if (!empty($cell['rowspan'])) {
-            $attrs[] = 'rowspan="' . (int) $cell['rowspan'] . '"';
+            $rowspan = min(100, max(1, (int) $cell['rowspan']));
+            $attrs[] = 'rowspan="' . $rowspan . '"';
         }
 
         if (!empty($cell['class'])) {
@@ -191,7 +199,7 @@ if (!function_exists('sg_table_render_cell')) {
         $content = '';
 
         if (!empty($cell['html'])) {
-            $content = wp_kses_post($cell['html']);
+            $content = starter_kses_post($cell['html']);
         } elseif (isset($cell['text'])) {
             $content = esc_html((string) $cell['text']);
         }
@@ -217,16 +225,18 @@ if (!function_exists('sg_table_render_rows')) {
     }
 }
 
-$args = component::args($args ?? null);
+$args = starter_args($args ?? null);
 $classes = component::classes('table', $args['classes'] ?? '');
 $attributes = component::attributes($args['attributes'] ?? []);
 $rows = !empty($args['rows']) && is_array($args['rows']) ? $args['rows'] : [];
+$caption = isset($args['caption']) && trim((string) $args['caption']) !== '' ? trim((string) $args['caption']) : '';
+$has_header = array_key_exists('header', $args) ? (bool) $args['header'] : true;
 
 if (empty($rows)) {
     return;
 }
 
-$split = sg_table_split_rows($rows);
+$split = sg_table_split_rows($rows, $has_header);
 $head = $split['head'];
 $body = $split['body'];
 
@@ -239,6 +249,10 @@ if (empty($head) && empty($body)) {
 <div class="<?= $classes ?>"<?= $attributes ?>>
     <div class="table__scroll" tabindex="0">
         <table>
+            <?php if ($caption !== '') : ?>
+                <caption><?= esc_html($caption) ?></caption>
+            <?php endif ?>
+
             <?php if (!empty($head)) : ?>
                 <thead>
                     <?php sg_table_render_rows($head) ?>

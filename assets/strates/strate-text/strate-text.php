@@ -1,5 +1,5 @@
 <?php
-$args = isset($args) && is_array($args) ? $args : [];
+$args = starter_args($args ?? null);
 ?>
 
 <section <?= options("strate strate-text", $args) ?>>

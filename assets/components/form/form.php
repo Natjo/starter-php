@@ -1,6 +1,6 @@
 <?php
 /** @var array $args */
-$args = component::args($args ?? null);
+$args = starter_args($args ?? null);
 $escAttr = function ($value) {
     if (function_exists('esc_attr')) {
         return esc_attr($value);

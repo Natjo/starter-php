@@ -6,14 +6,23 @@ class Tab {
         this.firstTab = null;
         this.lastTab = null;
 
-        this.tabs = Array.from(this.tablistNode.querySelectorAll('[role=tab]'));
+        const tabs = Array.from(this.tablistNode.querySelectorAll('[role=tab]'));
 
-        for (let i = 0; i < this.tabs.length; i += 1) {
-            const tab = this.tabs[i];
+        for (let i = 0; i < tabs.length; i += 1) {
+            const tab = tabs[i];
             const tabpanel = document.getElementById(tab.getAttribute('aria-controls'));
+
+            if (!tabpanel) continue;
 
             tab.tabIndex = -1;
             tab.setAttribute('aria-selected', 'false');
+
+            if (tab.disabled || tab.getAttribute('aria-disabled') === 'true') {
+                tabpanel.classList.add('is-hidden');
+                continue;
+            }
+
+            this.tabs.push(tab);
             this.tabpanels.push(tabpanel);
 
             tab.addEventListener('keydown', this.onKeydown.bind(this));
@@ -25,7 +34,9 @@ class Tab {
             this.lastTab = tab;
         }
 
-        this.setSelectedTab(this.firstTab, false);
+        if (this.firstTab) {
+            this.setSelectedTab(this.firstTab, false);
+        }
     }
 
     setSelectedTab(currentTab, setFocus = true) {
@@ -74,11 +85,13 @@ class Tab {
 
         switch (event.key) {
             case 'ArrowLeft':
+            case 'ArrowUp':
                 this.setSelectedToPreviousTab(tgt);
                 flag = true;
                 break;
 
             case 'ArrowRight':
+            case 'ArrowDown':
                 this.setSelectedToNextTab(tgt);
                 flag = true;
                 break;
@@ -110,10 +123,13 @@ class Tab {
 
 export default (el) => {
     if (!(el instanceof Element)) return null;
+    if (el.__tabInstance) return el.__tabInstance;
 
     const tablist =  el.querySelector('[role="tablist"]');
 
     if (!tablist) return null;
 
-    return new Tab(tablist);
+    el.__tabInstance = new Tab(tablist);
+
+    return el.__tabInstance;
 };

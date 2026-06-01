@@ -13,7 +13,13 @@
         font-family: var(--font-1);
         font-size: 1.4rem;
         line-height: 1.4;
-        letter-spacing: 0.02em;
+    }
+
+    caption {
+        margin-bottom: .8rem;
+        color: var(--color-1);
+        font-weight: 600;
+        text-align: left;
     }
 
     th,
@@ -40,15 +46,6 @@
 
     tbody tr:nth-child(even) td {
         background: var(--color-gray-light);
-    }
-
-    .table__scroll:focus {
-        outline: 2px solid var(--color-2);
-        outline-offset: 2px;
-    }
-
-    .table__scroll:focus:not(:focus-visible) {
-        outline: none;
     }
 
     .table__scroll:focus-visible {

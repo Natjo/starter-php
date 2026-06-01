@@ -1,5 +1,5 @@
 <?php
-$args = component::args($args ?? null);
+$args = starter_args($args ?? null);
 $title = $args["title"] ?? $args["titre"] ?? $args["heading"] ?? $args["headline"] ?? "";
 $title = is_scalar($title) ? (string) $title : "";
 

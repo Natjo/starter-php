@@ -1,7 +1,7 @@
 {
     "name": "builder",
-    "version": "2.13.0",
-    "description": "Starterkit lonsdale 2026 with critical css",
+    "version": "1.0.0",
+    "description": "Starterkit php 2026",
     "scripts": {
         "build": "node builder.js",
         "dev": "node builder.js --watch"

@@ -1,5 +1,5 @@
 <?php
-$args = component::args($args ?? null);
+$args = starter_args($args ?? null);
 
 $payload = $args["args"] ?? $args;
 $allowed_types = ["info", "btn", "link"];

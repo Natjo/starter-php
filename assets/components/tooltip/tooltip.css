@@ -1,6 +1,7 @@
 .tooltip {
     display: inline-block;
     position: relative;
+    width: max-content;
 
     .trigger-button {
         appearance: none;
@@ -26,22 +27,30 @@
         z-index: 10;
         width: max-content;
         max-width: min(28rem, calc(100vw - 3.2rem));
-        color: darkblue;
-        background-color: azure;
-        border: 1px solid #dddddd;
-        padding: 10px;
-        border-radius: 8px;
-        font-size: 1rem;
+        color: var(--tooltip-color, var(--color-text));
+        background-color: var(--tooltip-background, #fff);
+        border: 1px solid var(--tooltip-border, var(--color-gray-dark));
+        padding: 1rem;
+        border-radius: .4rem;
+        font-size: 1.2rem;
         line-height: 1.4;
         opacity: 0;
         pointer-events: none;
+        visibility: hidden;
         transform: translateX(-50%) translateY(.4rem);
-        transition: opacity .3s ease;
+        transition: opacity .2s ease, visibility .2s ease, transform .2s ease;
     }
 
     &:hover .tooltip-content,
     &:focus-within .tooltip-content {
         opacity: 1;
+        visibility: visible;
         transform: translateX(-50%) translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tooltip .tooltip-content {
+        transition: none;
     }
 }

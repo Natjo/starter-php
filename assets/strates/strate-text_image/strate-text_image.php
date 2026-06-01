@@ -1,5 +1,5 @@
 <?php
-$args = isset($args) && is_array($args) ? $args : [];
+$args = starter_args($args ?? null);
 $reverse = !empty($args["is_reverse"]) ? " reverse" : "";
 ?>
 

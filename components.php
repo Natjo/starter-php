@@ -2,12 +2,7 @@
 
 class component
 {
-    public static function args($args, array $defaults = []): array
-    {
-        return array_replace($defaults, is_array($args) ? $args : []);
-    }
-
-    public static function classes(...$classes)
+    public static function classes(mixed ...$classes): string
     {
         $classes = array_map(static function ($class) {
             if (is_array($class)) {
@@ -20,14 +15,14 @@ class component
         return esc_attr(sanitize_class_list(implode(' ', array_filter($classes, static fn($class) => $class !== null && $class !== false && $class !== ''))));
     }
 
-    public static function attributes($attributes)
+    public static function attributes(mixed $attributes): string
     {
         $attributes = starter_attributes($attributes);
 
         return $attributes !== '' ? ' ' . $attributes : '';
     }
 
-    public static function title($args, $hx = 2, $classes = null, $attributes = null)
+    public static function title(mixed $args, mixed $hx = 2, mixed $classes = null, mixed $attributes = null): void
     {
         if (is_string($args)) {
             $args = ["title" => $args];
@@ -50,7 +45,7 @@ class component
         get_template_part('components/title/title', null, $args);
     }
 
-    public static function text($args, $classes = null, $attributes = null)
+    public static function text(mixed $args, mixed $classes = null, mixed $attributes = null): void
     {
         if (is_string($args)) {
             $args = ["text" => $args];
@@ -69,7 +64,7 @@ class component
         get_template_part('components/text/text', null, $args);
     }
 
-    public static function picture($args, $sizes = "full", $classes = "", $lazy = true, $placeholder = false, $breakpoint = 768)
+    public static function picture(mixed $args, mixed $sizes = "full", mixed $classes = "", bool $lazy = true, bool $placeholder = false, int $breakpoint = 768): void
     {
         // $sizes accepte :
         // - une string  → desktop seulement (mobile retombe sur "full")
@@ -93,14 +88,39 @@ class component
         ]);
     }
 
-    public static function card($name, $args = [])
+    public static function card(mixed $name, mixed $args = []): void
     {
-        if (empty($name)) return;
+        $name = self::card_name($name);
+        if ($name === "") return;
 
         get_template_part("cards/{$name}/{$name}", null, is_array($args) ? $args : []);
     }
 
-    public static function slider($items, $card = "card-news", $classes = null, $navigation = true, $pagination = true, $label = "")
+    private static function card_name(mixed $name): string
+    {
+        $name = normalize_template_slug($name);
+
+        if ($name === "" || str_contains($name, "/")) {
+            return "";
+        }
+
+        $template = "cards/{$name}/{$name}.php";
+        $directories = array_filter([
+            APP_ROOT,
+            APP_ROOT . "/assets",
+            WEB_ROOT,
+        ], static fn($directory) => is_dir($directory));
+
+        foreach ($directories as $directory) {
+            if (is_safe_template_file($directory . "/" . $template, $directory)) {
+                return $name;
+            }
+        }
+
+        return "";
+    }
+
+    public static function slider(mixed $items, mixed $card = "card-news", mixed $classes = null, bool $navigation = true, bool $pagination = true, mixed $label = ""): void
     {
         if (empty($items) || !is_array($items)) return;
 
@@ -119,7 +139,7 @@ class component
         ]);
     }
 
-    public static function btn($args, $classes = null, $icon = [], $attributes = null)
+    public static function btn(mixed $args, mixed $classes = null, mixed $icon = [], mixed $attributes = null): void
     {
         if (is_string($args)) {
             $args = ["name" => $args];
@@ -142,7 +162,7 @@ class component
         get_template_part('components/btn/btn', null, $args);
     }
 
-    public static function icon($name, $width, $height, $classes = null)
+    public static function icon(mixed $name, mixed $width, mixed $height, mixed $classes = null, mixed $label = null): void
     {
         if (empty($name)) return;
 
@@ -151,11 +171,12 @@ class component
             "width" =>  $width,
             "height" =>  $height,
             "url" =>  THEME_ASSETS,
-            "classes" => $classes
+            "classes" => $classes,
+            "label" => $label,
         ]);
     }
 
-    public static function link($args, $classes = null, $icon = null, $attributes = null)
+    public static function link(mixed $args, mixed $classes = null, mixed $icon = null, mixed $attributes = null): void
     {
         if (empty($args)) return;
 
@@ -185,7 +206,7 @@ class component
             "attributes" => $attributes ?? ($args["attributes"] ?? "")
         ]);
     }
-    public static function quote($args, $classes = null, $attributes = null)
+    public static function quote(mixed $args, mixed $classes = null, mixed $attributes = null): void
     {
         if (is_string($args)) {
             $args = ["text" => $args];
@@ -206,7 +227,7 @@ class component
         ]);
     }
 
-    public static function accordion($items, $multiple = false, $classes = null, $attributes = null)
+    public static function accordion(mixed $items, mixed $multiple = false, mixed $classes = null, mixed $attributes = null): void
     {
         if (empty($items) || !is_array($items)) return;
 
@@ -238,24 +259,39 @@ class component
 
         get_template_part('components/accordion/accordion', null, $args);
     }
-    public static function header($args, $classes = null, $attributes = null)
+    public static function header(mixed $args, mixed $classes = null, mixed $attributes = null): void
     {
+        if (is_string($args)) {
+            $args = ["title" => $args];
+        }
+
         if (!is_array($args)) return;
-        if (empty($args["title"]) && empty($args["text"]) && empty($args["link"])) return;
 
+        $has_content = !empty($args["title"])
+            || !empty($args["titre"])
+            || !empty($args["heading"])
+            || !empty($args["headline"])
+            || !empty($args["text"])
+            || !empty($args["intro"])
+            || !empty($args["content"])
+            || !empty($args["description"])
+            || !empty($args["link"])
+            || !empty($args["cta"])
+            || !empty($args["button"]);
 
+        if (!$has_content) return;
 
         $data = $args;
-        if ($classes) {
+        if ($classes !== null) {
             $data["classes"] = $classes;
         }
-        if ($attributes) {
+        if ($attributes !== null) {
             $data["attributes"] = $attributes;
         }
 
         get_template_part('components/header/header', null, $data);
     }
-    public static function badge($name, $classes = null, $attributes = null)
+    public static function badge(mixed $name, mixed $classes = null, mixed $attributes = null): void
     {
         if (is_string($name)) {
             $name = ["name" => $name];
@@ -277,7 +313,7 @@ class component
     /**
      * @param array<int, mixed> $trigger [0] => "btn"|"link", [1] => label (null = défaut i18n), [2] => classes CSS du déclencheur
      */
-    public static function dialog($content, $trigger = ["btn", null, null], $classes = null, $attributes = null)
+    public static function dialog(mixed $content, mixed $trigger = ["btn", null, null], mixed $classes = null, mixed $attributes = null): void
     {
         $args = [];
 
@@ -320,7 +356,7 @@ class component
      * @param string|null $mandatory Message data-mandatory. Vide ou null = message navigateur.
      * @param array|null $args typemismatch, autocomplete, minlength, rows, pattern, min, max, data_patternmismatch, hint, checked, placeholder
      */
-    public static function form($type = 'text', $label = null, $name = null, $required = false, $options = null, $mandatory = null, $args = null, $classes = null, $attributes = null)
+    public static function form(mixed $type = 'text', mixed $label = null, mixed $name = null, bool $required = false, mixed $options = null, mixed $mandatory = null, mixed $args = null, mixed $classes = null, mixed $attributes = null): void
     {
         if (is_array($type)) {
             $field_args = $type;
@@ -407,7 +443,7 @@ class component
         ]);
     }
 
-    public static function navanchor($items, $classes = null, $attributes = null, $label = null)
+    public static function navanchor(mixed $items, mixed $classes = null, mixed $attributes = null, mixed $label = null): void
     {
         if (empty($items)) return;
 
@@ -429,7 +465,7 @@ class component
         get_template_part('components/navanchor/navanchor', null, $args);
     }
 
-    public static function picto($name, $type = "", $size = "", $classes = null, $attributes = null)
+    public static function picto(mixed $name, mixed $type = "", mixed $size = "", mixed $classes = null, mixed $attributes = null): void
     {
         if (empty($name)) return;
 
@@ -440,6 +476,9 @@ class component
             $size = $args["size"] ?? $size;
             $classes = $classes ?? ($args["classes"] ?? null);
             $attributes = $attributes ?? ($args["attributes"] ?? null);
+            $label = $args["label"] ?? null;
+        } else {
+            $label = null;
         }
 
         if (empty($name)) return;
@@ -450,29 +489,37 @@ class component
             "size" => $size,
             "classes" => $classes,
             "attributes" => $attributes,
+            "label" => $label,
         ]);
     }
     /**
      * @param array<int, array{name:string,value?:string,selected?:bool,disabled?:bool}> $args
      */
-    public static function select($args, $label = null, $name = null, $classes = null, $attributes = null)
+    public static function select(mixed $args, mixed $label = null, mixed $name = null, mixed $classes = null, mixed $attributes = null): void
     {
         if (empty($args) || !is_array($args)) return;
 
+        $data = isset($args['options']) && is_array($args['options']) ? $args : ['options' => $args];
 
         get_template_part('components/select/select', null, [
-            "args" => $args,
-            "label" => $label,
-            "name" => $name,
-            "classes" => $classes,
-            "attributes" => $attributes,
+            "args" => $data['options'],
+            "label" => $label ?? ($data['label'] ?? null),
+            "name" => $name ?? ($data['name'] ?? null),
+            "classes" => $classes ?? ($data['classes'] ?? null),
+            "attributes" => $attributes ?? ($data['attributes'] ?? null),
+            "placeholder" => $data['placeholder'] ?? null,
+            "required" => $data['required'] ?? false,
+            "disabled" => $data['disabled'] ?? false,
+            "multiple" => $data['multiple'] ?? false,
+            "autocomplete" => $data['autocomplete'] ?? null,
+            "aria_label" => $data['aria_label'] ?? null,
         ]);
     }
 
     /**
      * @param array<int, array{name:string,value?:string,selected?:bool,disabled?:bool}> $args
      */
-    public static function select_custom($args, $label, $multi = false, $classes = null, $attributes = null)
+    public static function select_custom(mixed $args, mixed $label, bool $multi = false, mixed $classes = null, mixed $attributes = null): void
     {
         if (empty($args) || !is_array($args)) return;
 
@@ -486,19 +533,24 @@ class component
         ]);
     }
 
-    public static function shares($list, $classes = null)
+    public static function shares(mixed $list, mixed $classes = null, mixed $attributes = null): void
     {
         if (empty($list)) return;
 
-        $args = [
-            "list" => $list,
-            "classes" => $classes
-        ];
+        $args = is_array($list) && array_key_exists("list", $list) ? $list : ["list" => $list];
+
+        if ($classes !== null) {
+            $args["classes"] = $classes;
+        }
+
+        if ($attributes !== null) {
+            $args["attributes"] = $attributes;
+        }
 
         get_template_part('components/shares/shares', null, $args);
     }
 
-    public static function video($url, $title = "", $poster = null, $autoplay = false, $loop = false, $classes = null, $attributes = null)
+    public static function video(mixed $url, mixed $title = "", mixed $poster = null, bool $autoplay = false, bool $loop = false, mixed $classes = null, mixed $attributes = null): void
     {
         if (empty($url)) return;
 
@@ -517,19 +569,47 @@ class component
      * @param array $rows Tableau de lignes ; chaque ligne est un tableau de colonnes (string ou cellule).
      *                    La première ligne alimente le <thead>.
      */
-    public static function table($rows, $classes = null, $attributes = null)
+    public static function table(mixed $rows, mixed $classes = null, mixed $attributes = null): void
     {
         if (!is_array($rows) || empty($rows)) {
             return;
         }
-        get_template_part('components/table/table', '', [
-            'rows' => $rows,
-            'classes' => $classes,
-            'attributes' => $attributes,
-        ]);
+
+        $args = array_key_exists('rows', $rows) ? $rows : ['rows' => $rows];
+
+        if ($classes !== null) {
+            $args['classes'] = $classes;
+        }
+
+        if ($attributes !== null) {
+            $args['attributes'] = $attributes;
+        }
+
+        get_template_part('components/table/table', '', $args);
     }
 
-    public static function list($items, $card = "news", $classes = null)
+    public static function tab(mixed $items, mixed $title = null, mixed $classes = null, mixed $attributes = null): void
+    {
+        if (empty($items)) return;
+
+        $args = is_array($items) && array_key_exists("items", $items) ? $items : ["items" => $items];
+
+        if ($title !== null) {
+            $args["title"] = $title;
+        }
+
+        if ($classes !== null) {
+            $args["classes"] = $classes;
+        }
+
+        if ($attributes !== null) {
+            $args["attributes"] = $attributes;
+        }
+
+        get_template_part('components/tab/tab', '', $args);
+    }
+
+    public static function list(mixed $items, mixed $card = "news", mixed $classes = null): void
     {
         if (empty($items)) return;
 
@@ -545,20 +625,37 @@ class component
         get_template_part('components/list/list', '', $args);
     }
 
-    public static function image($image, $size = "full", $classes = "", $lazy = true)
+    public static function image(mixed $image, mixed $size = "full", mixed $classes = "", bool $lazy = true, mixed $attributes = null): void
     {
         if (empty($image)) return;
 
-        get_template_part('components/image/image', '',   [
+        if (is_array($image)) {
+            $args = $image;
+            $image = $args["image"] ?? $args["src"] ?? $args["url"] ?? "";
+            $size = $args["size"] ?? $size;
+            $classes = $classes !== "" ? $classes : ($args["classes"] ?? "");
+            $lazy = array_key_exists("lazy", $args) ? (bool) $args["lazy"] : $lazy;
+            $attributes = $attributes ?? ($args["attributes"] ?? null);
+        } else {
+            $args = [];
+        }
+
+        if (empty($image)) return;
+
+        get_template_part('components/image/image', '', [
             "image" => $image,
             "size" => $size,
+            "alt" => $args["alt"] ?? "",
             "classes" => $classes,
             "lazy" => $lazy,
+            "decoding" => $args["decoding"] ?? "async",
+            "fetchpriority" => $args["fetchpriority"] ?? null,
+            "attributes" => $attributes,
         ]);
     }
 
 
-    public static function tag($args, $type = "info", $classes = null, $attributes = null)
+    public static function tag(mixed $args, mixed $type = "info", mixed $classes = null, mixed $attributes = null): void
     {
         if (is_string($args)) {
             $args = ["name" => $args];
@@ -591,30 +688,76 @@ class component
     }
 
 
-    public static function tooltip($label, $content, $classes = null, $attributes = null)
+    public static function tooltip(mixed $label, mixed $content = null, mixed $classes = null, mixed $attributes = null): void
     {
-        if (empty($label) || empty($content)) return;
+        if (empty($label)) return;
 
-        get_template_part('components/tooltip/tooltip', '', [
+        $args = is_array($label) ? $label : [
             "label" => $label,
             "content" => $content,
             "classes" => $classes,
             "attributes" => $attributes,
-        ]);
+        ];
+
+        if (!is_array($label)) {
+            get_template_part('components/tooltip/tooltip', '', $args);
+            return;
+        }
+
+        if ($content !== null) {
+            $args["content"] = $content;
+        }
+
+        if ($classes !== null) {
+            $args["classes"] = $classes;
+        }
+
+        if ($attributes !== null) {
+            $args["attributes"] = $attributes;
+        }
+
+        get_template_part('components/tooltip/tooltip', '', $args);
     }
-    public static function search($label = null, $placeholder = null, $button_label = null, $action = null, $classes = null, $attributes = null)
+    public static function search(mixed $label = null, mixed $placeholder = null, mixed $button_label = null, mixed $action = null, mixed $classes = null, mixed $attributes = null): void
     {
-        get_template_part('components/search/search', '', [
+        $args = is_array($label) ? $label : [
             "label" => $label,
             "placeholder" => $placeholder,
             "button_label" => $button_label,
             "action" => $action,
             "classes" => $classes,
             "attributes" => $attributes,
-        ]);
+        ];
+
+        if (!is_array($label)) {
+            get_template_part('components/search/search', '', $args);
+            return;
+        }
+
+        if ($placeholder !== null) {
+            $args["placeholder"] = $placeholder;
+        }
+
+        if ($button_label !== null) {
+            $args["button_label"] = $button_label;
+        }
+
+        if ($action !== null) {
+            $args["action"] = $action;
+        }
+
+        if ($classes !== null) {
+            $args["classes"] = $classes;
+        }
+
+        if ($attributes !== null) {
+            $args["attributes"] = $attributes;
+        }
+
+        get_template_part('components/search/search', '', $args);
     }
 
-    public static function autocomplete($items, $label, $classes = null, $attributes = null)
+    public static function autocomplete(mixed $items, mixed $label, mixed $classes = null, mixed $attributes = null): void
     {
         if (empty($items) || !is_array($items)) return;
 
@@ -625,6 +768,4 @@ class component
             "attributes" => $attributes,
         ]);
     }
-
-    
 }

@@ -1,0 +1,16 @@
+{
+    "_defaults": {
+        "fit": "cover",
+        "position": "center",
+        "quality": 85,
+        "filter": "lanczos",
+        "sharpen": 0.2
+    },
+    "130x87": {
+        "width": 130,
+        "height": 87,
+        "fit": "cover",
+        "position": "center",
+        "sharpen": 0.2
+    }
+}

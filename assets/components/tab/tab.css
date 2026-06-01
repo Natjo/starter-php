@@ -26,9 +26,15 @@
         transition: color .2s ease, border-color .2s ease;
 
         &:hover,
-        &:focus {
+        &:focus-visible {
             color: var(--color-2);
             outline: none;
+        }
+
+        &:disabled,
+        &[aria-disabled="true"] {
+            cursor: not-allowed;
+            opacity: .45;
         }
 
         .focus {
@@ -36,10 +42,15 @@
         }
 
         &:hover .focus,
-        &:focus .focus {
+        &:focus-visible .focus {
             outline: 2px solid var(--color-2);
             outline-offset: 2px;
             border-radius: .2rem;
+        }
+
+        &:disabled .focus,
+        &[aria-disabled="true"] .focus {
+            outline: none;
         }
     }
 

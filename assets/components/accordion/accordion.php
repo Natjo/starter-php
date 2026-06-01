@@ -1,5 +1,5 @@
 <?php
-$args = component::args($args ?? null);
+$args = starter_args($args ?? null);
 $items = !empty($args["items"]) && is_array($args["items"]) ? $args["items"] : [];
 $items = array_values(array_filter(array_map(static function ($item) {
     if (!is_array($item)) return null;

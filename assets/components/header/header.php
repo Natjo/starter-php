@@ -1,8 +1,12 @@
 <?php
-$args = component::args($args ?? null);
-$title = !empty($title) ? (string) $title : (!empty($args["title"]) ? (string) $args["title"] : "");
-$text = !empty($text) ? (string) $text : (!empty($args["text"]) ? (string) $args["text"] : "");
-$link = !empty($link) && is_array($link) ? $link : (!empty($args["link"]) && is_array($args["link"]) ? $args["link"] : []);
+$args = starter_args($args ?? null);
+$title = $args["title"] ?? $args["titre"] ?? $args["heading"] ?? $args["headline"] ?? "";
+$title = is_scalar($title) ? trim((string) $title) : "";
+$text = $args["text"] ?? $args["intro"] ?? $args["content"] ?? $args["description"] ?? "";
+$text = is_scalar($text) ? trim((string) $text) : "";
+$link = !empty($args["link"]) && is_array($args["link"]) ? $args["link"] : null;
+$link = $link ?: (!empty($args["cta"]) && is_array($args["cta"]) ? $args["cta"] : null);
+$link = $link ?: (!empty($args["button"]) && is_array($args["button"]) ? $args["button"] : null);
 $classes = component::classes("component-header", $classes ?? ($args["classes"] ?? ""));
 $attributes = component::attributes($attributes ?? ($args["attributes"] ?? []));
 
@@ -12,15 +16,10 @@ if ($title === "" && $text === "" && empty($link)) {
 ?>
 
 <header class="<?= $classes ?>"<?= $attributes ?>>
-    <?php if ($title !== "") : ?>
-        <?php component::title($title); ?>
-    <?php endif; ?>
 
-    <?php if ($text !== "") : ?>
-        <?php component::text($text); ?>
-    <?php endif; ?>
+    <?php component::title($title); ?>
 
-    <?php if (!empty($link)) : ?>
-        <?php component::link($link); ?>
-    <?php endif; ?>
+    <?php component::text($text); ?>
+
+    <?php component::link($link); ?>
 </header>

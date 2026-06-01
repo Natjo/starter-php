@@ -1,13 +1,46 @@
 <?php
-$args = component::args($args ?? null);
+$args = starter_args($args ?? null);
 $classes = component::classes("tabs", $args["classes"] ?? "");
 $attributes = component::attributes($args["attributes"] ?? []);
-$items = !empty($args["items"]) && is_array($args["items"]) ? $args["items"] : [];
-$title = !empty($args["title"]) ? $args["title"] : "";
+$items = [];
+$title = !empty($args["title"]) ? (string) $args["title"] : "";
+$default_panel_classes = $args["panel_classes"] ?? "";
+
+if (!empty($args["items"]) && is_array($args["items"])) {
+    foreach ($args["items"] as $item) {
+        if (!is_array($item)) continue;
+
+        $label = trim((string) ($item["label"] ?? $item["title"] ?? ""));
+        $content = $item["content"] ?? $item["text"] ?? "";
+        $disabled = !empty($item["disabled"]);
+        $panel_classes = $item["panel_classes"] ?? $item["classes"] ?? $default_panel_classes;
+
+        if ($label === "" || is_array($content) || trim((string) $content) === "") continue;
+
+        $items[] = [
+            "label" => $label,
+            "content" => (string) $content,
+            "disabled" => $disabled,
+            "panel_classes" => $panel_classes,
+        ];
+    }
+}
 
 if (empty($items)) return;
 
-$uid = uniqid("tabs-");
+$activeIndex = null;
+foreach ($items as $index => $item) {
+    if (empty($item["disabled"])) {
+        $activeIndex = $index;
+        break;
+    }
+}
+
+if ($activeIndex === null) return;
+
+static $tabsInstance = 0;
+$tabsInstance++;
+$uid = "tabs-" . $tabsInstance;
 $tablist_id = "tablist-{$uid}";
 ?>
 
@@ -20,16 +53,18 @@ $tablist_id = "tablist-{$uid}";
         <?php foreach ($items as $index => $item) :
             $tab_id = "tab-{$uid}-{$index}";
             $panel_id = "tabpanel-{$uid}-{$index}";
-            $label = $item["label"] ?? $item["title"] ?? "";
-            if ($label === "") continue;
+            $label = (string) $item["label"];
+            $disabled = !empty($item["disabled"]);
+            $isActive = $index === $activeIndex;
         ?>
             <button
                 id="<?= esc_attr($tab_id) ?>"
                 type="button"
                 role="tab"
-                aria-selected="<?= $index === 0 ? "true" : "false" ?>"
+                aria-selected="<?= $isActive ? "true" : "false" ?>"
                 aria-controls="<?= esc_attr($panel_id) ?>"
-                <?= $index > 0 ? 'tabindex="-1"' : "" ?>
+                <?= $disabled ? 'aria-disabled="true" disabled' : "" ?>
+                <?= !$isActive ? 'tabindex="-1"' : "" ?>
             >
                 <span class="focus"><?= esc_html($label) ?></span>
             </button>
@@ -39,19 +74,21 @@ $tablist_id = "tablist-{$uid}";
     <?php foreach ($items as $index => $item) :
         $tab_id = "tab-{$uid}-{$index}";
         $panel_id = "tabpanel-{$uid}-{$index}";
-        $label = $item["label"] ?? $item["title"] ?? "";
-        if ($label === "") continue;
-
-        $content = $item["content"] ?? $item["text"] ?? "";
+        $content = $item["content"];
+        $panel_classes = component::classes(
+            "tabs-panel",
+            $item["panel_classes"] ?? "",
+            $index !== $activeIndex ? "is-hidden" : ""
+        );
     ?>
         <div
             id="<?= esc_attr($panel_id) ?>"
             role="tabpanel"
             tabindex="0"
             aria-labelledby="<?= esc_attr($tab_id) ?>"
-            class="tabs-panel text rte<?= $index > 0 ? " is-hidden" : "" ?>"
+            class="<?= $panel_classes ?>"
         >
-            <?= wp_kses_post($content) ?>
+            <?= starter_kses_post($content) ?>
         </div>
     <?php endforeach ?>
 </div>

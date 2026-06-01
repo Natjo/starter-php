@@ -31,7 +31,7 @@
         font-size: 1.4rem;
         line-height: 1.4;
         text-decoration: none;
-        transition: background-color 0.2s ease, color 0.2s ease, font-weight 0.2s ease;
+        transition: background-color 0.2s ease, color 0.2s ease;
 
         &::before {
             content: "";
@@ -56,10 +56,15 @@
             }
         }
 
+        &:focus-visible {
+            color: var(--color-1);
+            outline: 2px solid var(--color-2);
+            outline-offset: 2px;
+        }
+
         @media (--breakpoint-lg-up) {
             &:hover {
                 color: var(--color-1);
-                font-weight: 600;
                 background: var(--color-gray-light);
 
                 &::before {

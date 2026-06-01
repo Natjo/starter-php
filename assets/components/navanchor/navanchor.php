@@ -1,50 +1,44 @@
 <?php
-$args = component::args($args ?? null);
-$escAttr = function ($value) {
-    if (function_exists("esc_attr")) {
-        return esc_attr($value);
-    }
-
-    return htmlspecialchars((string) $value, ENT_QUOTES, "UTF-8");
-};
-$escHtml = function ($value) {
-    if (function_exists("esc_html")) {
-        return esc_html($value);
-    }
-
-    return htmlspecialchars((string) $value, ENT_QUOTES, "UTF-8");
-};
-$translate = function ($text) {
-    if (function_exists("__")) {
-        return __($text, "starterkit");
-    }
-
-    return $text;
-};
-
-$items = !empty($args["items"]) && is_array($args["items"]) ? $args["items"] : [];
+$args = starter_args($args ?? null);
+$items = [];
 $classes = component::classes("navanchor", "menu-navigation", $args["classes"] ?? "");
 $attributes = component::attributes($args["attributes"] ?? []);
-$label = !empty($args["label"]) ? $args["label"] : $translate("Table des matières");
+$label = !empty($args["label"]) ? (string) $args["label"] : __("Table des matières", "starterkit");
+
+if (!empty($args["items"]) && is_array($args["items"])) {
+    foreach ($args["items"] as $item) {
+        if (!is_array($item)) continue;
+
+        $anchor = trim((string) ($item["anchor"] ?? $item["id"] ?? ""));
+        $name = trim((string) ($item["name"] ?? $item["label"] ?? $item["title"] ?? ""));
+
+        $anchor = ltrim($anchor, "#");
+        $anchor = sanitize_html_class($anchor);
+
+        if ($anchor === "" || $name === "") continue;
+
+        $items[] = [
+            "anchor" => $anchor,
+            "name" => $name,
+        ];
+    }
+}
 
 if (empty($items)) return;
+
+static $navanchorInstance = 0;
+$navanchorInstance++;
+$title_id = "navanchor-title-" . $navanchorInstance;
 ?>
 
-<nav class="<?= $classes ?>" data-module="components/navanchor" aria-label="<?= $escAttr($label) ?>"<?= $attributes ?>>
-    <p class="navanchor-title"><?= $escHtml($label) ?></p>
+<nav class="<?= $classes ?>" data-module="components/navanchor" aria-labelledby="<?= esc_attr($title_id) ?>"<?= $attributes ?>>
+    <p class="navanchor-title" id="<?= esc_attr($title_id) ?>"><?= esc_html($label) ?></p>
     <ul>
-        <?php foreach ($items as $i => $item) :
-            if (!is_array($item)) continue;
-            $anchor = $item["anchor"] ?? $item["id"] ?? "";
-            $name = $item["name"] ?? $item["label"] ?? $item["title"] ?? "";
-            if ($anchor === "" || $name === "") continue;
-            $is_first = $i === 0;
-        ?>
+        <?php foreach ($items as $item) : ?>
             <li class="list-item-navigation">
                 <a
-                    href="#<?= $escAttr($anchor) ?>"
-                    <?= $is_first ? 'class="active" aria-current="location"' : "" ?>
-                ><?= $escHtml($name) ?></a>
+                    href="#<?= esc_attr($item["anchor"]) ?>"
+                ><?= esc_html($item["name"]) ?></a>
             </li>
         <?php endforeach ?>
     </ul>

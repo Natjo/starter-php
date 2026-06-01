@@ -1,2 +1,2 @@
-.component-header{display:grid;gap:1.6rem}
+.component-header{display:grid;gap:var(--gap)}
 /*# sourceMappingURL=header.css.map */

@@ -57,6 +57,9 @@ class Video {
     }
 
     _reveal(player) {
+        if (player instanceof HTMLIFrameElement && !player.src && player.dataset.src) {
+            player.src = player.dataset.src;
+        }
         this.root.classList.add("is-playing");
         if (player) {
             try { player.focus(); } catch (_) { /* noop */ }

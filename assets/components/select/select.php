@@ -1,39 +1,44 @@
 <?php
 /** @var array $args */
-$args = component::args($args ?? null);
-$escAttr = function ($value) {
-    if (function_exists('esc_attr')) {
-        return esc_attr($value);
-    }
-
-    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
-};
-$escHtml = function ($value) {
-    if (function_exists('esc_html')) {
-        return esc_html($value);
-    }
-
-    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
-};
-
+$args = starter_args($args ?? null);
 $options = isset($args['args']) && is_array($args['args']) ? $args['args'] : [];
 $label = isset($args['label']) ? trim((string) $args['label']) : '';
 $name = isset($args['name']) && trim((string) $args['name']) !== '' ? trim((string) $args['name']) : 'select';
+$name = preg_replace('/[^A-Za-z0-9_\-\[\]]/', '', $name);
+$name = $name !== '' ? $name : 'select';
+$placeholder = isset($args['placeholder']) ? trim((string) $args['placeholder']) : '';
+$required = !empty($args['required']);
+$disabled = !empty($args['disabled']);
+$multiple = !empty($args['multiple']);
+$autocomplete = isset($args['autocomplete']) && is_scalar($args['autocomplete']) ? trim((string) $args['autocomplete']) : '';
+$aria_label = isset($args['aria_label']) && is_scalar($args['aria_label']) ? trim((string) $args['aria_label']) : '';
 $classes = component::classes('select', $args['classes'] ?? '');
 $attributes = component::attributes($args['attributes'] ?? []);
 
 if (empty($options)) return;
 
-$uid = uniqid('select-');
+static $select_count = 0;
+$select_count++;
+$uid = 'select-' . sanitize_html_class($name) . '-' . $select_count;
+$has_selected = false;
+foreach ($options as $option) {
+    if (is_array($option) && !empty($option['selected'])) {
+        $has_selected = true;
+        break;
+    }
+}
 ?>
 
 <div class="<?= $classes ?>"<?= $attributes ?>>
     <?php if ($label !== '') : ?>
-        <label for="<?= $escAttr($uid) ?>"><?= $escHtml($label) ?></label>
+        <label for="<?= esc_attr($uid) ?>"><?= esc_html($label) ?></label>
     <?php endif; ?>
 
     <div class="select-field">
-        <select id="<?= $escAttr($uid) ?>" name="<?= $escAttr($name) ?>"<?= $label === '' ? ' aria-label="' . $escAttr($name) . '"' : '' ?>>
+        <select id="<?= esc_attr($uid) ?>" name="<?= esc_attr($name . ($multiple && !str_ends_with($name, '[]') ? '[]' : '')) ?>"<?= $label === '' ? ' aria-label="' . esc_attr($aria_label !== '' ? $aria_label : $name) . '"' : '' ?><?= $required ? ' required' : '' ?><?= $disabled ? ' disabled' : '' ?><?= $multiple ? ' multiple' : '' ?><?= $autocomplete !== '' ? ' autocomplete="' . esc_attr($autocomplete) . '"' : '' ?>>
+            <?php if ($placeholder !== '') : ?>
+                <option value=""<?= $required ? ' disabled' : '' ?><?= !$has_selected ? ' selected' : '' ?>><?= esc_html($placeholder) ?></option>
+            <?php endif; ?>
             <?php foreach ($options as $option) :
                 if (!is_array($option)) continue;
                 $option_label = isset($option['name']) ? trim((string) $option['name']) : '';
@@ -42,8 +47,8 @@ $uid = uniqid('select-');
                 $selected = !empty($option['selected']);
                 $disabled = !empty($option['disabled']);
             ?>
-                <option value="<?= $escAttr($option_value) ?>"<?= $selected ? ' selected' : '' ?><?= $disabled ? ' disabled' : '' ?>>
-                    <?= $escHtml($option_label !== '' ? $option_label : $option_value) ?>
+                <option value="<?= esc_attr($option_value) ?>"<?= $selected ? ' selected' : '' ?><?= $disabled ? ' disabled' : '' ?>>
+                    <?= esc_html($option_label !== '' ? $option_label : $option_value) ?>
                 </option>
             <?php endforeach; ?>
         </select>

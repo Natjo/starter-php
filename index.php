@@ -4,12 +4,14 @@ declare(strict_types=1);
 define('APP_ROOT', __DIR__);
 define('WEB_ROOT', APP_ROOT . '/dist');
 define('ASSETS_ROOT', WEB_ROOT . '/assets');
+define('UPLOADS_ROOT', WEB_ROOT . '/uploads');
 define('ENV_LOCAL', isset($_SERVER['SERVER_NAME']) && false !== strrpos($_SERVER['SERVER_NAME'], '.code'));
 
 $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
 $basePath = $scriptName === '' ? '' : rtrim(str_replace('\\', '/', dirname($scriptName)), '/');
 $baseUrl = $basePath === '' ? '' : $basePath;
 define('THEME_ASSETS', $baseUrl . '/dist/assets/');
+define('THEME_UPLOADS', $baseUrl . '/dist/uploads/');
 
 require_once __DIR__ . '/functions.php';
 require_once __DIR__ . '/components.php';

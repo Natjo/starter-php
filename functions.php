@@ -1,28 +1,28 @@
 <?php
 
 if (!function_exists('__')) {
-    function __($text, $domain = null)
+    function __(string $text, ?string $domain = null): string
     {
         return $text;
     }
 }
 
 if (!function_exists('esc_attr')) {
-    function esc_attr($text)
+    function esc_attr(mixed $text): string
     {
         return htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8');
     }
 }
 
 if (!function_exists('esc_html')) {
-    function esc_html($text)
+    function esc_html(mixed $text): string
     {
         return htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8');
     }
 }
 
 if (!function_exists('esc_url')) {
-    function esc_url($url)
+    function esc_url(mixed $url): string
     {
         return htmlspecialchars((string) $url, ENT_QUOTES, 'UTF-8');
     }
@@ -31,13 +31,13 @@ if (!function_exists('esc_url')) {
 if (!function_exists('wp_kses_post')) {
     define('STARTER_WP_KSES_POST_FALLBACK', true);
 
-    function wp_kses_post($html)
+    function wp_kses_post(mixed $html): string
     {
         return (string) $html;
     }
 }
 
-function starter_kses_post($html)
+function starter_kses_post(mixed $html): string
 {
     if (function_exists('wp_kses') && function_exists('wp_kses_allowed_html')) {
         return wp_kses((string) $html, wp_kses_allowed_html('post'));
@@ -47,7 +47,151 @@ function starter_kses_post($html)
         return wp_kses_post($html);
     }
 
-    return strip_tags((string) $html, '<br><strong><b><em><i><span><sup><sub>');
+    return starter_kses_post_fallback((string) $html);
+}
+
+function starter_kses_post_fallback(string $html): string
+{
+    $allowed_tags = [
+        'a' => ['href', 'target', 'rel', 'title', 'class'],
+        'blockquote' => ['class'],
+        'br' => [],
+        'b' => ['class'],
+        'em' => ['class'],
+        'h2' => ['class'],
+        'h3' => ['class'],
+        'h4' => ['class'],
+        'h5' => ['class'],
+        'h6' => ['class'],
+        'i' => ['class'],
+        'li' => ['class'],
+        'ol' => ['class'],
+        'p' => ['class'],
+        'small' => ['class'],
+        'span' => ['class'],
+        'strong' => ['class'],
+        'sub' => ['class'],
+        'sup' => ['class'],
+        'ul' => ['class'],
+    ];
+
+    $html = preg_replace('#<(script|style|iframe|object|embed)\b[^>]*>.*?</\1>#isu', '', $html) ?? '';
+
+    if (!class_exists('DOMDocument')) {
+        $html = preg_replace('/<([a-z][a-z0-9]*)\b[^>]*>/iu', '<$1>', $html) ?? '';
+        return strip_tags($html, '<a><blockquote><br><b><em><h2><h3><h4><h5><h6><i><li><ol><p><small><span><strong><sub><sup><ul>');
+    }
+
+    $previous = libxml_use_internal_errors(true);
+    $dom = new DOMDocument('1.0', 'UTF-8');
+    $dom->loadHTML('<?xml encoding="UTF-8"><div>' . $html . '</div>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    libxml_clear_errors();
+    libxml_use_internal_errors($previous);
+
+    $root = $dom->documentElement;
+    if (!$root) {
+        return '';
+    }
+
+    $output = '';
+    foreach ($root->childNodes as $child) {
+        $output .= starter_sanitize_dom_node($child, $allowed_tags);
+    }
+
+    return $output;
+}
+
+function starter_sanitize_dom_node(DOMNode $node, array $allowed_tags): string
+{
+    if ($node instanceof DOMText) {
+        return htmlspecialchars($node->wholeText, ENT_QUOTES, 'UTF-8');
+    }
+
+    if (!$node instanceof DOMElement) {
+        return '';
+    }
+
+    $tag = strtolower($node->tagName);
+    if (in_array($tag, ['script', 'style', 'iframe', 'object', 'embed'], true)) {
+        return '';
+    }
+
+    $children = '';
+
+    foreach ($node->childNodes as $child) {
+        $children .= starter_sanitize_dom_node($child, $allowed_tags);
+    }
+
+    if (!isset($allowed_tags[$tag])) {
+        return $children;
+    }
+
+    $attributes = starter_sanitize_dom_attributes($node, $allowed_tags[$tag]);
+
+    if ($tag === 'br') {
+        return '<br>';
+    }
+
+    return '<' . $tag . $attributes . '>' . $children . '</' . $tag . '>';
+}
+
+function starter_sanitize_dom_attributes(DOMElement $node, array $allowed_attributes): string
+{
+    $attributes = '';
+
+    foreach ($allowed_attributes as $attribute) {
+        if (!$node->hasAttribute($attribute)) {
+            continue;
+        }
+
+        $value = trim($node->getAttribute($attribute));
+        if ($value === '') {
+            continue;
+        }
+
+        if ($attribute === 'href') {
+            $value = starter_safe_content_url($value);
+            if ($value === '') {
+                continue;
+            }
+        } elseif ($attribute === 'target') {
+            $value = in_array($value, ['_blank', '_self', '_parent', '_top'], true) ? $value : '';
+            if ($value === '') {
+                continue;
+            }
+        } elseif ($attribute === 'rel') {
+            $value = sanitize_class_list($value);
+        } elseif ($attribute === 'class') {
+            $value = sanitize_class_list($value);
+        }
+
+        $attributes .= ' ' . $attribute . '="' . esc_attr($value) . '"';
+    }
+
+    if ($node->hasAttribute('target') && $node->getAttribute('target') === '_blank' && !str_contains($attributes, ' rel=')) {
+        $attributes .= ' rel="noopener noreferrer"';
+    }
+
+    return $attributes;
+}
+
+function starter_safe_content_url(string $url): string
+{
+    if (str_starts_with($url, '#') || str_starts_with($url, '/')) {
+        return $url;
+    }
+
+    $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
+    if (in_array($scheme, ['http', 'https', 'mailto', 'tel'], true)) {
+        return $url;
+    }
+
+    return '';
+}
+
+function starter_args(mixed $args, array $defaults = []): array
+{
+    return array_replace($defaults, is_array($args) ? $args : []);
 }
 
 if (!function_exists('sanitize_html_class')) {
@@ -60,26 +204,27 @@ if (!function_exists('sanitize_html_class')) {
     }
 }
 
-function component($name, array $args = [])
+function component(string $name, array $args = []): void
 {
     get_template_part("components/{$name}/{$name}", null, $args);
 }
 
-function hero($name, array $args = [])
+function hero(string $name, array $args = []): void
 {
     get_template_part("heros/hero-{$name}/hero-{$name}", null, $args);
 }
 
-function strate($name, array $args = [])
+function strate(string $name, array $args = []): void
 {
     $name = str_replace('-', '_', $name);
     get_template_part("strates/strate-{$name}/strate-{$name}", null, $args);
 }
 
-function normalize_dist_file($file)
+function normalize_dist_file(mixed $file): string
 {
     $file = ltrim(str_replace('\\', '/', (string) $file), '/');
     $file = preg_replace('#/+#', '/', $file);
+    $file = preg_replace('#^\./+#', '', $file);
 
     if ($file === '' || has_unsafe_path_segments($file)) {
         return '';
@@ -88,7 +233,7 @@ function normalize_dist_file($file)
     return $file;
 }
 
-function has_unsafe_path_segments($path)
+function has_unsafe_path_segments(mixed $path): bool
 {
     if (str_contains((string) $path, "\0")) {
         return true;
@@ -103,19 +248,175 @@ function has_unsafe_path_segments($path)
     return false;
 }
 
-function dist_assets_root()
+function dist_assets_root(): string
 {
     return defined('ASSETS_ROOT') ? rtrim(ASSETS_ROOT, '/') : rtrim(WEB_ROOT . '/assets', '/');
 }
 
-function dist_asset_url($file)
+function dist_uploads_root(): string
+{
+    return defined('UPLOADS_ROOT') ? rtrim(UPLOADS_ROOT, '/') : rtrim(WEB_ROOT . '/uploads', '/');
+}
+
+function dist_asset_url(mixed $file): string
 {
     $file = normalize_dist_file($file);
 
     return rtrim(THEME_ASSETS, '/') . '/' . $file;
 }
 
-function dist_asset_version($file)
+function dist_upload_url(mixed $file): string
+{
+    $file = normalize_dist_file($file);
+    $base = defined('THEME_UPLOADS')
+        ? THEME_UPLOADS
+        : rtrim(dirname(rtrim(THEME_ASSETS, '/')), '/') . '/uploads/';
+
+    return rtrim($base, '/') . '/' . $file;
+}
+
+function starter_image_size_name(mixed $size): string
+{
+    if (is_array($size)) {
+        $width = isset($size[0]) ? (int) $size[0] : 0;
+        $height = isset($size[1]) ? (int) $size[1] : 0;
+
+        return $width > 0 && $height > 0 ? $width . 'x' . $height : '';
+    }
+
+    $size = is_scalar($size) ? trim((string) $size) : '';
+
+    if ($size === '' || $size === 'full') {
+        return '';
+    }
+
+    return sanitize_html_class($size);
+}
+
+function starter_image_variant_file(mixed $file, mixed $size = 'full', ?string $root = null): string
+{
+    $file = normalize_dist_file($file);
+    $size = starter_image_size_name($size);
+    $root = $root !== null ? rtrim($root, '/') : dist_uploads_root();
+
+    if ($file === '' || $size === '') {
+        return $file;
+    }
+
+    $path = pathinfo($file);
+    $dirname = !empty($path['dirname']) && $path['dirname'] !== '.' ? $path['dirname'] . '/' : '';
+    $extension = !empty($path['extension']) ? '.' . $path['extension'] : '';
+    $candidate = $dirname . $path['filename'] . '-' . $size . $extension;
+
+    return is_file($root . '/' . $candidate) ? $candidate : $file;
+}
+
+function starter_image_source(mixed $image, mixed $size = 'full'): array
+{
+    $file = normalize_dist_file($image);
+    $isUpload = false;
+
+    if (defined('THEME_UPLOADS')) {
+        $themeUploads = rtrim(normalize_dist_file(THEME_UPLOADS), '/');
+        if ($themeUploads !== '' && str_starts_with($file, $themeUploads . '/')) {
+            $file = substr($file, strlen($themeUploads) + 1);
+            $isUpload = true;
+        }
+    }
+
+    if (defined('THEME_ASSETS')) {
+        $themeAssets = rtrim(normalize_dist_file(THEME_ASSETS), '/');
+        if ($themeAssets !== '' && str_starts_with($file, $themeAssets . '/')) {
+            $file = substr($file, strlen($themeAssets) + 1);
+        }
+    }
+
+    if (str_starts_with($file, 'dist/uploads/')) {
+        $file = substr($file, strlen('dist/uploads/'));
+        $isUpload = true;
+    }
+
+    if (str_starts_with($file, 'dist/assets/')) {
+        $file = substr($file, strlen('dist/assets/'));
+    }
+
+    if ($file === '') {
+        return [];
+    }
+
+    if (str_starts_with($file, 'uploads/')) {
+        $file = substr($file, strlen('uploads/'));
+        $isUpload = true;
+    }
+
+    if (str_starts_with($file, 'img/')) {
+        $candidate = starter_image_variant_file($file, $size, dist_assets_root());
+
+        return [
+            'file' => $candidate,
+            'root' => dist_assets_root(),
+            'url' => dist_asset_url($candidate),
+        ];
+    }
+
+    if ($isUpload) {
+        $upload = starter_image_variant_file($file, $size, dist_uploads_root());
+        return [
+            'file' => $upload,
+            'root' => dist_uploads_root(),
+            'url' => dist_upload_url($upload),
+        ];
+    }
+
+    $asset = starter_image_variant_file('img/' . $file, $size, dist_assets_root());
+    if (is_file(dist_assets_root() . '/' . $asset)) {
+        return [
+            'file' => $asset,
+            'root' => dist_assets_root(),
+            'url' => dist_asset_url($asset),
+        ];
+    }
+
+    return [
+        'file' => $asset,
+        'root' => dist_assets_root(),
+        'url' => dist_asset_url($asset),
+    ];
+}
+
+function starter_image_asset_file(mixed $image, mixed $size = 'full'): string
+{
+    $source = starter_image_source($image, $size);
+
+    return (string) ($source['file'] ?? '');
+}
+
+if (!function_exists('lsd_get_thumb')) {
+    function lsd_get_thumb(mixed $image, mixed $size = 'full'): array
+    {
+        if (!is_scalar($image) || trim((string) $image) === '') {
+            return [];
+        }
+
+        $source = starter_image_source($image, $size);
+        if (empty($source['file']) || empty($source['root']) || empty($source['url'])) {
+            return [];
+        }
+
+        $path = rtrim((string) $source['root'], '/') . '/' . $source['file'];
+        if (!is_file($path)) {
+            return [];
+        }
+
+        $dimensions = @getimagesize($path);
+        $width = !empty($dimensions[0]) ? (int) $dimensions[0] : 0;
+        $height = !empty($dimensions[1]) ? (int) $dimensions[1] : 0;
+
+        return [$source['url'], $width, $height, ''];
+    }
+}
+
+function dist_asset_version(mixed $file): ?string
 {
     static $versions = [];
 
@@ -135,7 +436,7 @@ function dist_asset_version($file)
     return $versions[$file];
 }
 
-function dist_versioned_asset_url($file)
+function dist_versioned_asset_url(mixed $file): string
 {
     $url = dist_asset_url($file);
     $version = dist_asset_version($file);
@@ -143,14 +444,14 @@ function dist_versioned_asset_url($file)
     return $version ? $url . '?v=' . $version : $url;
 }
 
-function dist_css_file_exists($file)
+function dist_css_file_exists(mixed $file): bool
 {
     $file = normalize_dist_file($file);
 
     return $file !== '' && is_file(dist_assets_root() . '/' . $file);
 }
 
-function dist_css_manifest()
+function dist_css_manifest(): array
 {
     static $manifest = null;
 
@@ -178,12 +479,12 @@ function dist_css_manifest()
     return $manifest;
 }
 
-function dist_style_placeholder()
+function dist_style_placeholder(): void
 {
     echo '<!-- DIST_PAGE_STYLES -->' . PHP_EOL;
 }
 
-function enqueue_dist_style($file)
+function enqueue_dist_style(mixed $file): void
 {
     $file = ltrim(str_replace('\\', '/', (string) $file), '/');
     $manifest = dist_css_manifest();
@@ -200,7 +501,7 @@ function enqueue_dist_style($file)
     $GLOBALS['dist_enqueued_styles'][$file] = true;
 }
 
-function dist_enqueued_styles()
+function dist_enqueued_styles(): array
 {
     $styles = !empty($GLOBALS['dist_enqueued_styles']) && is_array($GLOBALS['dist_enqueued_styles'])
         ? array_keys($GLOBALS['dist_enqueued_styles'])
@@ -210,7 +511,7 @@ function dist_enqueued_styles()
     return $styles;
 }
 
-function enqueue_template_style($template)
+function enqueue_template_style(mixed $template): void
 {
     $template = ltrim(str_replace('\\', '/', (string) $template), '/');
     $template = preg_replace('#\.php$#', '', $template);
@@ -228,7 +529,7 @@ function enqueue_template_style($template)
     }
 }
 
-function dist_bundles_for_styles(array $styles)
+function dist_bundles_for_styles(array $styles): array
 {
     $manifest = dist_css_manifest();
     $bundledFiles = array_flip($manifest['bundledFiles']);
@@ -259,7 +560,7 @@ function dist_bundles_for_styles(array $styles)
     return array_keys($bundles);
 }
 
-function dist_style_link($file)
+function dist_style_link(mixed $file): string
 {
     $href = esc_url(dist_versioned_asset_url($file));
     $media = $file === 'styles/print.css' ? ' media="print"' : '';
@@ -267,14 +568,14 @@ function dist_style_link($file)
     return '    <link rel="stylesheet" href="' . $href . '"' . $media . '>' . PHP_EOL;
 }
 
-function dist_style_preload_link($file)
+function dist_style_preload_link(mixed $file): string
 {
     $href = esc_url(dist_versioned_asset_url($file));
 
     return '    <link rel="preload" href="' . $href . '" as="style">' . PHP_EOL;
 }
 
-function dist_should_preload_style($file)
+function dist_should_preload_style(mixed $file): bool
 {
     return in_array($file, [
         'common.css',
@@ -283,7 +584,7 @@ function dist_should_preload_style($file)
     ], true);
 }
 
-function dist_critical_styles($file = 'critical.css')
+function dist_critical_styles(mixed $file = 'critical.css'): void
 {
     $file = normalize_dist_file($file);
     $path = dist_assets_root() . '/' . $file;
@@ -302,7 +603,7 @@ function dist_critical_styles($file = 'critical.css')
     echo '    <style id="critical-css">' . $css . '</style>' . PHP_EOL;
 }
 
-function dist_bundle_styles($echo = true)
+function dist_bundle_styles(bool $echo = true): string
 {
     $html = '';
 
@@ -321,7 +622,7 @@ function dist_bundle_styles($echo = true)
     return $html;
 }
 
-function dist_styles($echo = true)
+function dist_styles(bool $echo = true): string
 {
     $manifest = dist_css_manifest();
     $bundled = array_merge([
@@ -355,7 +656,7 @@ function dist_styles($echo = true)
     return $html;
 }
 
-function dist_page_styles($echo = true)
+function dist_page_styles(bool $echo = true): string
 {
     $html = dist_bundle_styles(false) . dist_styles(false);
 
@@ -366,15 +667,20 @@ function dist_page_styles($echo = true)
     return $html;
 }
 
-function render_dist_style_placeholders($html)
+function render_dist_style_placeholders(mixed $html): string
 {
-    return str_replace('<!-- DIST_PAGE_STYLES -->', rtrim(dist_page_styles(false)), $html);
+    return str_replace('<!-- DIST_PAGE_STYLES -->', rtrim(dist_page_styles(false)), (string) $html);
 }
 
-function get_template_part($slug, $name = null, array $args = [])
+function get_template_part(mixed $slug, mixed $name = null, array $args = []): void
 {
     if (!empty($args)) {
-        extract($args, EXTR_SKIP);
+        $template_args = array_filter(
+            $args,
+            static fn($key) => is_string($key) && preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $key),
+            ARRAY_FILTER_USE_KEY
+        );
+        extract($template_args, EXTR_SKIP);
     }
 
     $slug = normalize_template_slug($slug);
@@ -436,7 +742,7 @@ function get_template_part($slug, $name = null, array $args = [])
     trigger_error("Template introuvable : {$slug}", E_USER_WARNING);
 }
 
-function normalize_template_slug($slug)
+function normalize_template_slug(mixed $slug): string
 {
     $slug = trim(str_replace('\\', '/', (string) $slug), '/');
     $slug = preg_replace('#\.php$#', '', $slug);
@@ -449,7 +755,7 @@ function normalize_template_slug($slug)
     return preg_match('#^[A-Za-z0-9_/-]+$#', $slug) ? $slug : '';
 }
 
-function is_safe_template_file($path, $directory)
+function is_safe_template_file(mixed $path, mixed $directory): bool
 {
     if (!is_file($path)) {
         return false;
@@ -463,67 +769,61 @@ function is_safe_template_file($path, $directory)
         && str_starts_with($realPath, rtrim($realDirectory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR);
 }
 
-function options($classes, $args = [])
+function options(mixed $classes, array $args = []): string
 {
-    $classes = sanitize_class_list($classes);
+    $options = !empty($args['options']) && is_array($args['options']) ? $args['options'] : [];
 
-    if (empty($args["options"])) {
-        return 'class="' . esc_attr($classes) . '"';
-    } else {
-        $options = $args["options"];
-
-        $container = "";
-        if (!empty($options["container"])) {
-            $container = !empty($options["container"]) ? " ctr-" . sanitize_html_class($options["container"]) : "";
-        }
-
-        $marginBottom = " mb-0";
-        if (!empty($options["margin"]["bottom"])) {
-            if ($options["margin"]["bottom"] == "md") {
-                $marginBottom = "";
-            } else {
-                $marginBottom = !empty($options["margin"]["bottom"]) ? " mb-" . sanitize_html_class($options["margin"]["bottom"]) : "";
-            }
-        }
-
-        $marginTop = "";
-        if (!empty($options["margin"]["top"])) {
-            $marginTop = !empty($options["margin"]["top"]) ? " mt-" . sanitize_html_class($options["margin"]["top"]) : "";
-        }
-
-        $background = "";
-        $paddingTop = "";
-        $paddingBottom = "";
-        if (!empty($options["background"]["hasbackground"])) {
-            $color = sanitize_html_class($options["background"]["color"] ?? '');
-            $background = $color !== '' ? " bg-" . $color : '';
-            $padding = !empty($options["background"]["padding"]) && is_array($options["background"]["padding"])
-                ? $options["background"]["padding"]
-                : [];
-
-            if (($padding["top"] ?? '') == "md" || empty($padding["top"])) {
-                $paddingTop = "";
-            } else {
-                $paddingTop = " pt-" . sanitize_html_class($padding["top"]);
-            }
-
-            if (($padding["bottom"] ?? '') == "md" || empty($padding["bottom"])) {
-                $paddingBottom = "";
-            } else {
-                $paddingBottom = " pb-" . sanitize_html_class($padding["bottom"]);
-            }
-        }
-
-        $id = "";
-        if (!empty($options["id"])) {
-            $id = ' id="' . esc_attr(sanitize_html_class($options["id"])) . '"';
-        }
-
-        return 'class="' . esc_attr(trim($classes . $marginBottom . $marginTop . $background . $paddingTop . $paddingBottom . $container)) . '"' . $id;
+    if (empty($options)) {
+        return starter_attributes(['class' => sanitize_class_list($classes)]);
     }
+
+    $class_list = [$classes];
+    $option_value = static fn($value): string => is_scalar($value) ? trim((string) $value) : '';
+
+    $container = $option_value($options['container'] ?? '');
+    if ($container !== '') {
+        $class_list[] = 'ctr-' . $container;
+    }
+
+    $margin = !empty($options['margin']) && is_array($options['margin']) ? $options['margin'] : [];
+    $margin_bottom = $option_value($margin['bottom'] ?? '');
+    $margin_top = $option_value($margin['top'] ?? '');
+
+    if ($margin_bottom === '') {
+        $class_list[] = 'mb-0';
+    } elseif ($margin_bottom !== 'md') {
+        $class_list[] = 'mb-' . $margin_bottom;
+    }
+
+    if ($margin_top !== '') {
+        $class_list[] = 'mt-' . $margin_top;
+    }
+
+    $background = !empty($options['background']) && is_array($options['background']) ? $options['background'] : [];
+    if (!empty($background['hasbackground'])) {
+        $color = $option_value($background['color'] ?? '');
+        if ($color !== '') {
+            $class_list[] = 'bg-' . $color;
+        }
+
+        $padding = !empty($background['padding']) && is_array($background['padding']) ? $background['padding'] : [];
+        foreach (['top' => 'pt', 'bottom' => 'pb'] as $key => $prefix) {
+            $value = $option_value($padding[$key] ?? '');
+            if ($value !== '' && $value !== 'md') {
+                $class_list[] = $prefix . '-' . $value;
+            }
+        }
+    }
+
+    $attributes = ['class' => sanitize_class_list($class_list)];
+    if (!empty($options['id'])) {
+        $attributes['id'] = sanitize_html_class($option_value($options['id']));
+    }
+
+    return starter_attributes($attributes);
 }
 
-function sanitize_class_list($classes)
+function sanitize_class_list(mixed $classes): string
 {
     if (is_array($classes)) {
         $classes = implode(' ', array_filter($classes, static fn($class) => is_scalar($class)));
@@ -536,7 +836,7 @@ function sanitize_class_list($classes)
     return implode(' ', array_unique($classes));
 }
 
-function starter_attributes($attributes)
+function starter_attributes(mixed $attributes): string
 {
     if (is_string($attributes)) {
         return trim($attributes);
@@ -566,23 +866,24 @@ function starter_attributes($attributes)
     return implode(' ', $html);
 }
 
-function youtube_id_from_url($url)
+function youtube_id_from_url(mixed $url): string
 {
-    $parts = parse_url($url);
+    $parts = parse_url((string) $url);
+    $id = "";
 
     if (isset($parts['query'])) {
         parse_str($parts['query'], $qs);
         if (isset($qs['v'])) {
-            return $qs['v'];
+            $id = (string) $qs['v'];
         } else if (isset($qs['vi'])) {
-            return $qs['vi'];
+            $id = (string) $qs['vi'];
         }
     }
 
-    if (isset($parts['path'])) {
+    if ($id === '' && isset($parts['path'])) {
         $path = explode('/', trim($parts['path'], '/'));
-        return $path[count($path) - 1];
+        $id = (string) $path[count($path) - 1];
     }
 
-    return "";
+    return preg_match('/^[A-Za-z0-9_-]{11}$/', $id) ? $id : "";
 }

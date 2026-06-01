@@ -73,8 +73,10 @@ web/wp-content/uploads/
 web/wp-content/languages/themes/*-backup-*
 
 # Workflow
+admin/.image-sizes-generated.json
+dist/uploads/*
+!dist/uploads/.gitkeep
 
 # node
 package-lock.json
 nodes_modules
-

@@ -1,7 +1,7 @@
 <?php
 /** @var array $args */
 /*https://access42.net/concevoir-un-composant-d-auto-completion-accessible/*/
-$args = component::args($args ?? null);
+$args = starter_args($args ?? null);
 
 $items = !empty($args["items"]) && is_array($args["items"]) ? $args["items"] : [];
 $items = array_values(array_filter(array_map(static function ($item) {

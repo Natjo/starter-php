@@ -1,10 +1,17 @@
 class Navanchor {
     constructor(el) {
         this.el = el;
-        this.links = Array.from(el.querySelectorAll('a[href^="#"]'));
-        this.sections = document.querySelectorAll(".strate[id]");
+        this.items = Array.from(el.querySelectorAll('a[href^="#"]'))
+            .map((link) => {
+                const id = decodeURIComponent(link.getAttribute("href").slice(1));
+                const section = document.getElementById(id);
 
-        if (!this.links.length || !this.sections.length) return;
+                return section ? { link, section } : null;
+            })
+            .filter(Boolean);
+        this.scrollFrame = null;
+
+        if (!this.items.length) return;
 
         this.onScroll = this.onScroll.bind(this);
         window.addEventListener("scroll", this.onScroll, { passive: true });
@@ -12,9 +19,18 @@ class Navanchor {
     }
 
     onScroll() {
+        if (this.scrollFrame) return;
+
+        this.scrollFrame = window.requestAnimationFrame(() => {
+            this.scrollFrame = null;
+            this.update();
+        });
+    }
+
+    update() {
         let activeIndex = -1;
 
-        this.sections.forEach((section) => {
+        this.items.forEach(({ section }) => {
             if (section.getBoundingClientRect().top < window.innerHeight / 2) {
                 activeIndex++;
             }
@@ -24,7 +40,7 @@ class Navanchor {
             activeIndex = 0;
         }
 
-        this.links.forEach((link, i) => {
+        this.items.forEach(({ link }, i) => {
             const isActive = i === activeIndex;
             link.classList.toggle("active", isActive);
             if (isActive) {
@@ -37,10 +53,18 @@ class Navanchor {
 
     destroy() {
         window.removeEventListener("scroll", this.onScroll);
+        if (this.scrollFrame) {
+            window.cancelAnimationFrame(this.scrollFrame);
+            this.scrollFrame = null;
+        }
     }
 }
 
 export default (el) => {
     if (!(el instanceof Element)) return null;
-    return new Navanchor(el);
+    if (el.__navanchorInstance) return el.__navanchorInstance;
+
+    el.__navanchorInstance = new Navanchor(el);
+
+    return el.__navanchorInstance;
 };

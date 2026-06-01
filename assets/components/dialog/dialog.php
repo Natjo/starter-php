@@ -1,5 +1,5 @@
 <?php
-$args = component::args($args ?? null);
+$args = starter_args($args ?? null);
 $uniqueId = function ($prefix = "") {
     if (function_exists("wp_unique_id")) {
         return wp_unique_id($prefix);

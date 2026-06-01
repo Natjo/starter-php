@@ -1,6 +1,6 @@
 <?php
-$args = component::args($args ?? null);
-$data = isset($quote) && is_array($quote) ? $quote : [];
+$args = starter_args($args ?? null);
+$data = isset($quote) && is_array($quote) ? $quote : $args;
 $text = trim((string) ($data["text"] ?? ($data["quote"] ?? "")));
 $author = trim((string) ($data["author"] ?? ""));
 $role = trim((string) ($data["role"] ?? ""));
@@ -9,22 +9,21 @@ $classes = component::classes('quote', $classes ?? '');
 $attributes = component::attributes($attributes ?? []);
 
 if ($text === "") return;
-
-$caption = $role !== '' ? $role : $source;
+$caption = trim(implode(" - ", array_filter([$role, $source], static fn($value) => $value !== "")));
 ?>
 
 <figure class="<?= $classes ?>"<?= $attributes ?>>
     <blockquote class="quote-text">
-        <?= $text ?>
+        <?= starter_kses_post($text) ?>
     </blockquote>
 
     <?php if ($author !== '' || $caption !== '') : ?>
         <figcaption class="quote-caption">
             <?php if ($author !== '') : ?>
-                <strong class="quote-author"><?= htmlspecialchars($author, ENT_QUOTES, "UTF-8") ?></strong>
+                <cite class="quote-author"><?= esc_html($author) ?></cite>
             <?php endif; ?>
             <?php if ($caption !== '') : ?>
-                <span class="quote-role"><?= htmlspecialchars($caption, ENT_QUOTES, "UTF-8") ?></span>
+                <span class="quote-role"><?= esc_html($caption) ?></span>
             <?php endif; ?>
         </figcaption>
     <?php endif; ?>
