@@ -23,6 +23,7 @@ const cssBundles = {
     components: 'components.css',
     modules: 'modules.css',
 };
+const cssImportTargetNames = new Set(['critical', ...Object.keys(cssBundles)]);
 const cssManifestFile = 'css-bundles.json';
 const bundledCssSourceDirs = new Set([...Object.keys(cssBundles), 'vendors', 'strates']);
 const excludedCopyDirs = new Set(['common', 'components', 'heros', 'modules', 'strates']);
@@ -35,6 +36,7 @@ const importAliases = {
 let appCssImports = new Set();
 let criticalCssImports = new Set();
 let bundledCssImports = new Set();
+let cssImportTargets = new Map();
 let cssManifest = {
     bundles: {},
     bundledFiles: [],
@@ -87,7 +89,7 @@ const isCssFile = file => path.extname(file) === '.css';
 
 const outputPath = file => path.join(dist, path.relative(src, file));
 
-const bundleGroupForRelativeCss = file => {
+const autoBundleGroupForRelativeCss = file => {
     const dir = file.split('/')[0];
 
     if (dir === 'vendors') return 'common';
@@ -96,6 +98,15 @@ const bundleGroupForRelativeCss = file => {
     if (cssBundles[dir]) return dir;
 
     return null;
+};
+
+const bundleGroupForRelativeCss = file => {
+    const explicitTarget = cssImportTargets.get(file);
+
+    if (explicitTarget === 'critical') return null;
+    if (cssBundles[explicitTarget]) return explicitTarget;
+
+    return autoBundleGroupForRelativeCss(file);
 };
 
 const resolveAliasImport = specifier => {
@@ -242,33 +253,89 @@ const rewriteCssUrls = (css = '', fromFile, toFile) => {
     });
 };
 
-function inlineImports(css = '') {
-    return css.replace(/^\s*@import\s+["']([^"']+)["']\s*;?/igm, (match, importedFile) => {
-        const normalized = toPosix(path.normalize(importedFile));
+const cssImportPattern = /^\s*@import\s+["']([^"']+)["']\s*([a-z-]+)?\s*;?/igm;
 
-        if (!normalized.startsWith('styles/') || normalized === 'styles/print.css') {
+function parseCssImports(css = '') {
+    const imports = [];
+
+    css.replace(cssImportPattern, (match, importedFile, target) => {
+        const normalized = toPosix(path.normalize(importedFile));
+        const normalizedTarget = target ? target.toLowerCase() : null;
+
+        if (normalizedTarget && !cssImportTargetNames.has(normalizedTarget)) {
+            throw new Error(`Target CSS invalide "${target}" pour l'import "${importedFile}". Valeurs autorisees : ${[...cssImportTargetNames].join(', ')}`);
+        }
+
+        imports.push({
+            file: normalized,
+            target: normalizedTarget,
+        });
+    });
+
+    return imports;
+}
+
+const isDefaultCriticalCssImport = file => file.startsWith('styles/') && file !== 'styles/print.css';
+
+const cssImportRelatives = importedFile => resolveCssImport(importedFile).map(file => toPosix(path.relative(src, file)));
+
+function collectCssImportTargets(imports) {
+    const criticalFiles = new Set();
+    const bundledFiles = new Set();
+    const explicitTargets = new Map();
+
+    imports.forEach(({ file, target }) => {
+        const files = cssImportRelatives(file);
+
+        files.forEach(relative => {
+            if (target) {
+                explicitTargets.set(relative, target);
+
+                if (target === 'critical') {
+                    criticalFiles.add(relative);
+                } else {
+                    bundledFiles.add(relative);
+                }
+
+                return;
+            }
+
+            if (isDefaultCriticalCssImport(relative)) {
+                criticalFiles.add(relative);
+                return;
+            }
+
+            if (autoBundleGroupForRelativeCss(relative)) {
+                bundledFiles.add(relative);
+            }
+        });
+    });
+
+    return {
+        criticalFiles,
+        bundledFiles,
+        explicitTargets,
+    };
+}
+
+function inlineImports(css = '') {
+    return css.replace(cssImportPattern, (match, importedFile, target) => {
+        const normalized = toPosix(path.normalize(importedFile));
+        const normalizedTarget = target ? target.toLowerCase() : null;
+
+        if (normalizedTarget && !cssImportTargetNames.has(normalizedTarget)) {
+            throw new Error(`Target CSS invalide "${target}" pour l'import "${importedFile}". Valeurs autorisees : ${[...cssImportTargetNames].join(', ')}`);
+        }
+
+        if (normalizedTarget !== 'critical' && (normalizedTarget || !isDefaultCriticalCssImport(normalized))) {
             return '';
         }
 
-        const importedPath = path.resolve(src, importedFile);
-
-        if (!fs.existsSync(importedPath)) {
-            throw new Error(`Import CSS introuvable : ${importedFile}`);
-        }
-
         const out = path.join(dist, criticalCss);
-        return `${rewriteCssUrls(fs.readFileSync(importedPath, 'utf8'), importedPath, out)}\n`;
+        return resolveCssImport(normalized)
+            .map(importedPath => rewriteCssUrls(fs.readFileSync(importedPath, 'utf8'), importedPath, out))
+            .join('\n') + '\n';
     });
-}
-
-function collectImports(css = '') {
-    const imports = [];
-
-    css.replace(/^\s*@import\s+["']([^"']+)["']\s*;?/igm, (match, importedFile) => {
-        imports.push(toPosix(path.normalize(importedFile)));
-    });
-
-    return new Set(imports);
 }
 
 function resolveCssImport(importedFile) {
@@ -289,18 +356,6 @@ function resolveCssImport(importedFile) {
     }
 
     throw new Error(`Import CSS introuvable : ${importedFile}`);
-}
-
-function collectBundleImports(imports) {
-    const files = [];
-
-    imports.forEach(importedFile => {
-        if (!bundleGroupForRelativeCss(importedFile)) return;
-
-        files.push(...resolveCssImport(importedFile));
-    });
-
-    return new Set(files.map(file => toPosix(path.relative(src, file))));
 }
 
 function writeCssManifest() {
@@ -328,9 +383,13 @@ async function compileAppCss() {
     }
 
     const source = fs.readFileSync(file, 'utf8');
-    appCssImports = collectImports(source);
-    criticalCssImports = new Set([...appCssImports].filter(importedFile => importedFile.startsWith('styles/') && importedFile !== 'styles/print.css'));
-    bundledCssImports = collectBundleImports(appCssImports);
+    const imports = parseCssImports(source);
+    const importTargets = collectCssImportTargets(imports);
+
+    appCssImports = new Set(imports.map(imported => imported.file));
+    cssImportTargets = importTargets.explicitTargets;
+    criticalCssImports = importTargets.criticalFiles;
+    bundledCssImports = importTargets.bundledFiles;
     cssManifest = {
         bundles: {},
         bundledFiles: [],

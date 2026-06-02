@@ -64,6 +64,29 @@ class component
         get_template_part('components/text/text', null, $args);
     }
 
+    public static function date(mixed $args, mixed $format = 'd/m/Y', mixed $classes = null, mixed $attributes = null): void
+    {
+        if ($args instanceof DateTimeInterface || is_scalar($args)) {
+            $args = ["date" => $args];
+        }
+
+        if (!is_array($args)) return;
+
+        if ($format !== null) {
+            $args["format"] = $format;
+        }
+
+        if ($classes !== null) {
+            $args["classes"] = $classes;
+        }
+
+        if ($attributes !== null) {
+            $args["attributes"] = $attributes;
+        }
+
+        get_template_part('components/date/date', null, $args);
+    }
+
     public static function picture(mixed $args, mixed $sizes = "full", mixed $classes = "", bool $lazy = true, bool $placeholder = false, int $breakpoint = 768): void
     {
         // $sizes accepte :
@@ -90,34 +113,11 @@ class component
 
     public static function card(mixed $name, mixed $args = []): void
     {
-        $name = self::card_name($name);
-        if ($name === "") return;
-
-        get_template_part("cards/{$name}/{$name}", null, is_array($args) ? $args : []);
-    }
-
-    private static function card_name(mixed $name): string
-    {
         $name = normalize_template_slug($name);
 
-        if ($name === "" || str_contains($name, "/")) {
-            return "";
-        }
-
-        $template = "cards/{$name}/{$name}.php";
-        $directories = array_filter([
-            APP_ROOT,
-            APP_ROOT . "/assets",
-            WEB_ROOT,
-        ], static fn($directory) => is_dir($directory));
-
-        foreach ($directories as $directory) {
-            if (is_safe_template_file($directory . "/" . $template, $directory)) {
-                return $name;
-            }
-        }
-
-        return "";
+        if ($name === "" || str_contains($name, "/")) return;
+        
+        get_template_part("cards/{$name}/{$name}", null, is_array($args) ? $args : []);
     }
 
     public static function slider(mixed $items, mixed $card = "card-news", mixed $classes = null, bool $navigation = true, bool $pagination = true, mixed $label = ""): void
@@ -206,6 +206,7 @@ class component
             "attributes" => $attributes ?? ($args["attributes"] ?? "")
         ]);
     }
+    
     public static function quote(mixed $args, mixed $classes = null, mixed $attributes = null): void
     {
         if (is_string($args)) {
@@ -259,6 +260,7 @@ class component
 
         get_template_part('components/accordion/accordion', null, $args);
     }
+    
     public static function header(mixed $args, mixed $classes = null, mixed $attributes = null): void
     {
         if (is_string($args)) {
@@ -291,6 +293,7 @@ class component
 
         get_template_part('components/header/header', null, $data);
     }
+   
     public static function badge(mixed $name, mixed $classes = null, mixed $attributes = null): void
     {
         if (is_string($name)) {
@@ -349,98 +352,50 @@ class component
         ]);
     }
 
-    /**
-     * Champ formulaire : text, textarea, select, checkbox(es), radio(s), number, email, url, tel, date, password.
-     *
-     * @param array|null $options Options pour select, checkboxes ou radios.
-     * @param string|null $mandatory Message data-mandatory. Vide ou null = message navigateur.
-     * @param array|null $args typemismatch, autocomplete, minlength, rows, pattern, min, max, data_patternmismatch, hint, checked, placeholder
-     */
-    public static function form(mixed $type = 'text', mixed $label = null, mixed $name = null, bool $required = false, mixed $options = null, mixed $mandatory = null, mixed $args = null, mixed $classes = null, mixed $attributes = null): void
-    {
+    public static function form(
+        mixed $type = 'text',
+        mixed $label = null,
+        mixed $name = null,
+        mixed $required = false,
+        mixed $mandatory = null,
+        mixed $placeholder = null,
+        mixed $options = null,
+        mixed $args = null,
+        mixed $classes = null,
+        mixed $attributes = null
+    ): void {
         if (is_array($type)) {
             $field_args = $type;
-            $type = $field_args['type'] ?? 'text';
-            $label = $field_args['label'] ?? null;
-            $name = $field_args['name'] ?? null;
-            $required = !empty($field_args['required']);
-            $options = $field_args['options'] ?? null;
-            $mandatory = $field_args['mandatory'] ?? null;
-            $classes = $classes ?? ($field_args['classes'] ?? null);
-            $attributes = $attributes ?? ($field_args['attributes'] ?? null);
-            $args = $field_args;
-        }
 
-        if ($name === null || trim((string) $name) === '') {
-            return;
-        }
+            if ($label !== null) {
+                $field_args['classes'] = $label;
+            }
 
-        $field_args = is_array($args) ? $args : [];
-        unset($field_args['type'], $field_args['label'], $field_args['name'], $field_args['required'], $field_args['options'], $field_args['mandatory'], $field_args['classes'], $field_args['attributes']);
-        $mandatory_msg = null;
-        if (is_string($mandatory)) {
-            $mandatory_msg = trim($mandatory);
-            if ($mandatory_msg === '') {
-                $mandatory_msg = null;
+            if ($name !== null) {
+                $field_args['attributes'] = $name;
+            }
+        } else {
+            $field_args = is_array($args) ? $args : [];
+            $field_args['type'] = $type;
+            $field_args['label'] = $label;
+            $field_args['name'] = $name;
+            $field_args['required'] = (bool) $required;
+            $field_args['mandatory'] = $mandatory;
+            $field_args['placeholder'] = $placeholder;
+            $field_args['options'] = is_array($options) ? $options : [];
+
+            if ($classes !== null) {
+                $field_args['classes'] = $classes;
+            }
+
+            if ($attributes !== null) {
+                $field_args['attributes'] = $attributes;
             }
         }
-        $type_normalized = strtolower(trim((string) $type));
-        $placeholder = $field_args['placeholder'] ?? null;
-        $placeholder_types = ['text', 'email', 'date', 'tel', 'number', 'password'];
-        $autocomplete_types = ['text', 'email', 'tel', 'number', 'date', 'password'];
-        if (!in_array($type_normalized, $placeholder_types, true)) {
-            $placeholder = null;
-        }
-        if (!in_array($type_normalized, $autocomplete_types, true)) {
-            unset($field_args['autocomplete']);
-        }
-        if ($type_normalized !== 'textarea') {
-            unset($field_args['rows']);
-        }
-        if ($type_normalized !== 'text') {
-            unset($field_args['minlength']);
-        }
-        if ($type_normalized !== 'number') {
-            unset($field_args['min'], $field_args['max']);
-        }
-        $pattern = isset($field_args['pattern']) ? trim((string) $field_args['pattern']) : '';
-        if ($pattern === '') {
-            unset($field_args['data_patternmismatch']);
-        }
 
-        get_template_part('components/form/form', null, [
-            'type' => $type,
-            'label' => $label,
-            'name' => $name,
-            'required' => (bool) $required,
-            'placeholder' => $placeholder,
-            'options' => is_array($options) ? $options : [],
-            'typemismatch' => $field_args['typemismatch'] ?? null,
-            'autocomplete' => (in_array($type_normalized, $autocomplete_types, true) && !empty($field_args['autocomplete']))
-                ? $field_args['autocomplete']
-                : null,
-            'minlength' => ($type_normalized === 'text' && isset($field_args['minlength']))
-                ? (int) $field_args['minlength']
-                : null,
-            'rows' => ($type_normalized === 'textarea' && isset($field_args['rows']))
-                ? max(2, (int) $field_args['rows'])
-                : null,
-            'pattern' => $pattern !== '' ? $pattern : null,
-            'min' => ($type_normalized === 'number' && isset($field_args['min']) && $field_args['min'] !== '')
-                ? $field_args['min']
-                : null,
-            'max' => ($type_normalized === 'number' && isset($field_args['max']) && $field_args['max'] !== '')
-                ? $field_args['max']
-                : null,
-            'data_patternmismatch' => ($pattern !== '' && !empty($field_args['data_patternmismatch']))
-                ? $field_args['data_patternmismatch']
-                : null,
-            'hint' => $field_args['hint'] ?? null,
-            'checked' => !empty($field_args['checked']),
-            'mandatory' => $mandatory_msg,
-            'classes' => $classes,
-            'attributes' => $attributes,
-        ]);
+        if (empty($field_args['name']) || trim((string) $field_args['name']) === '') return;
+
+        get_template_part('components/form/form', null, $field_args);
     }
 
     public static function navanchor(mixed $items, mixed $classes = null, mixed $attributes = null, mixed $label = null): void
@@ -492,16 +447,22 @@ class component
             "label" => $label,
         ]);
     }
+    
     /**
      * @param array<int, array{name:string,value?:string,selected?:bool,disabled?:bool}> $args
      */
     public static function select(mixed $args, mixed $label = null, mixed $name = null, mixed $classes = null, mixed $attributes = null): void
     {
+        self::select_custom($args, $label, $name, $classes, $attributes);
+    }
+
+    public static function select_custom(mixed $args, mixed $label = null, mixed $name = null, mixed $classes = null, mixed $attributes = null): void
+    {
         if (empty($args) || !is_array($args)) return;
 
         $data = isset($args['options']) && is_array($args['options']) ? $args : ['options' => $args];
 
-        get_template_part('components/select/select', null, [
+        get_template_part('components/select-custom/select-custom', null, [
             "args" => $data['options'],
             "label" => $label ?? ($data['label'] ?? null),
             "name" => $name ?? ($data['name'] ?? null),
@@ -519,17 +480,21 @@ class component
     /**
      * @param array<int, array{name:string,value?:string,selected?:bool,disabled?:bool}> $args
      */
-    public static function select_custom(mixed $args, mixed $label, bool $multi = false, mixed $classes = null, mixed $attributes = null): void
+    public static function select_custom_full(mixed $args, mixed $label = null, bool $multi = false, mixed $classes = null, mixed $attributes = null): void
     {
         if (empty($args) || !is_array($args)) return;
 
+        $data = isset($args['options']) && is_array($args['options']) ? $args : ['options' => $args];
 
-        get_template_part('components/select-custom/select-custom', null, [
-            "args" => $args,
-            "label" => $label,
-            "multi" => $multi,
-            "classes" => $classes,
-            "attributes" => $attributes,
+        get_template_part('components/select-custom-full/select-custom-full', null, [
+            "options" => $data['options'],
+            "label" => $label ?? ($data['label'] ?? null),
+            "name" => $data['name'] ?? null,
+            "required" => $data['required'] ?? false,
+            "mandatory" => $data['mandatory'] ?? null,
+            "multi" => $multi || !empty($data['multi']) || !empty($data['multiple']),
+            "classes" => $classes ?? ($data['classes'] ?? null),
+            "attributes" => $attributes ?? ($data['attributes'] ?? null),
         ]);
     }
 
@@ -654,7 +619,6 @@ class component
         ]);
     }
 
-
     public static function tag(mixed $args, mixed $type = "info", mixed $classes = null, mixed $attributes = null): void
     {
         if (is_string($args)) {
@@ -687,7 +651,6 @@ class component
         get_template_part('components/tag/tag', '', $args);
     }
 
-
     public static function tooltip(mixed $label, mixed $content = null, mixed $classes = null, mixed $attributes = null): void
     {
         if (empty($label)) return;
@@ -718,6 +681,7 @@ class component
 
         get_template_part('components/tooltip/tooltip', '', $args);
     }
+   
     public static function search(mixed $label = null, mixed $placeholder = null, mixed $button_label = null, mixed $action = null, mixed $classes = null, mixed $attributes = null): void
     {
         $args = is_array($label) ? $label : [

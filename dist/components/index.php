@@ -12,6 +12,16 @@ get_template_part('header-nav', null);
     ?>
 
     <div class="strate">
+        <?php component::text("text","rte") ?>
+    </div>
+<?php component::date("2026-06-02"); ?>
+<?php component::date("2026-06-02", "d F Y"); ?>
+<?php component::date([
+    "date" => "2026-06-02",
+    "label" => "2 juin 2026",
+    "classes" => "date-news",
+]); ?>
+    <div class="strate">
         <?php component::btn("ret") ?>
          <?php component::btn([
             "link" => [
@@ -58,7 +68,7 @@ get_template_part('header-nav', null);
     </div>
     <div class="strate">
 
-        <?php component::select([
+        <?php component::select_custom([
             [
                 "name" => "Option 1",
                 "value" => "option-1"
@@ -81,7 +91,7 @@ get_template_part('header-nav', null);
     </div>
     <div class="strate">
 
-        <?php component::select_custom([
+        <?php component::select_custom_full([
             [
                 "name" => "Option 1",
                 "value" => "option-1"

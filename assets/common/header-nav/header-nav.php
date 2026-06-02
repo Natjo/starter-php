@@ -10,7 +10,10 @@ $args = [
         [
             "title" => "Components",
             "url" => "/components",
-        ],
+        ],[
+            "title" => "Contact",
+            "url" => "/contact",
+        ]
     ],
 ];
 

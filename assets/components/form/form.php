@@ -1,27 +1,6 @@
 <?php
 /** @var array $args */
 $args = starter_args($args ?? null);
-$escAttr = function ($value) {
-    if (function_exists('esc_attr')) {
-        return esc_attr($value);
-    }
-
-    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
-};
-$escHtml = function ($value) {
-    if (function_exists('esc_html')) {
-        return esc_html($value);
-    }
-
-    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
-};
-$sanitizeClass = function ($value) {
-    if (function_exists('sanitize_html_class')) {
-        return sanitize_html_class($value);
-    }
-
-    return preg_replace('/[^A-Za-z0-9_-]/', '-', (string) $value);
-};
 
 $label = isset($args['label']) ? trim((string) $args['label']) : '';
 $name = isset($args['name']) && trim((string) $args['name']) !== '' ? trim((string) $args['name']) : '';
@@ -31,7 +10,7 @@ if ($type === '' || !preg_match('/^[a-z0-9_-]+$/', $type)) {
 }
 
 $allowed_types = [
-    'text', 'textarea', 'select', 'checkbox', 'checkboxes',
+    'text', 'textarea', 'select', 'select-custom', 'select-custom-full', 'checkbox', 'checkboxes',
     'radio', 'radios', 'number', 'email', 'url', 'tel', 'date', 'password',
 ];
 if ($name === '' || !in_array($type, $allowed_types, true)) {
@@ -52,9 +31,10 @@ $autocomplete = (in_array($type, $autocomplete_types, true) && isset($args['auto
 $minlength = ($type === 'text' && !empty($args['minlength'])) ? (int) $args['minlength'] : 0;
 $rows = ($type === 'textarea' && !empty($args['rows'])) ? max(2, (int) $args['rows']) : 4;
 $options = !empty($args['options']) && is_array($args['options']) ? $args['options'] : [];
-if (in_array($type, ['select', 'checkboxes', 'radios'], true) && empty($options)) {
+if (in_array($type, ['select', 'select-custom', 'select-custom-full', 'checkboxes', 'radios'], true) && empty($options)) {
     return;
 }
+
 $pattern = isset($args['pattern']) ? trim((string) $args['pattern']) : '';
 $data_patternmismatch = ($pattern !== '' && isset($args['data_patternmismatch']))
     ? trim((string) $args['data_patternmismatch'])
@@ -69,12 +49,24 @@ $hint = isset($args['hint']) ? trim((string) $args['hint']) : '';
 $checked = !empty($args['checked']);
 $attributes = component::attributes($args['attributes'] ?? []);
 $mandatory_msg = isset($args['mandatory']) ? trim((string) $args['mandatory']) : '';
-$data_mandatory_attr = $mandatory_msg !== '' ? ' data-mandatory="' . $escAttr($mandatory_msg) . '"' : '';
+$required_msg = $mandatory_msg !== '' ? $mandatory_msg : __('Ce champ est obligatoire.', 'starterkit');
+$invalid_msg = $required ? $required_msg : '';
+$data_mandatory_msg = $required ? $required_msg : $mandatory_msg;
+$data_mandatory_attr = $data_mandatory_msg !== '' ? ' data-mandatory="' . esc_attr($data_mandatory_msg) . '"' : '';
 
-$field_id = $sanitizeClass($name);
+static $formFieldInstance = 0;
+$formFieldInstance++;
+$field_base_id = sanitize_html_class($name);
+$field_id = !empty($args['id']) ? sanitize_html_class((string) $args['id']) : '';
+$field_id = $field_id !== '' ? $field_id : $field_base_id . '-' . $formFieldInstance;
 $field_error_id = $field_id . '-error';
+$field_hint_id = $field_id . '-hint';
 $group_label_id = $field_id . '-label';
-$field_describedby = $field_error_id;
+$field_describedby_ids = [$field_error_id];
+if ($hint !== '') {
+    $field_describedby_ids[] = $field_hint_id;
+}
+$field_describedby = implode(' ', $field_describedby_ids);
 $is_group = in_array($type, ['checkboxes', 'radios'], true);
 $is_single_checkbox = $type === 'checkbox';
 
@@ -85,7 +77,7 @@ $root_class = component::classes(
     $args['classes'] ?? ''
 );
 
-$aria_label = ($label === '' && !$is_group && !$is_single_checkbox) ? ' aria-label="' . $escAttr($name) . '"' : '';
+$aria_label = ($label === '' && !$is_group && !$is_single_checkbox) ? ' aria-label="' . esc_attr($name) . '"' : '';
 
 if (in_array($type, $autocomplete_types, true)) {
     if ($autocomplete === '' && $type === 'email') {
@@ -102,135 +94,38 @@ if (in_array($type, $autocomplete_types, true)) {
 $input_types = ['text', 'email', 'url', 'tel', 'date', 'number', 'password'];
 $placeholder_types = ['text', 'email', 'date', 'tel', 'number', 'password'];
 $use_placeholder = $placeholder !== '' && in_array($type, $placeholder_types, true);
-$field_aria = ' aria-describedby="' . $escAttr($field_describedby) . '"';
+$field_aria = ' aria-describedby="' . esc_attr($field_describedby) . '"';
+
+$field_template = match (true) {
+    $type === 'textarea' => 'textarea',
+    $type === 'select' => 'select',
+    $type === 'select-custom' => 'select-custom',
+    $type === 'select-custom-full' => 'select-custom-full',
+    $type === 'checkboxes' || $type === 'radios' => 'choices',
+    $is_single_checkbox => 'checkbox',
+    in_array($type, $input_types, true) => 'input',
+    default => '',
+};
+
+if ($field_template === '') {
+    return;
+}
 ?>
 
-<div class="<?= $root_class ?>"<?= $is_group ? ' role="group" aria-labelledby="' . $escAttr($group_label_id) . '" aria-describedby="' . $escAttr($field_error_id) . '"' : '' ?><?= $is_group ? $data_mandatory_attr : '' ?><?= ($is_group && $required && $type === 'checkboxes') ? ' data-required="true"' : '' ?><?= $attributes ?>>
-    <?php if ($label !== '' && !$is_single_checkbox) : ?>
+<div class="<?= $root_class ?>"<?= $is_group ? ' role="group" aria-labelledby="' . esc_attr($group_label_id) . '" aria-describedby="' . esc_attr($field_describedby) . '"' : '' ?><?= $is_group ? $data_mandatory_attr : '' ?><?= ($is_group && $required && $type === 'checkboxes') ? ' data-required="true"' : '' ?><?= $attributes ?>>
+    <?php if ($label !== '' && !$is_single_checkbox && $type !== 'select-custom') : ?>
         <?php if ($is_group) : ?>
-            <label id="<?= $escAttr($group_label_id) ?>"><?= $escHtml($label) ?></label>
+            <span id="<?= esc_attr($group_label_id) ?>"><?= esc_html($label) ?></span>
         <?php else : ?>
-            <label for="<?= $escAttr($field_id) ?>"><?= $escHtml($label) ?></label>
+            <label for="<?= esc_attr($field_id) ?>"><?= esc_html($label) ?></label>
         <?php endif ?>
     <?php endif ?>
 
-    <?php if ($type === 'textarea') : ?>
-        <textarea
-            id="<?= $escAttr($field_id) ?>"
-            name="<?= $escAttr($name) ?>"
-            rows="<?= (int) $rows ?>"
-            <?php if ($required) : ?>required<?php endif ?>
-            <?= $data_mandatory_attr ?>
-            <?= $field_aria ?>
-            <?= $aria_label ?>
-        ></textarea>
-        <div id="<?= $escAttr($field_error_id) ?>" class="invalid-msg" hidden></div>
-
-    <?php elseif ($type === 'select') : ?>
-        <select
-            id="<?= $escAttr($field_id) ?>"
-            name="<?= $escAttr($name) ?>"
-            <?php if ($required) : ?>required<?php endif ?>
-            <?= $data_mandatory_attr ?>
-            <?= $field_aria ?>
-            <?= $aria_label ?>
-        >
-            <?php foreach ($options as $option) :
-                if (!is_array($option)) {
-                    continue;
-                }
-                $option_label = isset($option['label']) ? trim((string) $option['label']) : (isset($option['name']) ? trim((string) $option['name']) : '');
-                $option_value = isset($option['value']) ? (string) $option['value'] : $option_label;
-                $hidden = !empty($option['hidden']);
-                $selected = !empty($option['selected']);
-                $disabled = !empty($option['disabled']);
-            ?>
-                <option
-                    value="<?= $escAttr($option_value) ?>"
-                    <?php if ($hidden) : ?>hidden<?php endif ?>
-                    <?php if ($selected) : ?>selected<?php endif ?>
-                    <?php if ($disabled) : ?>disabled<?php endif ?>
-                ><?= $escHtml($option_label !== '' ? $option_label : $option_value) ?></option>
-            <?php endforeach; ?>
-        </select>
-        <div id="<?= $escAttr($field_error_id) ?>" class="invalid-msg" hidden></div>
-
-    <?php elseif ($type === 'checkboxes' || $type === 'radios') : ?>
-        <?php $require_first_checkbox = $required && $type === 'checkboxes'; ?>
-        <ul>
-            <?php foreach ($options as $index => $option) :
-                if (!is_array($option)) {
-                    continue;
-                }
-                $option_label = isset($option['label']) ? trim((string) $option['label']) : (isset($option['name']) ? trim((string) $option['name']) : '');
-                $option_value = isset($option['value']) ? (string) $option['value'] : (string) $index;
-                $option_id = isset($option['id']) ? $sanitizeClass((string) $option['id']) : $field_id . '-' . $index;
-                $option_name = $type === 'radios' ? $name : ($option['name'] ?? $name . '-' . $index);
-                $checked = !empty($option['checked']) || !empty($option['selected']);
-                $disabled = !empty($option['disabled']);
-                if ($type === 'radios' && substr($option_name, -2) !== '[]') {
-                    $option_name .= '[]';
-                }
-                if ($option_label === '') {
-                    continue;
-                }
-            ?>
-                <li>
-                    <input
-                        id="<?= $escAttr($option_id) ?>"
-                        type="<?= $type === 'radios' ? 'radio' : 'checkbox' ?>"
-                        name="<?= $escAttr($option_name) ?>"
-                        value="<?= $escAttr($option_value) ?>"
-                        <?php if ($checked) : ?>checked<?php endif ?>
-                        <?php if ($disabled) : ?>disabled<?php endif ?>
-                        <?php if ($required && $type === 'radios') : ?>required<?php endif ?>
-                        <?php if ($require_first_checkbox) : ?>required<?php $require_first_checkbox = false; endif ?>
-                    >
-                    <label for="<?= $escAttr($option_id) ?>"><?= $escHtml($option_label) ?></label>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-        <div id="<?= $escAttr($field_error_id) ?>" class="invalid-msg" hidden></div>
-
-    <?php elseif ($is_single_checkbox) : ?>
-        <input
-            type="checkbox"
-            id="<?= $escAttr($field_id) ?>"
-            name="<?= $escAttr($name) ?>"
-            value="1"
-            <?php if ($checked) : ?>checked<?php endif ?>
-            <?php if ($required) : ?>required<?php endif ?>
-            <?= $data_mandatory_attr ?>
-            <?= $field_aria ?>
-        >
-        <?php if ($label !== '') : ?>
-            <label for="<?= $escAttr($field_id) ?>"><?= $escHtml($label) ?></label>
-        <?php endif ?>
-        <div id="<?= $escAttr($field_error_id) ?>" class="invalid-msg" hidden></div>
-
-    <?php elseif (in_array($type, $input_types, true)) : ?>
-        <input
-            type="<?= $escAttr($type) ?>"
-            id="<?= $escAttr($field_id) ?>"
-            name="<?= $escAttr($name) ?>"
-            <?php if ($use_placeholder) : ?>placeholder="<?= $escAttr($placeholder) ?>"<?php endif ?>
-            <?php if ($required) : ?>required<?php endif ?>
-            <?php if ($minlength > 0 && $type === 'text') : ?>minlength="<?= (int) $minlength ?>"<?php endif ?>
-            <?php if ($min !== null && $type === 'number') : ?>min="<?= $escAttr((string) $min) ?>"<?php endif ?>
-            <?php if ($max !== null && $type === 'number') : ?>max="<?= $escAttr((string) $max) ?>"<?php endif ?>
-            <?php if ($pattern !== '') : ?>pattern="<?= $escAttr($pattern) ?>"<?php endif ?>
-            <?php if ($autocomplete !== '') : ?>autocomplete="<?= $escAttr($autocomplete) ?>"<?php endif ?>
-            <?php if ($typemismatch !== '' && $type === 'text') : ?>data-typemismatch="<?= $escAttr($typemismatch) ?>"<?php endif ?>
-            <?php if ($pattern !== '' && $data_patternmismatch !== '') : ?>data-patternmismatch="<?= $escAttr($data_patternmismatch) ?>"<?php endif ?>
-            <?= $data_mandatory_attr ?>
-            <?= $field_aria ?>
-            <?= $aria_label ?>
-        >
-        <div id="<?= $escAttr($field_error_id) ?>" class="invalid-msg" hidden></div>
-
-    <?php endif ?>
+    <?php get_template_part("components/form/fields/{$field_template}", null, get_defined_vars()); ?>
 
     <?php if ($hint !== '') : ?>
-        <small><?= $escHtml($hint) ?></small>
+        <small id="<?= esc_attr($field_hint_id) ?>"><?= esc_html($hint) ?></small>
     <?php endif ?>
+
+    <div id="<?= esc_attr($field_error_id) ?>" class="invalid-msg" data-default="<?= esc_attr($invalid_msg) ?>" hidden><?= esc_html($invalid_msg) ?></div>
 </div>

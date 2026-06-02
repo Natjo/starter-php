@@ -636,90 +636,105 @@ $sizes[''] = array_replace($defaults, ['width' => '', 'height' => '']);
 </head>
 <body>
     <main>
-        <h1>Images</h1>
+        <h1>Admin</h1>
 
-        <?php if ($message !== '') : ?>
-            <p><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p>
-        <?php endif; ?>
+        <nav aria-label="Admin sections">
+            <ul>
+                <li><a href="#images">Images</a></li>
+                <li><a href="#menus">Menus</a></li>
+            </ul>
+        </nav>
 
-        <?php if ($result !== null) : ?>
-            <p>
-                Créées: <?= (int) $result['created'] ?>,
-                ignorées: <?= (int) $result['skipped'] ?>,
-                supprimées: <?= (int) $result['deleted'] ?>
-            </p>
+        <section id="images">
+            <h2>Images</h2>
 
-            <?php if (!empty($result['errors'])) : ?>
-                <ul>
-                    <?php foreach ($result['errors'] as $error) : ?>
-                        <li><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></li>
-                    <?php endforeach; ?>
-                </ul>
+            <?php if ($message !== '') : ?>
+                <p><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p>
             <?php endif; ?>
-        <?php endif; ?>
 
-        <form method="post">
-            <button type="submit" name="action" value="generate">Generate</button>
-            <button type="submit" name="action" value="regenerate">Regenerate</button>
-            <button type="submit" name="action" value="clean">Clean</button>
-        </form>
+            <?php if ($result !== null) : ?>
+                <p>
+                    Créées: <?= (int) $result['created'] ?>,
+                    ignorées: <?= (int) $result['skipped'] ?>,
+                    supprimées: <?= (int) $result['deleted'] ?>
+                </p>
 
-        <h2>Settings</h2>
+                <?php if (!empty($result['errors'])) : ?>
+                    <ul>
+                        <?php foreach ($result['errors'] as $error) : ?>
+                            <li><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+            <?php endif; ?>
 
-        <form method="post">
-            <fieldset>
-                <legend>Defaults</legend>
+            <form method="post">
+                <button type="submit" name="action" value="generate">Generate</button>
+                <button type="submit" name="action" value="regenerate">Regenerate</button>
+                <button type="submit" name="action" value="clean">Clean</button>
+            </form>
 
-                <label>
-                    WebP quality
-                    <input type="number" name="default_quality" min="1" max="100" value="<?= (int) $defaults['quality'] ?>">
-                </label>
+            <h3>Settings</h3>
 
-                <label>
-                    Filter
-                    <input type="text" value="lanczos" readonly>
-                </label>
-            </fieldset>
+            <form method="post">
+                <fieldset>
+                    <legend>Defaults</legend>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Width</th>
-                        <th>Height</th>
-                        <th>Fit</th>
-                        <th>Position</th>
-                        <th>Sharpen</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($sizes as $name => $size) : ?>
+                    <label>
+                        WebP quality
+                        <input type="number" name="default_quality" min="1" max="100" value="<?= (int) $defaults['quality'] ?>">
+                    </label>
+
+                    <label>
+                        Filter
+                        <input type="text" value="lanczos" readonly>
+                    </label>
+                </fieldset>
+
+                <table>
+                    <thead>
                         <tr>
-                            <td><input name="name[]" value="<?= htmlspecialchars((string) $name, ENT_QUOTES, 'UTF-8') ?>"></td>
-                            <td><input type="number" name="width[]" min="1" value="<?= htmlspecialchars((string) $size['width'], ENT_QUOTES, 'UTF-8') ?>"></td>
-                            <td><input type="number" name="height[]" min="1" value="<?= htmlspecialchars((string) $size['height'], ENT_QUOTES, 'UTF-8') ?>"></td>
-                            <td>
-                                <select name="fit[]">
-                                    <?php foreach (['cover', 'contain'] as $fit) : ?>
-                                        <option value="<?= $fit ?>"<?= $size['fit'] === $fit ? ' selected' : '' ?>><?= $fit ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </td>
-                            <td>
-                                <select name="position[]">
-                                    <?php foreach (array_keys(image_gravity_map()) as $position) : ?>
-                                        <option value="<?= htmlspecialchars($position, ENT_QUOTES, 'UTF-8') ?>"<?= $size['position'] === $position ? ' selected' : '' ?>><?= htmlspecialchars($position, ENT_QUOTES, 'UTF-8') ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </td>
-                            <td><input type="number" name="sharpen[]" min="0" max="10" step="0.1" value="<?= htmlspecialchars((string) $size['sharpen'], ENT_QUOTES, 'UTF-8') ?>"></td>
+                            <th>Name</th>
+                            <th>Width</th>
+                            <th>Height</th>
+                            <th>Fit</th>
+                            <th>Position</th>
+                            <th>Sharpen</th>
                         </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($sizes as $name => $size) : ?>
+                            <tr>
+                                <td><input name="name[]" value="<?= htmlspecialchars((string) $name, ENT_QUOTES, 'UTF-8') ?>"></td>
+                                <td><input type="number" name="width[]" min="1" value="<?= htmlspecialchars((string) $size['width'], ENT_QUOTES, 'UTF-8') ?>"></td>
+                                <td><input type="number" name="height[]" min="1" value="<?= htmlspecialchars((string) $size['height'], ENT_QUOTES, 'UTF-8') ?>"></td>
+                                <td>
+                                    <select name="fit[]">
+                                        <?php foreach (['cover', 'contain'] as $fit) : ?>
+                                            <option value="<?= $fit ?>"<?= $size['fit'] === $fit ? ' selected' : '' ?>><?= $fit ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </td>
+                                <td>
+                                    <select name="position[]">
+                                        <?php foreach (array_keys(image_gravity_map()) as $position) : ?>
+                                            <option value="<?= htmlspecialchars($position, ENT_QUOTES, 'UTF-8') ?>"<?= $size['position'] === $position ? ' selected' : '' ?>><?= htmlspecialchars($position, ENT_QUOTES, 'UTF-8') ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </td>
+                                <td><input type="number" name="sharpen[]" min="0" max="10" step="0.1" value="<?= htmlspecialchars((string) $size['sharpen'], ENT_QUOTES, 'UTF-8') ?>"></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
 
-            <button type="submit" name="action" value="save_settings">Save settings</button>
-        </form>
+                <button type="submit" name="action" value="save_settings">Save settings</button>
+            </form>
+        </section>
+
+        <section id="menus">
+            <h2>Menus</h2>
+        </section>
     </main>
 </body>
 </html>

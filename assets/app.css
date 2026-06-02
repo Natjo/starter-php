@@ -6,25 +6,25 @@
 @import "styles/layout.css";
 @import "styles/fonts.css";
 @import "styles/classes.css";
-@import "styles/rte.css";
 
 /*
 bundle common/vendors/strates
 */
-@import "common/header-nav/header-nav.css";
-@import "common/footer/footer.css";
-@import "vendors/lenis/lenis.css";
-@import "styles/print.css";
-@import "strates/strate-slider/strate-slider.css";
-@import "strates/strate-text/strate-text.css";
-@import "strates/strate-text_image/strate-text_image.css";
+@import "common/header-nav/header-nav.css" common;
+@import "common/footer/footer.css" common;
+@import "vendors/lenis/lenis.css" common;
+@import "styles/print.css" common;
+@import "strates/strate-slider/strate-slider.css" common;
+@import "strates/strate-text/strate-text.css" common;
+@import "strates/strate-text_image/strate-text_image.css" common;
 
 /*
 bundle components
 */
-@import "components/slider/slider.css";
-@import "components/tag/tag.css";
-@import "components/title/title.css";
-@import "components/btn/btn.css";
-@import "components/link/link.css";
-@import "components/list/list.css";
+@import "components/slider/slider.css" components;
+@import "components/tag/tag.css" components;
+@import "components/title/title.css" critical;
+@import "components/text/text.css" critical;
+@import "components/btn/btn.css" components;
+@import "components/link/link.css" components;
+@import "components/list/list.css" components;

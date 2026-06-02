@@ -1,5 +1,11 @@
 <?php
 
+/*
+|--------------------------------------------------------------------------
+| WordPress compatibility
+|--------------------------------------------------------------------------
+*/
+
 if (!function_exists('__')) {
     function __(string $text, ?string $domain = null): string
     {
@@ -36,6 +42,12 @@ if (!function_exists('wp_kses_post')) {
         return (string) $html;
     }
 }
+
+/*
+|--------------------------------------------------------------------------
+| Content sanitization
+|--------------------------------------------------------------------------
+*/
 
 function starter_kses_post(mixed $html): string
 {
@@ -189,6 +201,12 @@ function starter_safe_content_url(string $url): string
     return '';
 }
 
+/*
+|--------------------------------------------------------------------------
+| Generic helpers
+|--------------------------------------------------------------------------
+*/
+
 function starter_args(mixed $args, array $defaults = []): array
 {
     return array_replace($defaults, is_array($args) ? $args : []);
@@ -203,6 +221,12 @@ if (!function_exists('sanitize_html_class')) {
         return $class !== '' ? $class : (string) $fallback;
     }
 }
+
+/*
+|--------------------------------------------------------------------------
+| Template shortcuts
+|--------------------------------------------------------------------------
+*/
 
 function component(string $name, array $args = []): void
 {
@@ -219,6 +243,12 @@ function strate(string $name, array $args = []): void
     $name = str_replace('-', '_', $name);
     get_template_part("strates/strate-{$name}/strate-{$name}", null, $args);
 }
+
+/*
+|--------------------------------------------------------------------------
+| Dist paths and URLs
+|--------------------------------------------------------------------------
+*/
 
 function normalize_dist_file(mixed $file): string
 {
@@ -274,6 +304,12 @@ function dist_upload_url(mixed $file): string
 
     return rtrim($base, '/') . '/' . $file;
 }
+
+/*
+|--------------------------------------------------------------------------
+| Images
+|--------------------------------------------------------------------------
+*/
 
 function starter_image_size_name(mixed $size): string
 {
@@ -384,13 +420,6 @@ function starter_image_source(mixed $image, mixed $size = 'full'): array
     ];
 }
 
-function starter_image_asset_file(mixed $image, mixed $size = 'full'): string
-{
-    $source = starter_image_source($image, $size);
-
-    return (string) ($source['file'] ?? '');
-}
-
 if (!function_exists('lsd_get_thumb')) {
     function lsd_get_thumb(mixed $image, mixed $size = 'full'): array
     {
@@ -415,6 +444,12 @@ if (!function_exists('lsd_get_thumb')) {
         return [$source['url'], $width, $height, ''];
     }
 }
+
+/*
+|--------------------------------------------------------------------------
+| Asset versioning
+|--------------------------------------------------------------------------
+*/
 
 function dist_asset_version(mixed $file): ?string
 {
@@ -443,6 +478,12 @@ function dist_versioned_asset_url(mixed $file): string
 
     return $version ? $url . '?v=' . $version : $url;
 }
+
+/*
+|--------------------------------------------------------------------------
+| CSS loading
+|--------------------------------------------------------------------------
+*/
 
 function dist_css_file_exists(mixed $file): bool
 {
@@ -672,6 +713,12 @@ function render_dist_style_placeholders(mixed $html): string
     return str_replace('<!-- DIST_PAGE_STYLES -->', rtrim(dist_page_styles(false)), (string) $html);
 }
 
+/*
+|--------------------------------------------------------------------------
+| Template loading
+|--------------------------------------------------------------------------
+*/
+
 function get_template_part(mixed $slug, mixed $name = null, array $args = []): void
 {
     if (!empty($args)) {
@@ -769,6 +816,12 @@ function is_safe_template_file(mixed $path, mixed $directory): bool
         && str_starts_with($realPath, rtrim($realDirectory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR);
 }
 
+/*
+|--------------------------------------------------------------------------
+| Layout options and HTML attributes
+|--------------------------------------------------------------------------
+*/
+
 function options(mixed $classes, array $args = []): string
 {
     $options = !empty($args['options']) && is_array($args['options']) ? $args['options'] : [];
@@ -865,6 +918,12 @@ function starter_attributes(mixed $attributes): string
 
     return implode(' ', $html);
 }
+
+/*
+|--------------------------------------------------------------------------
+| Media helpers
+|--------------------------------------------------------------------------
+*/
 
 function youtube_id_from_url(mixed $url): string
 {

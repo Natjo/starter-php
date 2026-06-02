@@ -8,6 +8,7 @@
  *  - ArrowDown / ArrowUp (listbox) → navigation en boucle entre options
  *  - Home / End (listbox)          → premier / dernier
  *  - Escape (listbox)              → ferme et remet le focus sur le bouton
+ *  - Tab                           → ferme et laisse le focus sortir naturellement
  */
 class SelectCustom {
     constructor(root) {
@@ -19,6 +20,8 @@ class SelectCustom {
         this.listbox = root.querySelector('[role="listbox"]');
         if (!this.button || !this.listbox) return;
 
+        this.input = root.querySelector("[data-field-value]");
+        this.inputsContainer = root.querySelector("[data-field-values]");
         this.options = Array.from(this.listbox.querySelectorAll('[role="option"]'));
         // Rendre les options focusables programmatiquement.
         this.options.forEach((opt) => {
@@ -130,17 +133,8 @@ class SelectCustom {
             return;
         }
 
-        // Tab / Shift+Tab : on valide l'option focus puis on ramène le focus sur
-        // le bouton (et on annule la navigation native pour ne pas perdre le contexte).
         if (key === "Tab") {
-            event.preventDefault();
-            const target = document.activeElement;
-            if (target && this.options.includes(target)) {
-                this._selectOption(target);
-            } else {
-                this._close();
-                try { this.button.focus(); } catch (_) { /* noop */ }
-            }
+            this._close();
             return;
         }
 
@@ -200,6 +194,7 @@ class SelectCustom {
         this.button.textContent = label;
         this.button.value = value;
         this.button.setAttribute("value", value);
+        this._setValues([value]);
         this._setActiveDescendant(opt);
 
         this._close();
@@ -239,6 +234,28 @@ class SelectCustom {
         this.button.textContent = label;
         this.button.value = value;
         this.button.setAttribute("value", value);
+        this._setValues(values);
+    }
+
+    _setValues(values) {
+        if (this.inputsContainer) {
+            const name = this.inputsContainer.dataset.name || "";
+            this.inputsContainer.textContent = "";
+            values.forEach((value) => {
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = name;
+                input.value = value;
+                input.dataset.fieldValue = "";
+                this.inputsContainer.appendChild(input);
+            });
+            this.inputsContainer.dispatchEvent(new Event("change", { bubbles: true }));
+            return;
+        }
+
+        if (!this.input) return;
+        this.input.value = values[0] || "";
+        this.input.dispatchEvent(new Event("change", { bubbles: true }));
     }
 
     _enabledOptions() {

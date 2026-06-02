@@ -1,3 +1,2 @@
 <?php
-header('Location: generate.php');
-exit;
+require __DIR__ . '/generate.php';
