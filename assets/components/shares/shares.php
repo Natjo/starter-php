@@ -3,7 +3,7 @@ $args = normalize_args($args ?? null);
 $list = isset($args["list"]) ? $args["list"] : [];
 $classes = component::classes("shares", $args["classes"] ?? "");
 $attributes = component::attributes($args["attributes"] ?? []);
-$title = !empty($args["title"]) ? (string) $args["title"] : __("Partager l’article", 'lsd_lang');
+$title = !empty($args["title"]) ? (string) $args["title"] : "Partager l’article";
 
 static $sharesInstance = 0;
 $sharesInstance++;
@@ -129,10 +129,10 @@ if (empty($keys)) {
                             class="sr-only"
                             role="status"
                             aria-live="polite"
-                            data-success="<?= esc_attr(__("Copié", 'lsd_lang')) ?>"
-                            data-error="<?= esc_attr(__("Impossible de copier le lien", 'lsd_lang')) ?>"
+                            data-success="<?= esc_attr("Copié") ?>"
+                            data-error="<?= esc_attr("Impossible de copier le lien") ?>"
                         ></span>
-                        <div class="tip" aria-hidden="true"><?= __("Copié", 'lsd_lang') ?></div>
+                        <div class="tip" aria-hidden="true"><?= "Copié" ?></div>
                     <?php endif; ?>
                 </button>
             </li>

@@ -120,8 +120,17 @@ class component
         get_template_part("cards/{$name}/{$name}", null, is_array($args) ? $args : []);
     }
 
-    public static function slider(mixed $items, mixed $card = "card-news", mixed $classes = null, bool $navigation = true, bool $pagination = true, mixed $label = ""): void
-    {
+    public static function slider(
+        mixed $items,
+        mixed $card = "card-news",
+        mixed $classes = null,
+        bool $navigation = true,
+        bool $pagination = true,
+        mixed $aria_label = "Carrousel",
+        mixed $prev_label = "Diapositive précédente",
+        mixed $next_label = "Diapositive suivante",
+        mixed $pagination_label = "Navigation du carrousel"
+    ): void {
         if (empty($items) || !is_array($items)) return;
 
         $isList = array_keys($items) === range(0, count($items) - 1);
@@ -135,7 +144,10 @@ class component
             "classes" => $classes ?? "",
             "navigation" => $navigation,
             "pagination" => $pagination,
-            "label" => $label,
+            "aria_label" => $aria_label,
+            "prev_label" => $prev_label,
+            "next_label" => $next_label,
+            "pagination_label" => $pagination_label,
         ]);
     }
 
@@ -359,6 +371,7 @@ class component
         mixed $name = null,
         mixed $required = false,
         mixed $mandatory = null,
+        mixed $mandatory_msg = "Ce champ est obligatoire.",
         mixed $placeholder = null,
         mixed $options = null,
         mixed $args = null,
@@ -394,31 +407,29 @@ class component
             }
         }
 
+        if (!isset($field_args['mandatory_msg'])) {
+            $field_args['mandatory_msg'] = $mandatory_msg;
+        }
+
         if (empty($field_args['name']) || trim((string) $field_args['name']) === '') return;
 
         get_template_part('components/form/form', null, $field_args);
     }
 
-    public static function navanchor(mixed $items, mixed $classes = null, mixed $attributes = null, mixed $label = null): void
-    {
+    public static function navanchor(
+        mixed $items,
+        mixed $classes = null,
+        mixed $attributes = null,
+        mixed $label = "Table des matières"
+    ): void {
         if (empty($items)) return;
 
-        if (isset($items["items"]) && is_array($items["items"])) {
-            $args = $items;
-            $items = $args["items"];
-            $classes = $classes ?? ($args["classes"] ?? null);
-            $attributes = $attributes ?? ($args["attributes"] ?? null);
-            $label = $label ?? ($args["label"] ?? null);
-        }
-
-        $args = [
+        get_template_part('components/navanchor/navanchor', null, [
             "items" => $items,
             "classes" => $classes,
             "attributes" => $attributes,
             "label" => $label,
-        ];
-
-        get_template_part('components/navanchor/navanchor', null, $args);
+        ]);
     }
 
     public static function picto(mixed $name, mixed $type = "", mixed $size = "", mixed $classes = null, mixed $attributes = null): void

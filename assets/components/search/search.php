@@ -1,6 +1,6 @@
 <?php
 $args = normalize_args($args ?? null);
-$label = isset($args["label"]) && trim((string) $args["label"]) !== "" ? trim((string) $args["label"]) : __("Rechercher", "lsd_lang");
+$label = isset($args["label"]) && trim((string) $args["label"]) !== "" ? trim((string) $args["label"]) : "Rechercher";
 $placeholder = isset($args["placeholder"]) && trim((string) $args["placeholder"]) !== "" ? trim((string) $args["placeholder"]) : "";
 $button_label = isset($args["button_label"]) && trim((string) $args["button_label"]) !== "" ? trim((string) $args["button_label"]) : $label;
 $action = isset($args["action"]) && trim((string) $args["action"]) !== "" ? trim((string) $args["action"]) : "/";

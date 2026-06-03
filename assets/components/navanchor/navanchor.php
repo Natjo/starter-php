@@ -1,9 +1,19 @@
 <?php
 $args = normalize_args($args ?? null);
+$source = $args["items"] ?? [];
+
+if (is_array($source) && isset($source["items"]) && is_array($source["items"])) {
+    $args = array_replace($source, [
+        "classes" => $args["classes"] ?? ($source["classes"] ?? null),
+        "attributes" => $args["attributes"] ?? ($source["attributes"] ?? null),
+        "label" => $source["label"] ?? ($args["label"] ?? null),
+    ]);
+}
+
 $items = [];
 $classes = component::classes("navanchor", "menu-navigation", $args["classes"] ?? "");
 $attributes = component::attributes($args["attributes"] ?? []);
-$label = !empty($args["label"]) ? (string) $args["label"] : __("Table des matières", "starterkit");
+$label = isset($args["label"]) && is_scalar($args["label"]) ? trim((string) $args["label"]) : "";
 
 if (!empty($args["items"]) && is_array($args["items"])) {
     foreach ($args["items"] as $item) {

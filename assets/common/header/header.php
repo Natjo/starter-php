@@ -20,12 +20,12 @@ $theme_color = isset($theme_color) && is_scalar($theme_color) && trim((string) $
         <meta name="description" content="<?= esc_attr($page_description) ?>">
     <?php endif; ?>
     <meta name="theme-color" content="<?= esc_attr($theme_color) ?>">
-    <link rel="icon" href="<?= esc_url(dist_asset_url('favicon/favicon.ico')) ?>" sizes="any">
-    <link rel="icon" href="<?= esc_url(dist_asset_url('favicon/favicon.svg')) ?>" type="image/svg+xml">
-    <link rel="icon" href="<?= esc_url(dist_asset_url('favicon/favicon-32x32.png')) ?>" type="image/png" sizes="32x32">
-    <link rel="icon" href="<?= esc_url(dist_asset_url('favicon/favicon-16x16.png')) ?>" type="image/png" sizes="16x16">
-    <link rel="apple-touch-icon" href="<?= esc_url(dist_asset_url('favicon/apple-touch-icon.png')) ?>">
-    <link rel="preload" href="<?= esc_url(dist_asset_url('font/roboto.woff2')) ?>" as="font" type="font/woff2" crossorigin>
+    <link rel="icon" href="<?= esc_url(THEME_ASSETS . 'favicon/favicon.ico') ?>" sizes="any">
+    <link rel="icon" href="<?= esc_url(THEME_ASSETS . 'favicon/favicon.svg') ?>" type="image/svg+xml">
+    <link rel="icon" href="<?= esc_url(THEME_ASSETS . 'favicon/favicon-32x32.png') ?>" type="image/png" sizes="32x32">
+    <link rel="icon" href="<?= esc_url(THEME_ASSETS . 'favicon/favicon-16x16.png') ?>" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="<?= esc_url(THEME_ASSETS . 'favicon/apple-touch-icon.png') ?>">
+    <link rel="preload" href="<?= esc_url(THEME_ASSETS . 'font/roboto.woff2') ?>" as="font" type="font/woff2" crossorigin>
     <?php dist_critical_styles(); ?>
     <?php dist_style_placeholder(); ?>
 </head>
