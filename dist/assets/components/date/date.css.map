@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../assets/components/date/date.css"],"names":[],"mappings":"AAAA,MACI,wBAA2B,CAC3B,WACJ","file":"date.css","sourcesContent":[".date{\n    background-color: aliceblue;\n    padding: 5px;\n}"]}

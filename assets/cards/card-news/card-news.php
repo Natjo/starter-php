@@ -1,5 +1,5 @@
 <?php
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
 $link = !empty($args["link"]) && is_array($args["link"]) ? $args["link"] : [];
 $url = htmlspecialchars((string) ($link["url"] ?? "#"), ENT_QUOTES, "UTF-8");
 $title = htmlspecialchars((string) ($args["title"] ?? ($link["title"] ?? "")), ENT_QUOTES, "UTF-8");

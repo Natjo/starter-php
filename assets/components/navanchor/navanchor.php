@@ -1,5 +1,5 @@
 <?php
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
 $items = [];
 $classes = component::classes("navanchor", "menu-navigation", $args["classes"] ?? "");
 $attributes = component::attributes($args["attributes"] ?? []);

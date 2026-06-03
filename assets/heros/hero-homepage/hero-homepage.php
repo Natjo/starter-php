@@ -1,5 +1,5 @@
 <?php
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
 ?>
 
 <header class="hero hero-homepage">

@@ -1,6 +1,6 @@
 <?php
 /** @var array $args */
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
 
 $label = isset($args['label']) ? trim((string) $args['label']) : '';
 $content = isset($args['content']) ? trim((string) $args['content']) : '';

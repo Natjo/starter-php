@@ -13,6 +13,7 @@ $baseUrl = $basePath === '' ? '' : $basePath;
 define('THEME_ASSETS', $baseUrl . '/dist/assets/');
 define('THEME_UPLOADS', $baseUrl . '/dist/uploads/');
 
+require_once __DIR__ . '/method.php';
 require_once __DIR__ . '/functions.php';
 require_once __DIR__ . '/components.php';
 

@@ -225,7 +225,7 @@ if (!function_exists('sg_table_render_rows')) {
     }
 }
 
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
 $classes = component::classes('table', $args['classes'] ?? '');
 $attributes = component::attributes($args['attributes'] ?? []);
 $rows = !empty($args['rows']) && is_array($args['rows']) ? $args['rows'] : [];

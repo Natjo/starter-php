@@ -1,6 +1,6 @@
 <?php
 /** @var array $args */
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
 $input = $args["image"] ?? "";
 $size = $args["size"] ?? "full";
 $alt = isset($args["alt"]) && is_scalar($args["alt"]) ? trim((string) $args["alt"]) : "";

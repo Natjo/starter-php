@@ -116,7 +116,7 @@ class component
         $name = normalize_template_slug($name);
 
         if ($name === "" || str_contains($name, "/")) return;
-        
+
         get_template_part("cards/{$name}/{$name}", null, is_array($args) ? $args : []);
     }
 
@@ -220,7 +220,7 @@ class component
             "attributes" => $attributes ?? ($args["attributes"] ?? "")
         ]);
     }
-    
+
     public static function quote(mixed $args, mixed $classes = null, mixed $attributes = null): void
     {
         if (is_string($args)) {
@@ -274,7 +274,7 @@ class component
 
         get_template_part('components/accordion/accordion', null, $args);
     }
-    
+
     public static function header(mixed $args, mixed $classes = null, mixed $attributes = null): void
     {
         if (is_string($args)) {
@@ -307,7 +307,7 @@ class component
 
         get_template_part('components/header/header', null, $data);
     }
-   
+
     public static function badge(mixed $name, mixed $classes = null, mixed $attributes = null): void
     {
         if (is_string($name)) {
@@ -328,42 +328,29 @@ class component
     }
 
     /**
-     * @param array<int, mixed> $trigger [0] => "btn"|"link", [1] => label (null = défaut i18n), [2] => classes CSS du déclencheur
+     * @param array<int, mixed> $trigger [0] => "btn"|"link", [1] => label, [2] => classes CSS du déclencheur
      */
-    public static function dialog(mixed $content, mixed $trigger = ["btn", null, null], mixed $classes = null, mixed $attributes = null): void
+    public static function dialog(mixed $content, mixed $trigger = ["btn", null, null], mixed $trigger_label = "Open dialog", mixed $close_label = "Close", mixed $aria_label = "Dialog", mixed $classes = null, mixed $attributes = null): void
     {
-        $args = [];
+        $args = is_array($content) ? $content : ["content" => $content];
 
-        if (is_array($content)) {
-            $args = $content;
-            $content = $args["content"] ?? "";
-            $trigger = $args["trigger"] ?? $trigger;
-            $classes = $classes ?? ($args["classes"] ?? null);
-            $attributes = $attributes ?? ($args["attributes"] ?? null);
+        if (!is_array($content)) {
+            $args["trigger"] = $trigger;
         }
 
-        if (trim((string) $content) === "") return;
+        $args["trigger_label"] = $args["trigger_label"] ?? $trigger_label;
+        $args["close_label"] = $args["close_label"] ?? $close_label;
+        $args["aria_label"] = $args["aria_label"] ?? $aria_label;
 
-        if (!is_array($trigger)) {
-            $trigger = ["btn", null, null];
+        if ($classes !== null) {
+            $args["classes"] = $classes;
         }
-        $t = array_values($trigger);
-        $t = array_pad($t, 3, null);
-        $kind = isset($t[0]) ? strtolower(trim((string) $t[0])) : "btn";
-        $kind = $kind === "link" ? "link" : "btn";
-        $trigger = [
-            $kind,
-            ($t[1] !== null && trim((string) $t[1]) !== "") ? trim((string) $t[1]) : null,
-            ($t[2] !== null && trim((string) $t[2]) !== "") ? trim((string) $t[2]) : null,
-        ];
 
-        get_template_part('components/dialog/dialog', null, [
-            "content" => $content,
-            "title" => $args["title"] ?? null,
-            "trigger" => $trigger,
-            "classes" => $classes,
-            "attributes" => $attributes,
-        ]);
+        if ($attributes !== null) {
+            $args["attributes"] = $attributes;
+        }
+
+        get_template_part('components/dialog/dialog', null, $args);
     }
 
     public static function form(
@@ -461,7 +448,7 @@ class component
             "label" => $label,
         ]);
     }
-    
+
     /**
      * @param array<int, array{name:string,value?:string,selected?:bool,disabled?:bool}> $args
      */
@@ -529,14 +516,23 @@ class component
         get_template_part('components/shares/shares', null, $args);
     }
 
-    public static function video(mixed $url, mixed $title = "", mixed $poster = null, bool $autoplay = false, bool $loop = false, mixed $classes = null, mixed $attributes = null): void
-    {
+    public static function video(
+        mixed $url,
+        mixed $title = "Lecteur vidéo",
+        mixed $poster = null,
+        bool $autoplay = false,
+        bool $loop = false,
+        mixed $classes = null,
+        mixed $attributes = null,
+        mixed $play_label = "Lire la vidéo"
+    ): void {
         if (empty($url)) return;
 
         get_template_part('components/video/video', '', [
             "url" => $url,
             "title" => $title,
             "poster" => $poster,
+            "play_label" => $play_label,
             "autoplay" => $autoplay,
             "loop" => $loop,
             "classes" => $classes,
@@ -695,7 +691,7 @@ class component
 
         get_template_part('components/tooltip/tooltip', '', $args);
     }
-   
+
     public static function search(mixed $label = null, mixed $placeholder = null, mixed $button_label = null, mixed $action = null, mixed $classes = null, mixed $attributes = null): void
     {
         $args = is_array($label) ? $label : [

@@ -1,5 +1,5 @@
 <?php
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
 $link = !empty($args["link"]) && is_array($args["link"]) ? $args["link"] : $args;
 $url = isset($link["url"]) && is_scalar($link["url"]) ? trim((string) $link["url"]) : "";
 $title = isset($link["title"]) && is_scalar($link["title"]) ? trim((string) $link["title"]) : "";

@@ -1,5 +1,5 @@
 <?php
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
 
 $raw_date = $args["date"] ?? $args["datetime"] ?? $args["time"] ?? $args["value"] ?? "";
 $format = isset($args["format"]) && is_scalar($args["format"]) && trim((string) $args["format"]) !== ""

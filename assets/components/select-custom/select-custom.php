@@ -1,6 +1,6 @@
 <?php
 /** @var array $args */
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
 $options = isset($args['options']) && is_array($args['options'])
     ? $args['options']
     : (isset($args['args']) && is_array($args['args']) ? $args['args'] : []);

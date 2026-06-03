@@ -235,10 +235,6 @@ function starter_safe_content_url(string $url): string
 |--------------------------------------------------------------------------
 */
 
-function starter_args(mixed $args, array $defaults = []): array
-{
-    return array_replace($defaults, is_array($args) ? $args : []);
-}
 
 
 /*
@@ -342,7 +338,7 @@ function starter_menus(): array
 
 function nav_menu(mixed $args = []): void
 {
-    $args = is_string($args) ? ['theme_location' => $args] : starter_args($args);
+    $args = is_string($args) ? ['theme_location' => $args] : normalize_args($args);
     $location = starter_menu_location($args['theme_location'] ?? '');
 
     if ($location === '') {

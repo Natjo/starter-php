@@ -1,5 +1,5 @@
 <?php
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
 $name = !empty($args["name"]) ? sanitize_html_class((string) $args["name"]) : "";
 $width = !empty($args["width"]) ? max(1, (int) $args["width"]) : 24;
 $height = !empty($args["height"]) ? max(1, (int) $args["height"]) : 24;

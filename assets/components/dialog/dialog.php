@@ -1,5 +1,5 @@
 <?php
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
 $uniqueId = function ($prefix = "") {
     if (function_exists("wp_unique_id")) {
         return wp_unique_id($prefix);
@@ -7,32 +7,30 @@ $uniqueId = function ($prefix = "") {
 
     return uniqid($prefix);
 };
+$text = static fn($value): string => is_scalar($value) ? trim((string) $value) : "";
 
 $content = isset($args["content"]) ? (string) $args["content"] : "";
-$title = isset($args["title"]) && is_scalar($args["title"]) ? trim((string) $args["title"]) : "";
+$title = $text($args["title"] ?? "");
 $trigger_cfg = isset($args["trigger"]) && is_array($args["trigger"]) ? array_values($args["trigger"]) : ["btn", null, null];
 $trigger_cfg = array_pad($trigger_cfg, 3, null);
-$type = isset($trigger_cfg[0]) && strtolower((string) $trigger_cfg[0]) === "link" ? "link" : "btn";
-$trigger_label = ($trigger_cfg[1] !== null && trim((string) $trigger_cfg[1]) !== "")
-    ? trim((string) $trigger_cfg[1])
-    : __("Open dialog", "starterkit");
-$trigger_classes = ($trigger_cfg[2] !== null && trim((string) $trigger_cfg[2]) !== "")
-    ? trim((string) $trigger_cfg[2])
-    : "";
+$type = strtolower($text($trigger_cfg[0] ?? "")) === "link" ? "link" : "btn";
+$trigger_label = $text($trigger_cfg[1] ?? "");
+$trigger_label = $trigger_label !== "" ? $trigger_label : $text($args["trigger_label"] ?? "");
+$trigger_classes = $text($trigger_cfg[2] ?? "");
 $classes = component::classes("dialog", $args["classes"] ?? "");
 $attributes = component::attributes($args["attributes"] ?? []);
 
-$close_label = __("Close", "starterkit");
-$id = "";
+$close_label = $text($args["close_label"] ?? "");
+$id = sanitize_html_class($text($args["id"] ?? ""));
 
 if ($content === "") return;
-if ($id === "") $id = $uniqueId("dialog-");
+$id = $id !== "" ? $id : $uniqueId("dialog-");
 $title_id = $id . "-title";
 $content_id = $id . "-content";
-$aria_label = $trigger_label !== "" ? $trigger_label : __("Dialog", "starterkit");
+$aria_label = $trigger_label !== "" ? $trigger_label : $text($args["aria_label"] ?? "");
 $aria = $title !== ""
     ? ' aria-labelledby="' . esc_attr($title_id) . '"'
-    : ' aria-label="' . esc_attr($aria_label) . '"';
+    : ($aria_label !== "" ? ' aria-label="' . esc_attr($aria_label) . '"' : '');
 
 $trigger_extra = $trigger_classes !== "" ? " " . $trigger_classes : "";
 ?>

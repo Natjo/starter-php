@@ -1,5 +1,5 @@
 <?php
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
 $text = $args["text"] ?? $args["intro"] ?? $args["legend"] ?? $args["content"] ?? $args["description"] ?? "";
 $text = is_scalar($text) ? trim((string) $text) : "";
 $classes = component::classes("text", $args["classes"] ?? "");

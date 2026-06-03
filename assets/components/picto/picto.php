@@ -1,5 +1,5 @@
 <?php
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
 $name = isset($args['name']) ? sanitize_html_class((string) $args['name']) : '';
 if ($name === '') return;
 $type = isset($args['type']) ? trim((string) $args['type']) : '';

@@ -1,7 +1,7 @@
 <?php
 /** @var array $args */
 /*https://access42.net/concevoir-un-composant-d-auto-completion-accessible/*/
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
 
 $items = !empty($args["items"]) && is_array($args["items"]) ? $args["items"] : [];
 $items = array_values(array_filter(array_map(static function ($item) {
@@ -16,7 +16,7 @@ $items = array_values(array_filter(array_map(static function ($item) {
 $label = isset($args["label"]) ? (string) $args["label"] : "";
 $name = !empty($args["name"]) ? preg_replace('/[^a-zA-Z0-9_\-\[\]]/', '', trim((string) $args["name"])) : "autocomplete";
 $name = $name !== "" ? $name : "autocomplete";
-$placeholder = isset($args["placeholder"]) ? (string) $args["placeholder"] : __("Sélectionner", "starterkit");
+$placeholder = isset($args["placeholder"]) ? (string) $args["placeholder"] : "Sélectionner";
 $classes = component::classes("autocomplete-field", $args["classes"] ?? "");
 $attributes = component::attributes($args["attributes"] ?? []);
 

@@ -1,5 +1,5 @@
 <?php
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
 $classes = component::classes("tabs", $args["classes"] ?? "");
 $attributes = component::attributes($args["attributes"] ?? []);
 $items = [];

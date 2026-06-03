@@ -1,5 +1,5 @@
 <?php
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
 $title = $args["title"] ?? $args["titre"] ?? $args["heading"] ?? $args["headline"] ?? "";
 $title = is_scalar($title) ? trim((string) $title) : "";
 $text = $args["text"] ?? $args["intro"] ?? $args["content"] ?? $args["description"] ?? "";

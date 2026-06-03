@@ -1,5 +1,5 @@
 <?php
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
 $items = !empty($args["items"]) && is_array($args["items"]) ? $args["items"] : [];
 $isList = empty($items) || array_keys($items) === range(0, count($items) - 1);
 if (!$isList) {

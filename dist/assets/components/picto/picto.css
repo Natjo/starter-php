@@ -1,1 +1,2 @@
 .picto{--size:3.5rem;align-items:center;background-color:var(--color-1);border-radius:50%;color:#fff;display:flex;height:calc(var(--size) + .5rem);justify-content:center;width:calc(var(--size) + .5rem);.icon{height:var(--size);width:var(--size)}&.sm{--size:2.5rem}&.lg{--size:4.5rem}}.picto-2{background-color:var(--color-2)}.picto-3{background:none;border:1px solid var(--color-2);color:var(--color-2)}
+/*# sourceMappingURL=picto.css.map */

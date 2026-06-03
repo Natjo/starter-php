@@ -1,22 +1,23 @@
 <?php
 
 /** @var array $args */
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
+$text = static fn(mixed $value): string => is_scalar($value) ? trim((string) $value) : "";
 
 // $args["url"] accepte :
 // - une string (URL ou ID média WordPress) → un seul <source>
 // - un tableau d'URLs / IDs → plusieurs <source> avec MIME auto-détecté
 //   (utile pour servir un .webm + .mp4 en fallback).
 $url_input = $args["url"] ?? "";
-$title = isset($args["title"]) ? trim((string) $args["title"]) : "";
-$poster = isset($args["poster"]) ? trim((string) $args["poster"]) : "";
+$title = $text($args["title"] ?? "");
+$poster = $text($args["poster"] ?? "");
 $autoplay = !empty($args["autoplay"]);
 $loop = !empty($args["loop"]);
 $classes = component::classes("video", $args["classes"] ?? "");
 $attributes = component::attributes($args["attributes"] ?? []);
 
-$is_safe_media_url = function (mixed $url): bool {
-    $url = trim((string) $url);
+$is_safe_media_url = function (mixed $url) use ($text): bool {
+    $url = $text($url);
     if ($url === "" || str_contains($url, "\0")) return false;
 
     if (str_starts_with($url, "/")) {
@@ -28,8 +29,8 @@ $is_safe_media_url = function (mixed $url): bool {
 };
 
 $urls = is_array($url_input) ? $url_input : [$url_input];
-$urls = array_values(array_filter(array_map(function ($u) use ($is_safe_media_url) {
-    $u = trim((string) $u);
+$urls = array_values(array_filter(array_map(function (mixed $u) use ($is_safe_media_url, $text): string {
+    $u = $text($u);
     if ($u === "") return "";
     if (is_numeric($u)) {
         if (!function_exists('wp_get_attachment_url')) return "";
@@ -89,10 +90,9 @@ if ($is_youtube) {
 $has_facade = $poster !== "";
 $iframe_src = $has_facade && !$autoplay ? "" : ($autoplay ? $autoplay_src : $idle_src);
 $iframe_data_src = $has_facade && !$autoplay ? ' data-src="' . esc_attr($idle_src) . '"' : '';
-$iframe_title = $title !== "" ? $title : __("Lecteur vidéo", "starterkit");
-$play_label = $title !== ""
-    ? sprintf(__("Lire la vidéo : %s", "starterkit"), $title)
-    : __("Lire la vidéo", "starterkit");
+
+$play_label = $text($args["play_label"] ?? "");
+$play_label = $title !== "" && $play_label !== "" ? sprintf("%s : %s", $play_label, $title) : $play_label;
 // Quand la facade est visible, l'iframe / <video> est retiré de l'ordre de tabulation
 // (le bouton .poster prend le focus). Le JS retire `tabindex="-1"` au click.
 $hide_tab = $has_facade ? ' tabindex="-1"' : '';
@@ -103,7 +103,7 @@ $hide_tab = $has_facade ? ' tabindex="-1"' : '';
         <iframe
             <?= $iframe_src !== "" ? 'src="' . esc_url($iframe_src) . '"' : "" ?>
             <?= $iframe_data_src ?>
-            title="<?= esc_attr($iframe_title) ?>"
+            title="<?= esc_attr($title) ?>"
             loading="lazy"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowfullscreen<?= $hide_tab ?>></iframe>
@@ -124,7 +124,6 @@ $hide_tab = $has_facade ? ' tabindex="-1"' : '';
             <?php foreach ($urls as $u) : ?>
                 <source src="<?= esc_url($u) ?>" type="<?= esc_attr($detect_mime($u)) ?>">
             <?php endforeach ?>
-            <?= esc_html(__("Votre navigateur ne peut pas lire cette vidéo.", "starterkit")) ?>
         </video>
     <?php endif ?>
 

@@ -1,5 +1,5 @@
 <?php
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
 $list = isset($args["list"]) ? $args["list"] : [];
 $classes = component::classes("shares", $args["classes"] ?? "");
 $attributes = component::attributes($args["attributes"] ?? []);
@@ -57,31 +57,31 @@ $catalog = [
         "name" => "email",
         "icon" => "mail",
         "url" => "mailto:?body=" . $encodedMailBody,
-        "label" => __("Partager l’article par E-mail", 'lsd_lang'),
+        "label" => "Partager l’article par E-mail",
     ],
     "copy" => [
         "name" => "copy",
         "icon" => "copy",
         "url" => $url,
-        "label" => __("Copier le lien", 'lsd_lang'),
+        "label" => "Copier le lien",
     ],
     "facebook" => [
         "name" => "facebook",
         "icon" => "facebook",
         "url" => "https://www.facebook.com/sharer/sharer.php?u=" . $encodedUrl,
-        "label" => __("Partager l’article sur Facebook", 'lsd_lang'),
+        "label" => "Partager l’article sur Facebook",
     ],
     "x" => [
         "name" => "x",
         "icon" => "x",
         "url" => "https://www.twitter.com/share?url=" . $encodedUrl,
-        "label" => __("Partager l’article sur X", 'lsd_lang'),
+        "label" => "Partager l’article sur X",
     ],
     "whatsapp" => [
         "name" => "whatsapp",
         "icon" => "whatsapp",
         "url" => "https://wa.me/?text=" . $encodedUrl,
-        "label" => __("Partager l’article sur Whatsapp", 'lsd_lang'),
+        "label" => "Partager l’article sur Whatsapp",
     ],
 ];
 

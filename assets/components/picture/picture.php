@@ -1,6 +1,6 @@
 <?php
 /** @var array $args */
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
 // Accepts:
 // - $args["images"] as ["desktop" => id|path, "mobile" => id|path], scalar, or indexed array
 // - Or directly an id|path as $args itself (backward-friendly)

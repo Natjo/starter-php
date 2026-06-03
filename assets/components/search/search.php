@@ -1,5 +1,5 @@
 <?php
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
 $label = isset($args["label"]) && trim((string) $args["label"]) !== "" ? trim((string) $args["label"]) : __("Rechercher", "lsd_lang");
 $placeholder = isset($args["placeholder"]) && trim((string) $args["placeholder"]) !== "" ? trim((string) $args["placeholder"]) : "";
 $button_label = isset($args["button_label"]) && trim((string) $args["button_label"]) !== "" ? trim((string) $args["button_label"]) : $label;

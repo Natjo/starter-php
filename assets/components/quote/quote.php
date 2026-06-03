@@ -1,5 +1,5 @@
 <?php
-$args = starter_args($args ?? null);
+$args = normalize_args($args ?? null);
 $data = isset($quote) && is_array($quote) ? $quote : $args;
 $text = trim((string) ($data["text"] ?? ($data["quote"] ?? "")));
 $author = trim((string) ($data["author"] ?? ""));
