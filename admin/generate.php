@@ -4,9 +4,120 @@ declare(strict_types=1);
 $root = dirname(__DIR__);
 $uploadsDir = $root . '/dist/uploads';
 $sizesFile = $root . '/image-sizes.json';
+$menusFile = $root . '/menus.json';
 $manifestFile = __DIR__ . '/.image-sizes-generated.json';
 $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
 $convertExtensions = ['jpg', 'jpeg', 'png'];
+
+function admin_escape(mixed $value): string
+{
+    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+}
+
+function admin_menu_location(mixed $location): string
+{
+    $location = preg_replace('/[^A-Za-z0-9_-]/', '-', (string) $location);
+    $location = trim((string) $location, '-');
+
+    return $location;
+}
+
+function admin_menus(string $file): array
+{
+    if (!is_file($file)) {
+        return [];
+    }
+
+    $json = json_decode((string) file_get_contents($file), true);
+    $menus = is_array($json['menus'] ?? null) ? $json['menus'] : [];
+    $clean = [];
+
+    foreach ($menus as $menu) {
+        if (!is_array($menu)) {
+            continue;
+        }
+
+        $location = admin_menu_location($menu['theme_location'] ?? '');
+        if ($location === '') {
+            continue;
+        }
+
+        $title = trim((string) ($menu['title'] ?? $location));
+        $items = [];
+
+        foreach (($menu['items'] ?? []) as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $itemTitle = trim((string) ($item['title'] ?? ''));
+            $itemUrl = trim((string) ($item['url'] ?? ''));
+
+            if ($itemTitle === '' || $itemUrl === '') {
+                continue;
+            }
+
+            $items[] = [
+                'title' => $itemTitle,
+                'url' => $itemUrl,
+            ];
+        }
+
+        $clean[] = [
+            'title' => $title !== '' ? $title : $location,
+            'theme_location' => $location,
+            'items' => $items,
+        ];
+    }
+
+    return $clean;
+}
+
+function save_admin_menus(string $file, array $post): void
+{
+    $titles = is_array($post['menu_title'] ?? null) ? $post['menu_title'] : [];
+    $locations = is_array($post['menu_location'] ?? null) ? $post['menu_location'] : [];
+    $itemTitles = is_array($post['item_title'] ?? null) ? $post['item_title'] : [];
+    $itemUrls = is_array($post['item_url'] ?? null) ? $post['item_url'] : [];
+    $menus = [];
+    $usedLocations = [];
+
+    foreach ($titles as $index => $title) {
+        $title = trim((string) $title);
+        $location = admin_menu_location($locations[$index] ?? '');
+
+        if ($title === '' || $location === '' || isset($usedLocations[$location])) {
+            continue;
+        }
+
+        $items = [];
+        $titlesForMenu = is_array($itemTitles[$index] ?? null) ? $itemTitles[$index] : [];
+        $urlsForMenu = is_array($itemUrls[$index] ?? null) ? $itemUrls[$index] : [];
+
+        foreach ($titlesForMenu as $itemIndex => $itemTitle) {
+            $itemTitle = trim((string) $itemTitle);
+            $itemUrl = trim((string) ($urlsForMenu[$itemIndex] ?? ''));
+
+            if ($itemTitle === '' || $itemUrl === '') {
+                continue;
+            }
+
+            $items[] = [
+                'title' => $itemTitle,
+                'url' => $itemUrl,
+            ];
+        }
+
+        $menus[] = [
+            'title' => $title,
+            'theme_location' => $location,
+            'items' => $items,
+        ];
+        $usedLocations[$location] = true;
+    }
+
+    file_put_contents($file, json_encode(['menus' => $menus], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+}
 
 function generate(bool $force = false): array
 {
@@ -612,6 +723,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'save_settings') {
         save_image_settings($sizesFile, $_POST);
         $message = 'Réglages enregistrés.';
+    } elseif ($action === 'save_menus') {
+        save_admin_menus($menusFile, $_POST);
+        $message = 'Menus enregistrés.';
     } else {
         $result = match ($action) {
             'regenerate' => generate(true),
@@ -625,6 +739,7 @@ $config = image_config($sizesFile);
 $defaults = $config['defaults'];
 $sizes = $config['sizes'];
 $sizes[''] = array_replace($defaults, ['width' => '', 'height' => '']);
+$menus = admin_menus($menusFile);
 ?>
 
 <!doctype html>
@@ -633,6 +748,16 @@ $sizes[''] = array_replace($defaults, ['width' => '', 'height' => '']);
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Generate images</title>
+    <style>
+        .admin-layout { display: grid; gap: 2rem; grid-template-columns: 20rem 1fr; align-items: start; }
+        .admin-sidebar { position: sticky; top: 1rem; display: grid; gap: 1rem; }
+        .admin-menu-list { display: grid; gap: .5rem; margin: 0; padding: 0; list-style: none; }
+        .admin-menu-panel { display: grid; gap: 1rem; margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; }
+        .admin-menu-head,
+        .admin-menu-row { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; align-items: end; }
+        .admin-field { display: grid; gap: .35rem; }
+        .admin-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+    </style>
 </head>
 <body>
     <main>
@@ -645,12 +770,12 @@ $sizes[''] = array_replace($defaults, ['width' => '', 'height' => '']);
             </ul>
         </nav>
 
+        <?php if ($message !== '') : ?>
+            <p><?= admin_escape($message) ?></p>
+        <?php endif; ?>
+
         <section id="images">
             <h2>Images</h2>
-
-            <?php if ($message !== '') : ?>
-                <p><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p>
-            <?php endif; ?>
 
             <?php if ($result !== null) : ?>
                 <p>
@@ -734,7 +859,186 @@ $sizes[''] = array_replace($defaults, ['width' => '', 'height' => '']);
 
         <section id="menus">
             <h2>Menus</h2>
+
+            <form method="post" data-menus-form>
+                <div class="admin-layout">
+                    <aside class="admin-sidebar">
+                        <button type="button" data-add-menu>Add menu</button>
+
+                        <ul class="admin-menu-list" data-menu-sidebar>
+                            <?php foreach ($menus as $menuIndex => $menu) : ?>
+                                <li><a href="#menu-<?= (int) $menuIndex ?>"><?= admin_escape($menu['title'] ?? '') ?></a></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </aside>
+
+                    <div data-menu-panels>
+                        <?php foreach ($menus as $menuIndex => $menu) : ?>
+                            <section class="admin-menu-panel" id="menu-<?= (int) $menuIndex ?>" data-menu-panel>
+                                <div class="admin-menu-head">
+                                    <label class="admin-field">
+                                        Titre
+                                        <input name="menu_title[<?= (int) $menuIndex ?>]" value="<?= admin_escape($menu['title'] ?? '') ?>" required>
+                                    </label>
+
+                                    <label class="admin-field">
+                                        Theme location
+                                        <input name="menu_location[<?= (int) $menuIndex ?>]" value="<?= admin_escape($menu['theme_location'] ?? '') ?>" required>
+                                    </label>
+
+                                    <button type="button" data-remove-menu>Supprimer</button>
+                                </div>
+
+                                <div data-menu-items>
+                                    <?php foreach (($menu['items'] ?? []) as $item) : ?>
+                                        <div class="admin-menu-row" data-menu-item>
+                                            <label class="admin-field">
+                                                Titre
+                                                <input name="item_title[<?= (int) $menuIndex ?>][]" value="<?= admin_escape($item['title'] ?? '') ?>">
+                                            </label>
+
+                                            <label class="admin-field">
+                                                URL
+                                                <input name="item_url[<?= (int) $menuIndex ?>][]" value="<?= admin_escape($item['url'] ?? '') ?>">
+                                            </label>
+
+                                            <button type="button" data-remove-item>Supprimer</button>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+
+                                <div class="admin-actions">
+                                    <button type="button" data-add-item>Ajouter une ligne</button>
+                                </div>
+                            </section>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <button type="submit" name="action" value="save_menus">Save menus</button>
+            </form>
         </section>
     </main>
+
+    <template data-menu-template>
+        <section class="admin-menu-panel" data-menu-panel>
+            <div class="admin-menu-head">
+                <label class="admin-field">
+                    Titre
+                    <input data-name="menu_title" value="Nouveau menu" required>
+                </label>
+
+                <label class="admin-field">
+                    Theme location
+                    <input data-name="menu_location" value="menu-footer" required>
+                </label>
+
+                <button type="button" data-remove-menu>Supprimer</button>
+            </div>
+
+            <div data-menu-items></div>
+
+            <div class="admin-actions">
+                <button type="button" data-add-item>Ajouter une ligne</button>
+            </div>
+        </section>
+    </template>
+
+    <template data-menu-item-template>
+        <div class="admin-menu-row" data-menu-item>
+            <label class="admin-field">
+                Titre
+                <input data-name="item_title">
+            </label>
+
+            <label class="admin-field">
+                URL
+                <input data-name="item_url">
+            </label>
+
+            <button type="button" data-remove-item>Supprimer</button>
+        </div>
+    </template>
+
+    <script>
+        (() => {
+            const form = document.querySelector('[data-menus-form]');
+            if (!form) return;
+
+            const panels = form.querySelector('[data-menu-panels]');
+            const sidebar = form.querySelector('[data-menu-sidebar]');
+            const menuTemplate = document.querySelector('[data-menu-template]');
+            const itemTemplate = document.querySelector('[data-menu-item-template]');
+            let nextIndex = <?= count($menus) ?>;
+
+            const inputName = (key, index) => key.startsWith('item_') ? `${key}[${index}][]` : `${key}[${index}]`;
+
+            const assignInputNames = (element, index) => {
+                element.querySelectorAll('[data-name]').forEach(input => {
+                    input.name = inputName(input.dataset.name, index);
+                    input.removeAttribute('data-name');
+                });
+            };
+
+            const titleFor = panel => panel.querySelector('input[name^="menu_title"]')?.value.trim() || 'Menu';
+
+            const rebuildSidebar = () => {
+                sidebar.innerHTML = '';
+                panels.querySelectorAll('[data-menu-panel]').forEach(panel => {
+                    const item = document.createElement('li');
+                    const link = document.createElement('a');
+                    link.href = `#${panel.id}`;
+                    link.textContent = titleFor(panel);
+                    item.append(link);
+                    sidebar.append(item);
+                });
+            };
+
+            const addItem = panel => {
+                const index = panel.id.replace('menu-', '');
+                const item = itemTemplate.content.firstElementChild.cloneNode(true);
+                assignInputNames(item, index);
+                panel.querySelector('[data-menu-items]').append(item);
+            };
+
+            form.addEventListener('click', event => {
+                const button = event.target.closest('button');
+                if (!button) return;
+
+                if (button.matches('[data-add-menu]')) {
+                    const index = nextIndex++;
+                    const panel = menuTemplate.content.firstElementChild.cloneNode(true);
+                    panel.id = `menu-${index}`;
+                    assignInputNames(panel, index);
+                    panels.append(panel);
+                    addItem(panel);
+                    rebuildSidebar();
+                    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    return;
+                }
+
+                if (button.matches('[data-remove-menu]')) {
+                    button.closest('[data-menu-panel]')?.remove();
+                    rebuildSidebar();
+                    return;
+                }
+
+                if (button.matches('[data-add-item]')) {
+                    addItem(button.closest('[data-menu-panel]'));
+                    return;
+                }
+
+                if (button.matches('[data-remove-item]')) {
+                    button.closest('[data-menu-item]')?.remove();
+                }
+            });
+
+            form.addEventListener('input', event => {
+                if (event.target.matches('input[name^="menu_title"]')) {
+                    rebuildSidebar();
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

@@ -43,6 +43,16 @@ if (!function_exists('wp_kses_post')) {
     }
 }
 
+if (!function_exists('sanitize_html_class')) {
+    function sanitize_html_class($class, $fallback = '')
+    {
+        $class = preg_replace('/[^A-Za-z0-9_-]/', '-', (string) $class);
+        $class = trim((string) $class, '-');
+
+        return $class !== '' ? $class : (string) $fallback;
+    }
+}
+
 /*
 |--------------------------------------------------------------------------
 | Content sanitization
@@ -189,8 +199,26 @@ function starter_sanitize_dom_attributes(DOMElement $node, array $allowed_attrib
 
 function starter_safe_content_url(string $url): string
 {
-    if (str_starts_with($url, '#') || str_starts_with($url, '/')) {
+    $url = trim($url);
+
+    if ($url === '') {
+        return '';
+    }
+
+    if (str_starts_with($url, '#')) {
         return $url;
+    }
+
+    if (str_starts_with($url, '//')) {
+        return '';
+    }
+
+    if (str_starts_with($url, '/')) {
+        return has_unsafe_path_segments(parse_url($url, PHP_URL_PATH) ?: '') ? '' : $url;
+    }
+
+    if (!str_contains($url, ':') && !str_contains($url, '\\') && !preg_match('/[\x00-\x1F\x7F<>"\']/', $url)) {
+        return has_unsafe_path_segments(parse_url($url, PHP_URL_PATH) ?: '') ? '' : '/' . ltrim($url, '/');
     }
 
     $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
@@ -212,15 +240,6 @@ function starter_args(mixed $args, array $defaults = []): array
     return array_replace($defaults, is_array($args) ? $args : []);
 }
 
-if (!function_exists('sanitize_html_class')) {
-    function sanitize_html_class($class, $fallback = '')
-    {
-        $class = preg_replace('/[^A-Za-z0-9_-]/', '-', (string) $class);
-        $class = trim((string) $class, '-');
-
-        return $class !== '' ? $class : (string) $fallback;
-    }
-}
 
 /*
 |--------------------------------------------------------------------------
@@ -242,6 +261,123 @@ function strate(string $name, array $args = []): void
 {
     $name = str_replace('-', '_', $name);
     get_template_part("strates/strate-{$name}/strate-{$name}", null, $args);
+}
+
+/*
+|--------------------------------------------------------------------------
+| Menu
+|--------------------------------------------------------------------------
+*/
+
+function starter_menus_file(): string
+{
+    return APP_ROOT . '/menus.json';
+}
+
+function starter_menu_location(mixed $location): string
+{
+    $location = is_scalar($location) ? trim((string) $location) : '';
+
+    return $location !== '' ? sanitize_html_class($location) : '';
+}
+
+function starter_menus(): array
+{
+    static $menus = null;
+
+    if ($menus !== null) {
+        return $menus;
+    }
+
+    $file = starter_menus_file();
+    if (!is_file($file)) {
+        $menus = [];
+        return $menus;
+    }
+
+    $data = json_decode((string) file_get_contents($file), true);
+    $items = is_array($data['menus'] ?? null) ? $data['menus'] : [];
+    $menus = [];
+
+    foreach ($items as $menu) {
+        if (!is_array($menu)) {
+            continue;
+        }
+
+        $location = starter_menu_location($menu['theme_location'] ?? '');
+        if ($location === '') {
+            continue;
+        }
+
+        $title = is_scalar($menu['title'] ?? null) ? trim((string) $menu['title']) : $location;
+        $links = [];
+
+        foreach (($menu['items'] ?? []) as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $item_title = is_scalar($item['title'] ?? null) ? trim((string) $item['title']) : '';
+            $item_url = is_scalar($item['url'] ?? null) ? trim((string) $item['url']) : '';
+
+            if ($item_title === '' || $item_url === '') {
+                continue;
+            }
+
+            $links[] = [
+                'title' => $item_title,
+                'url' => starter_safe_content_url($item_url),
+            ];
+        }
+
+        $menus[$location] = [
+            'title' => $title !== '' ? $title : $location,
+            'theme_location' => $location,
+            'items' => array_values(array_filter($links, static fn($item) => $item['url'] !== '')),
+        ];
+    }
+
+    return $menus;
+}
+
+function nav_menu(mixed $args = []): void
+{
+    $args = is_string($args) ? ['theme_location' => $args] : starter_args($args);
+    $location = starter_menu_location($args['theme_location'] ?? '');
+
+    if ($location === '') {
+        return;
+    }
+
+    $menu = starter_menus()[$location] ?? null;
+    if (empty($menu['items']) || !is_array($menu['items'])) {
+        return;
+    }
+
+    $current = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/');
+    $nav_class = sanitize_class_list($args['container_class'] ?? ['nav-menu', 'nav-menu-' . $location]);
+    $list_class = sanitize_class_list($args['menu_class'] ?? 'nav-menu-list');
+    $item_class = sanitize_class_list($args['item_class'] ?? 'nav-menu-item');
+    $link_class = sanitize_class_list($args['link_class'] ?? 'nav-menu-link');
+    $aria_label = is_scalar($args['label'] ?? null) && trim((string) $args['label']) !== ''
+        ? trim((string) $args['label'])
+        : (string) $menu['title'];
+    ?>
+    <nav class="<?= esc_attr($nav_class) ?>" aria-label="<?= esc_attr($aria_label) ?>">
+        <ul class="<?= esc_attr($list_class) ?>">
+            <?php foreach ($menu['items'] as $item) :
+                $url = (string) $item['url'];
+                $title = (string) $item['title'];
+                $path = trim(parse_url($url, PHP_URL_PATH) ?: '', '/');
+                $is_active = $path === $current;
+            ?>
+                <li class="<?= esc_attr($item_class) ?>">
+                    <a class="<?= esc_attr($link_class) ?>" href="<?= esc_url($url) ?>"<?= $is_active ? ' aria-current="page"' : '' ?>><?= esc_html($title) ?></a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </nav>
+    <?php
 }
 
 /*

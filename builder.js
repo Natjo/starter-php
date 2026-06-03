@@ -31,6 +31,7 @@ const importAliases = {
     'common': path.join(src, 'common'),
     '@common': path.join(src, 'common'),
     '@components': path.join(src, 'components'),
+    '@modules': path.join(src, 'modules'),
     '@vendors': path.join(src, 'vendors'),
 };
 let appCssImports = new Set();
@@ -46,6 +47,7 @@ const rebuildTimers = new Map();
 let fullBuildTimer = null;
 let sourceSnapshot = new Map();
 const shouldWatch = process.argv.includes('--watch');
+const isProd = process.argv.includes('--prod');
 
 const processor = postcss([
     cssnano,
@@ -57,7 +59,7 @@ const processor = postcss([
 
 const toPosix = file => file.split(path.sep).join('/');
 
-const isIgnored = file => path.basename(file) === '.DS_Store';
+const isIgnored = file => path.basename(file) === '.DS_Store' || (isProd && path.extname(file) === '.map');
 
 const sourceAppCss = () => {
     const appCss = path.join(src, fromCss);
@@ -198,7 +200,7 @@ const appBundlePlugin = {
             return { path: resolved };
         });
 
-        build.onResolve({ filter: /^\.\/(common|components|strates)\// }, args => ({
+        build.onResolve({ filter: /^\.\/(common|components|modules|strates)\// }, args => ({
             path: args.path,
             external: true,
         }));
@@ -220,7 +222,7 @@ async function runPostcss(css, from, to) {
         from,
         to,
         parser,
-        map: { inline: false, annotation: `${path.basename(to)}.map` },
+        map: isProd ? false : { inline: false, annotation: `${path.basename(to)}.map` },
     });
 
     fs.ensureDirSync(path.dirname(to));
@@ -519,7 +521,7 @@ async function compileJs(file) {
             platform: 'browser',
             target: ['es2020'],
             minify: true,
-            drop: [],
+            drop: isProd ? ['console', 'debugger'] : [],
             define: {
                 __MODULE_VERSIONS__: JSON.stringify(moduleVersions),
             },
@@ -532,6 +534,7 @@ async function compileJs(file) {
     const result = babel.transformFileSync(file, {
         minified: true,
         comments: false,
+        sourceMaps: false,
         plugins: [babelAliasPlugin],
         presets: [
             ['@babel/preset-env', {
@@ -728,8 +731,13 @@ function snapshotSourceFiles() {
     return snapshot;
 }
 
-async function build() {
-    fs.ensureDirSync(dist);
+async function build({ clean = true } = {}) {
+    if (clean) {
+        cleanDistAssets();
+    } else {
+        fs.ensureDirSync(dist);
+    }
+
     syncCopiedDirs();
 
     await compileAppCss();
@@ -745,6 +753,12 @@ async function build() {
 
     await compileAllJsModules();
     await compileAppJs();
+}
+
+function cleanDistAssets() {
+    fs.removeSync(dist);
+    fs.ensureDirSync(dist);
+    display('dist/assets', 'remove');
 }
 
 async function rebuild(file, evt = 'update') {
@@ -864,7 +878,7 @@ function scheduleFullBuild(reason = 'watch') {
     clearTimeout(fullBuildTimer);
     fullBuildTimer = setTimeout(() => {
         fullBuildTimer = null;
-        build()
+        build({ clean: false })
             .then(() => display(reason, 'update'))
             .catch(error => {
                 display(reason, 'error');

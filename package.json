@@ -4,7 +4,8 @@
     "description": "Starterkit php 2026",
     "scripts": {
         "build": "node builder.js",
-        "dev": "node builder.js --watch"
+        "dev": "node builder.js --watch",
+        "prod": "node builder.js --prod"
     },
     "author": "Martin Jonathan",
     "license": "ISC",

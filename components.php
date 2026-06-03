@@ -162,17 +162,31 @@ class component
         get_template_part('components/btn/btn', null, $args);
     }
 
-    public static function icon(mixed $name, mixed $width, mixed $height, mixed $classes = null, mixed $label = null): void
+    public static function icon(mixed $name, mixed $width = 24, mixed $height = 24, mixed $classes = null, mixed $label = null, mixed $attributes = null): void
     {
-        if (empty($name)) return;
+        if (is_array($name)) {
+            $args = $name;
+        } else {
+            if (empty($name)) return;
 
-        get_template_part('components/icon', '', [
-            "name" => $name,
-            "width" =>  $width,
-            "height" =>  $height,
+            $args = [
+                "name" => $name,
+                "width" => $width,
+                "height" => $height,
+                "classes" => $classes,
+                "label" => $label,
+                "attributes" => $attributes,
+            ];
+        }
+
+        get_template_part('components/icon/icon', null, [
+            "name" => $args["name"] ?? "",
+            "width" =>  $args["width"] ?? 24,
+            "height" =>  $args["height"] ?? 24,
             "url" =>  THEME_ASSETS,
-            "classes" => $classes,
-            "label" => $label,
+            "classes" => $args["classes"] ?? null,
+            "label" => $args["label"] ?? null,
+            "attributes" => $args["attributes"] ?? null,
         ]);
     }
 

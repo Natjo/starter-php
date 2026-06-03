@@ -7,10 +7,23 @@ $args = [
             "title" => "Accueil",
             "url" => "/",
         ],
+                [
+            "title" => "Styles",
+            "url" => "/styles",
+        ],
         [
             "title" => "Components",
             "url" => "/components",
-        ],[
+        ],
+        [
+            "title" => "Strates",
+            "url" => "/strates",
+        ],
+                [
+            "title" => "Layout",
+            "url" => "/layout",
+        ],
+        [
             "title" => "Contact",
             "url" => "/contact",
         ]
@@ -42,7 +55,7 @@ $current = trim(parse_url($_SERVER["REQUEST_URI"] ?? "/", PHP_URL_PATH), "/");
                     continue;
                 }
             ?>
-                <a class="header-nav-link<?= $isActive ? " is-active" : "" ?>" href="<?= htmlspecialchars($url, ENT_QUOTES, "UTF-8") ?>"<?= $target ?><?= $isActive ? ' aria-current="page"' : "" ?>>
+                <a class="header-nav-link<?= $isActive ? " is-active" : "" ?>" href="<?= htmlspecialchars($url, ENT_QUOTES, "UTF-8") ?>" <?= $target ?><?= $isActive ? ' aria-current="page"' : "" ?>>
                     <?= htmlspecialchars($title, ENT_QUOTES, "UTF-8") ?>
                 </a>
             <?php endforeach; ?>
