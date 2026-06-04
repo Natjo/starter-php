@@ -29,15 +29,15 @@ $theme_color = isset($theme_color) && is_scalar($theme_color) && trim((string) $
     <link rel="icon" href="<?= esc_url(THEME_ASSETS . 'favicon/favicon-16x16.png') ?>" type="image/png" sizes="16x16">
     <link rel="apple-touch-icon" href="<?= esc_url(THEME_ASSETS . 'favicon/apple-touch-icon.png') ?>">
     <link rel="preload" href="<?= esc_url(THEME_ASSETS . 'font/roboto.woff2') ?>" as="font" type="font/woff2" crossorigin>
-    <?php dist_critical_styles(); ?>
-    <?php dist_style_placeholder(); ?>
+    <?php starter_dist_critical_styles(); ?>
+    <?php starter_dist_style_placeholder(); ?>
 </head>
 
 <body>
     
     <?= $content ?>
 
-    <?php dist_scripts(); ?>
+    <?php starter_dist_scripts(); ?>
 </body>
 
 </html>

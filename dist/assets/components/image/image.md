@@ -67,7 +67,7 @@ Une image d'upload ne doit pas etre appelee avec un simple nom de fichier.
 
 Dans WordPress, `$size` correspond a une taille declaree avec `add_image_size()`.
 
-Dans le starter, les tailles sont declarees dans `image-sizes.json` a la racine du projet.
+Dans le starter, les tailles sont declarees dans `starter/image-sizes.json`.
 
 Exemple :
 
@@ -95,7 +95,7 @@ Exemple :
 }
 ```
 
-La page `admin/generate.php` genere les variantes avec Imagick directement dans `dist/uploads`, a cote de l'image originale. Les images `jpg` et `png` sont converties en `webp`, et les crops sont toujours generes en `webp`.
+La page `/admin/` genere les variantes avec Imagick directement dans `dist/uploads`, a cote de l'image originale. Les images `jpg` et `png` sont converties en `webp`, et les crops sont toujours generes en `webp`.
 
 Exemple :
 

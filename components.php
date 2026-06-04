@@ -17,7 +17,7 @@ class component
 
     public static function attributes(mixed $attributes): string
     {
-        $attributes = starter_attributes($attributes);
+        $attributes = html_attributes($attributes);
 
         return $attributes !== '' ? ' ' . $attributes : '';
     }

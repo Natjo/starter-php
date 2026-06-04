@@ -24,8 +24,8 @@ $args = [
             "url" => "/layout",
         ],
         [
-            "title" => "Contact",
-            "url" => "/contact",
+            "title" => "Form",
+            "url" => "/form",
         ]
     ],
 ];

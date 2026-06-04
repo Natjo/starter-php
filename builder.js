@@ -92,13 +92,6 @@ const isCssFile = file => path.extname(file) === '.css';
 const outputPath = file => path.join(dist, path.relative(src, file));
 
 const autoBundleGroupForRelativeCss = file => {
-    const dir = file.split('/')[0];
-
-    if (dir === 'vendors') return 'common';
-    if (dir === 'strates') return 'common';
-    if (file === 'styles/print.css') return 'common';
-    if (cssBundles[dir]) return dir;
-
     return null;
 };
 

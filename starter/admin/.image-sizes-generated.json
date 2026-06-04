@@ -1,0 +1,32 @@
+{
+    "sizes": {
+        "130x87": {
+            "fit": "cover",
+            "position": "center",
+            "quality": 85,
+            "filter": "lanczos",
+            "sharpen": 0.2,
+            "width": 130,
+            "height": 87
+        }
+    },
+    "generated": {
+        "image1.jpg": {
+            "130x87": "image1-130x87.webp",
+            "full": "image1.webp"
+        },
+        "image2.jpg": {
+            "130x87": "image2-130x87.webp",
+            "full": "image2.webp"
+        },
+        "image3.jpg": {
+            "full": "image3.webp",
+            "130x87": "image3-130x87.webp"
+        },
+        "2026/image-test.jpg": {
+            "full": "2026/image-test.webp",
+            "130x87": "2026/image-test-130x87.webp"
+        }
+    },
+    "updatedAt": "2026-06-02T16:59:48+00:00"
+}

@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-$root = dirname(__DIR__);
+$root = dirname(__DIR__, 2);
 $uploadsDir = $root . '/dist/uploads';
 $assetsDir = $root . '/dist/assets';
-$sizesFile = $root . '/image-sizes.json';
+$sizesFile = $root . '/starter/image-sizes.json';
 $manifestFile = __DIR__ . '/.image-sizes-generated.json';
 $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
 $convertExtensions = ['jpg', 'jpeg', 'png'];

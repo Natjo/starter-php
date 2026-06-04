@@ -1,15 +1,23 @@
 <?php
 
-
+/**
+ * Fonctions techniques propres au starter.
+ *
+ * Ce fichier regroupe la logique d'infrastructure du projet: sécurité de
+ * contenu, résolution des assets générés, versionning, injection des styles
+ * et scripts du dist, helpers d'images, lecture de manifests et fonctions
+ * utilisées par le rendu final des pages.
+ *
+ * Contrairement à method.php, qui contient les helpers génériques utilisés
+ * directement par les composants, ce fichier porte surtout la mécanique du
+ * starter. Il est donc moins destiné à être copié tel quel dans WordPress.
+ */
 
 /*
 |--------------------------------------------------------------------------
 | Content sanitization
 |--------------------------------------------------------------------------
 */
-
-
-
 
 function starter_sanitize_dom_attributes(DOMElement $node, array $allowed_attributes): string
 {
@@ -84,33 +92,30 @@ function starter_safe_content_url(string $url): string
 }
 
 
-
 /*
 |--------------------------------------------------------------------------
 | Dist paths and URLs
 |--------------------------------------------------------------------------
 */
 
-
-
-function dist_assets_root(): string
+function starter_dist_assets_root(): string
 {
     return defined('ASSETS_ROOT') ? rtrim(ASSETS_ROOT, '/') : rtrim(WEB_ROOT . '/assets', '/');
 }
 
-function dist_uploads_root(): string
+function starter_dist_uploads_root(): string
 {
     return defined('UPLOADS_ROOT') ? rtrim(UPLOADS_ROOT, '/') : rtrim(WEB_ROOT . '/uploads', '/');
 }
 
-function dist_asset_url(mixed $file): string
+function starter_dist_asset_url(mixed $file): string
 {
     $file = normalize_dist_file($file);
 
     return rtrim(THEME_ASSETS, '/') . '/' . $file;
 }
 
-function dist_upload_url(mixed $file): string
+function starter_dist_upload_url(mixed $file): string
 {
     $file = normalize_dist_file($file);
     $base = defined('THEME_UPLOADS')
@@ -148,7 +153,7 @@ function starter_image_variant_file(mixed $file, mixed $size = 'full', ?string $
 {
     $file = normalize_dist_file($file);
     $size = starter_image_size_name($size);
-    $root = $root !== null ? rtrim($root, '/') : dist_uploads_root();
+    $root = $root !== null ? rtrim($root, '/') : starter_dist_uploads_root();
 
     if ($file === '' || $size === '') {
         return $file;
@@ -163,15 +168,13 @@ function starter_image_variant_file(mixed $file, mixed $size = 'full', ?string $
 }
 
 
-
-
 /*
 |--------------------------------------------------------------------------
 | Asset versioning
 |--------------------------------------------------------------------------
 */
 
-function dist_asset_version(mixed $file): ?string
+function starter_dist_asset_version(mixed $file): ?string
 {
     static $versions = [];
 
@@ -185,23 +188,23 @@ function dist_asset_version(mixed $file): ?string
         return $versions[$file];
     }
 
-    $path = dist_assets_root() . '/' . $file;
+    $path = starter_dist_assets_root() . '/' . $file;
     $versions[$file] = is_file($path) ? substr(md5_file($path), 0, 10) : null;
 
     return $versions[$file];
 }
 
-function dist_versioned_asset_url(mixed $file): string
+function starter_dist_versioned_asset_url(mixed $file): string
 {
-    $url = dist_asset_url($file);
-    $version = dist_asset_version($file);
+    $url = starter_dist_asset_url($file);
+    $version = starter_dist_asset_version($file);
 
     return $version ? $url . '?v=' . $version : $url;
 }
 
-function dist_scripts(): void
+function starter_dist_scripts(): void
 {
-    echo '<script type="module" src="' . esc_url(dist_versioned_asset_url('app.js')) . '"></script>' . PHP_EOL;
+    echo '<script type="module" src="' . esc_url(starter_dist_versioned_asset_url('app.js')) . '"></script>' . PHP_EOL;
 }
 
 /*
@@ -210,14 +213,14 @@ function dist_scripts(): void
 |--------------------------------------------------------------------------
 */
 
-function dist_css_file_exists(mixed $file): bool
+function starter_dist_css_file_exists(mixed $file): bool
 {
     $file = normalize_dist_file($file);
 
-    return $file !== '' && is_file(dist_assets_root() . '/' . $file);
+    return $file !== '' && is_file(starter_dist_assets_root() . '/' . $file);
 }
 
-function dist_css_manifest(): array
+function starter_dist_css_manifest(): array
 {
     static $manifest = null;
 
@@ -225,7 +228,7 @@ function dist_css_manifest(): array
         return $manifest;
     }
 
-    $path = dist_assets_root() . '/css-bundles.json';
+    $path = starter_dist_assets_root() . '/css-bundles.json';
 
     if (!is_file($path)) {
         $manifest = [
@@ -245,43 +248,41 @@ function dist_css_manifest(): array
     return $manifest;
 }
 
-function dist_style_placeholder(): void
+function starter_dist_style_placeholder(): void
 {
     echo '<!-- DIST_PAGE_STYLES -->' . PHP_EOL;
 }
 
-function enqueue_dist_style(mixed $file): void
+function starter_enqueue_dist_style(mixed $file): void
 {
     $file = ltrim(str_replace('\\', '/', (string) $file), '/');
-    $manifest = dist_css_manifest();
+    $manifest = starter_dist_css_manifest();
     $bundledFiles = array_flip($manifest['bundledFiles']);
 
-    if ($file === '' || (!dist_css_file_exists($file) && !isset($bundledFiles[$file]))) {
+    if ($file === '' || (!starter_dist_css_file_exists($file) && !isset($bundledFiles[$file]))) {
         return;
     }
 
-    if (empty($GLOBALS['dist_enqueued_styles']) || !is_array($GLOBALS['dist_enqueued_styles'])) {
-        $GLOBALS['dist_enqueued_styles'] = [];
+    if (empty($GLOBALS['starter_dist_enqueued_styles']) || !is_array($GLOBALS['starter_dist_enqueued_styles'])) {
+        $GLOBALS['starter_dist_enqueued_styles'] = [];
     }
 
-    $GLOBALS['dist_enqueued_styles'][$file] = true;
+    $GLOBALS['starter_dist_enqueued_styles'][$file] = true;
 }
 
-function dist_enqueued_styles(): array
+function starter_dist_enqueued_styles(): array
 {
-    $styles = !empty($GLOBALS['dist_enqueued_styles']) && is_array($GLOBALS['dist_enqueued_styles'])
-        ? array_keys($GLOBALS['dist_enqueued_styles'])
+    $styles = !empty($GLOBALS['starter_dist_enqueued_styles']) && is_array($GLOBALS['starter_dist_enqueued_styles'])
+        ? array_keys($GLOBALS['starter_dist_enqueued_styles'])
         : [];
 
     sort($styles);
     return $styles;
 }
 
-
-
-function dist_bundles_for_styles(array $styles): array
+function starter_dist_bundles_for_styles(array $styles): array
 {
-    $manifest = dist_css_manifest();
+    $manifest = starter_dist_css_manifest();
     $bundledFiles = array_flip($manifest['bundledFiles']);
     $bundles = [];
 
@@ -302,7 +303,7 @@ function dist_bundles_for_styles(array $styles): array
 
         $bundle = $manifest['bundles'][$group];
 
-        if (dist_css_file_exists($bundle)) {
+        if (starter_dist_css_file_exists($bundle)) {
             $bundles[$bundle] = true;
         }
     }
@@ -310,22 +311,22 @@ function dist_bundles_for_styles(array $styles): array
     return array_keys($bundles);
 }
 
-function dist_style_link(mixed $file): string
+function starter_dist_style_link(mixed $file): string
 {
-    $href = esc_url(dist_versioned_asset_url($file));
+    $href = esc_url(starter_dist_versioned_asset_url($file));
     $media = $file === 'styles/print.css' ? ' media="print"' : '';
 
     return '    <link rel="stylesheet" href="' . $href . '"' . $media . '>' . PHP_EOL;
 }
 
-function dist_style_preload_link(mixed $file): string
+function starter_dist_style_preload_link(mixed $file): string
 {
-    $href = esc_url(dist_versioned_asset_url($file));
+    $href = esc_url(starter_dist_versioned_asset_url($file));
 
     return '    <link rel="preload" href="' . $href . '" as="style">' . PHP_EOL;
 }
 
-function dist_should_preload_style(mixed $file): bool
+function starter_dist_should_preload_style(mixed $file): bool
 {
     return in_array($file, [
         'common.css',
@@ -334,10 +335,10 @@ function dist_should_preload_style(mixed $file): bool
     ], true);
 }
 
-function dist_critical_styles(mixed $file = 'critical.css'): void
+function starter_dist_critical_styles(mixed $file = 'critical.css'): void
 {
     $file = normalize_dist_file($file);
-    $path = dist_assets_root() . '/' . $file;
+    $path = starter_dist_assets_root() . '/' . $file;
 
     if ($file === '' || !is_file($path)) {
         return;
@@ -347,22 +348,22 @@ function dist_critical_styles(mixed $file = 'critical.css'): void
     $css = preg_replace('~/\*# sourceMappingURL=[^*]+\*/~', '', $css);
     $css = preg_replace_callback('~url\((["\']?)(?!data:|https?:|//|#)([^"\')]+)\1\)~i', function ($matches) {
         $url = ltrim($matches[2], './');
-        return 'url("' . esc_url(dist_asset_url($url)) . '")';
+        return 'url("' . esc_url(starter_dist_asset_url($url)) . '")';
     }, $css);
 
     echo '    <style id="critical-css">' . $css . '</style>' . PHP_EOL;
 }
 
-function dist_bundle_styles(bool $echo = true): string
+function starter_dist_bundle_styles(bool $echo = true): string
 {
     $html = '';
 
-    foreach (dist_bundles_for_styles(dist_enqueued_styles()) as $file) {
-        if (dist_should_preload_style($file)) {
-            $html .= dist_style_preload_link($file);
+    foreach (starter_dist_bundles_for_styles(starter_dist_enqueued_styles()) as $file) {
+        if (starter_dist_should_preload_style($file)) {
+            $html .= starter_dist_style_preload_link($file);
         }
 
-        $html .= dist_style_link($file);
+        $html .= starter_dist_style_link($file);
     }
 
     if ($echo) {
@@ -372,16 +373,16 @@ function dist_bundle_styles(bool $echo = true): string
     return $html;
 }
 
-function dist_styles(bool $echo = true): string
+function starter_dist_styles(bool $echo = true): string
 {
-    $manifest = dist_css_manifest();
+    $manifest = starter_dist_css_manifest();
     $bundled = array_merge([
         'critical.css',
         'styles.css',
     ], array_values($manifest['bundles']));
     $bundledFiles = array_flip($manifest['bundledFiles']);
 
-    $styles = array_unique(dist_enqueued_styles());
+    $styles = array_unique(starter_dist_enqueued_styles());
 
     sort($styles);
     $html = '';
@@ -391,12 +392,12 @@ function dist_styles(bool $echo = true): string
             in_array($file, $bundled, true)
             || isset($bundledFiles[$file])
             || (str_starts_with($file, 'styles/') && $file !== 'styles/print.css')
-            || !dist_css_file_exists($file)
+            || !starter_dist_css_file_exists($file)
         ) {
             continue;
         }
 
-        $html .= dist_style_link($file);
+        $html .= starter_dist_style_link($file);
     }
 
     if ($echo) {
@@ -406,9 +407,9 @@ function dist_styles(bool $echo = true): string
     return $html;
 }
 
-function dist_page_styles(bool $echo = true): string
+function starter_dist_page_styles(bool $echo = true): string
 {
-    $html = dist_bundle_styles(false) . dist_styles(false);
+    $html = starter_dist_bundle_styles(false) . starter_dist_styles(false);
 
     if ($echo) {
         echo $html;
@@ -417,7 +418,7 @@ function dist_page_styles(bool $echo = true): string
     return $html;
 }
 
-function render_dist_style_placeholders(mixed $html): string
+function starter_render_dist_style_placeholders(mixed $html): string
 {
-    return str_replace('<!-- DIST_PAGE_STYLES -->', rtrim(dist_page_styles(false)), (string) $html);
+    return str_replace('<!-- DIST_PAGE_STYLES -->', rtrim(starter_dist_page_styles(false)), (string) $html);
 }

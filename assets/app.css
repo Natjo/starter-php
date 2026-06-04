@@ -1,26 +1,31 @@
 /*
- critical css
+app.css ne contient que les imports explicitement ciblés:
+critical = inline dans le <head>, common/components/modules = bundle dédié.
+Un @import sans suffixe dans app.css n'est pas pris en compte pour les sorties CSS.
+Les CSS page-aware restent hors d'app.css et sont chargés selon les templates utilisés.
 */
-@import "styles/reset.css";
-@import "styles/variables.css";
-@import "styles/layout.css";
-@import "styles/fonts.css";
-@import "styles/classes.css";
 
-/*
-bundle common/vendors/strates
-*/
+//styles
+@import "styles/reset.css" critical;
+@import "styles/variables.css" critical;
+@import "styles/layout.css" critical;
+@import "styles/fonts.css" critical;
+@import "styles/classes.css" critical;
+@import "styles/print.css" common;
+
+// vendors
+@import "vendors/lenis/lenis.css" common;
+
+// common
 @import "common/header-nav/header-nav.css" common;
 @import "common/footer/footer.css" common;
-@import "vendors/lenis/lenis.css" common;
-@import "styles/print.css" common;
+
+// strates
 @import "strates/strate-slider/strate-slider.css" common;
 @import "strates/strate-text/strate-text.css" common;
 @import "strates/strate-text_image/strate-text_image.css" common;
 
-/*
-bundle components
-*/
+// components
 @import "components/slider/slider.css" components;
 @import "components/tag/tag.css" components;
 @import "components/title/title.css" critical;

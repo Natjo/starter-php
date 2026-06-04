@@ -96,7 +96,7 @@ peut rendre :
 "full"
 ```
 
-ou une taille declaree dans `image-sizes.json` :
+ou une taille declaree dans `starter/image-sizes.json` :
 
 ```php
 "130x87"

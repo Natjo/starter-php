@@ -20,7 +20,7 @@ $sliderInstance++;
 $slider_id   = function_exists("wp_unique_id") ? "slider-" . wp_unique_id() : "slider-" . $sliderInstance;
 $status_id   = $slider_id . "-status";
 
-$region_attributes = starter_attributes([
+$region_attributes = html_attributes([
     "class" => $classes,
     "role" => "region",
     "aria-label" => $aria_label,
