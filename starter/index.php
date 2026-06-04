@@ -20,7 +20,7 @@ require_once STARTER_ROOT . '/functions.php';
 require_once APP_ROOT . '/components.php';
 
 $uri = safe_request_path($_SERVER['REQUEST_URI'] ?? '/');
-$file = dist_page_file($uri);
+$file = page_file($uri);
 
 if (is_file($file)) {
     ob_start();
@@ -64,7 +64,20 @@ function safe_request_path($requestUri)
     return preg_match('#^[A-Za-z0-9_/-]+$#', $path) ? $path : null;
 }
 
-function dist_page_file($uri)
+function page_file($uri): string
+{
+    if ($uri === null) {
+        return '';
+    }
+
+    if ($uri === 'styleguide' || str_starts_with($uri, 'styleguide/')) {
+        return safe_page_file(APP_ROOT . '/' . $uri . '/index.php', APP_ROOT . '/styleguide');
+    }
+
+    return dist_page_file($uri);
+}
+
+function dist_page_file($uri): string
 {
     if ($uri === null) {
         return '';
@@ -74,7 +87,12 @@ function dist_page_file($uri)
         ? WEB_ROOT . '/index.php'
         : WEB_ROOT . '/' . $uri . '/index.php';
 
-    $realWebRoot = realpath(WEB_ROOT);
+    return safe_page_file($file, WEB_ROOT);
+}
+
+function safe_page_file(string $file, string $root): string
+{
+    $realWebRoot = realpath($root);
     $realFile = is_file($file) ? realpath($file) : false;
 
     if ($realWebRoot === false || $realFile === false) {

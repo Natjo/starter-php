@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-$root = dirname(__DIR__, 2);
+$root = dirname(__DIR__);
 $uploadsDir = $root . '/dist/uploads';
 $assetsDir = $root . '/dist/assets';
 $sizesFile = $root . '/starter/image-sizes.json';
