@@ -1,9 +1,6 @@
-<?php
-get_template_part('header');
-get_template_part('header-nav', null);
-?>
+<?php common('header-nav'); ?>
 
-<main>
+<main id="main">
     <div class="strate">
         <h1>Contact</h1>
 
@@ -186,4 +183,4 @@ get_template_part('header-nav', null);
     </div>
 </main>
 
-<?php get_template_part('footer'); ?>
+<?php common('footer'); ?>

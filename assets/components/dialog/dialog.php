@@ -78,7 +78,7 @@ $trigger_extra = $trigger_classes !== "" ? " " . $trigger_classes : "";
         <?php endif; ?>
 
         <div id="<?= esc_attr($content_id) ?>" class="dialog-content">
-            <?= starter_kses_post($content) ?>
+            <?= wp_kses_post($content) ?>
         </div>
         <form method="dialog" class="dialog-actions">
             <button type="submit" class="dialog-close" value="close" data-dialog-close>

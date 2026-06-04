@@ -1,3 +1,6 @@
+<?php
+$content = isset($content) && is_scalar($content) ? (string) $content : "";
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <?php
@@ -31,3 +34,10 @@ $theme_color = isset($theme_color) && is_scalar($theme_color) && trim((string) $
 </head>
 
 <body>
+    
+    <?= $content ?>
+
+    <?php dist_scripts(); ?>
+</body>
+
+</html>

@@ -25,6 +25,6 @@ $uid = 'tooltip-' . $tooltipInstance;
         class="tooltip-content"
         id="<?= esc_attr($uid) ?>"
         role="tooltip">
-        <?= starter_kses_post($content) ?>
+        <?= wp_kses_post($content) ?>
     </span>
 </span>

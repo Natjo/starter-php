@@ -1,9 +1,11 @@
 <?php
-function normalize_args(mixed $args, array $defaults = []): array
-{
-    return array_replace($defaults, is_array($args) ? $args : []);
-}
 
+/**
+ * 
+ * fake wp
+ * fonction de wordpress revue pour etre compatible dans starter
+ * 
+ */
 function esc_attr(mixed $text): string
 {
     return htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8');
@@ -17,38 +19,6 @@ function esc_html(mixed $text): string
 function esc_url(mixed $url): string
 {
     return htmlspecialchars((string) $url, ENT_QUOTES, 'UTF-8');
-}
-
-function sanitize_html_class(mixed $class, $fallback = '')
-{
-    $class = preg_replace('/[^A-Za-z0-9_-]/', '-', (string) $class);
-    $class = trim((string) $class, '-');
-
-    return $class !== '' ? $class : (string) $fallback;
-}
-
-
-function lsd_get_thumb(mixed $image, mixed $size = 'full'): array
-{
-    if (!is_scalar($image) || trim((string) $image) === '') {
-        return [];
-    }
-
-    $source = starter_image_source($image, $size);
-    if (empty($source['file']) || empty($source['root']) || empty($source['url'])) {
-        return [];
-    }
-
-    $path = rtrim((string) $source['root'], '/') . '/' . $source['file'];
-    if (!is_file($path)) {
-        return [];
-    }
-
-    $dimensions = @getimagesize($path);
-    $width = !empty($dimensions[0]) ? (int) $dimensions[0] : 0;
-    $height = !empty($dimensions[1]) ? (int) $dimensions[1] : 0;
-
-    return [$source['url'], $width, $height, ''];
 }
 
 function get_template_part(mixed $slug, mixed $name = null, array $args = []): void
@@ -121,13 +91,221 @@ function get_template_part(mixed $slug, mixed $name = null, array $args = []): v
     trigger_error("Template introuvable : {$slug}", E_USER_WARNING);
 }
 
+function lsd_get_thumb(mixed $image, mixed $size = 'full'): array
+{
+    if (!is_scalar($image) || trim((string) $image) === '') {
+        return [];
+    }
+
+    $source = starter_image_source($image, $size);
+    if (empty($source['file']) || empty($source['root']) || empty($source['url'])) {
+        return [];
+    }
+
+    $path = rtrim((string) $source['root'], '/') . '/' . $source['file'];
+    if (!is_file($path)) {
+        return [];
+    }
+
+    $dimensions = @getimagesize($path);
+    $width = !empty($dimensions[0]) ? (int) $dimensions[0] : 0;
+    $height = !empty($dimensions[1]) ? (int) $dimensions[1] : 0;
+
+    return [$source['url'], $width, $height, ''];
+}
+
+function sanitize_html_class(mixed $class, $fallback = '')
+{
+    $class = preg_replace('/[^A-Za-z0-9_-]/', '-', (string) $class);
+    $class = trim((string) $class, '-');
+
+    return $class !== '' ? $class : (string) $fallback;
+}
+
+function wp_kses_post(mixed $html): string
+{
+    $html = (string) $html;
+    $allowed_tags = [
+        'a' => ['href', 'target', 'rel', 'title', 'class'],
+        'blockquote' => ['class'],
+        'br' => [],
+        'b' => ['class'],
+        'em' => ['class'],
+        'h2' => ['class'],
+        'h3' => ['class'],
+        'h4' => ['class'],
+        'h5' => ['class'],
+        'h6' => ['class'],
+        'i' => ['class'],
+        'li' => ['class'],
+        'ol' => ['class'],
+        'p' => ['class'],
+        'small' => ['class'],
+        'span' => ['class'],
+        'strong' => ['class'],
+        'sub' => ['class'],
+        'sup' => ['class'],
+        'ul' => ['class'],
+    ];
+
+    $html = preg_replace('#<(script|style|iframe|object|embed)\b[^>]*>.*?</\1>#isu', '', $html) ?? '';
+
+    if (!class_exists('DOMDocument')) {
+        $html = preg_replace('/<([a-z][a-z0-9]*)\b[^>]*>/iu', '<$1>', $html) ?? '';
+        return strip_tags($html, '<a><blockquote><br><b><em><h2><h3><h4><h5><h6><i><li><ol><p><small><span><strong><sub><sup><ul>');
+    }
+
+    $previous = libxml_use_internal_errors(true);
+    $dom = new DOMDocument('1.0', 'UTF-8');
+    $dom->loadHTML('<?xml encoding="UTF-8"><div>' . $html . '</div>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    libxml_clear_errors();
+    libxml_use_internal_errors($previous);
+
+    $root = $dom->documentElement;
+    if (!$root) {
+        return '';
+    }
+
+    $output = '';
+    foreach ($root->childNodes as $child) {
+        $output .= starter_sanitize_dom_node($child, $allowed_tags);
+    }
+
+    return $output;
+}
+
+// helpers fake wp
+function starter_image_source(mixed $image, mixed $size = 'full'): array
+{
+    $file = normalize_dist_file($image);
+    $isUpload = false;
+
+    if (defined('THEME_UPLOADS')) {
+        $themeUploads = rtrim(normalize_dist_file(THEME_UPLOADS), '/');
+        if ($themeUploads !== '' && str_starts_with($file, $themeUploads . '/')) {
+            $file = substr($file, strlen($themeUploads) + 1);
+            $isUpload = true;
+        }
+    }
+
+    if (defined('THEME_ASSETS')) {
+        $themeAssets = rtrim(normalize_dist_file(THEME_ASSETS), '/');
+        if ($themeAssets !== '' && str_starts_with($file, $themeAssets . '/')) {
+            $file = substr($file, strlen($themeAssets) + 1);
+        }
+    }
+
+    if (str_starts_with($file, 'dist/uploads/')) {
+        $file = substr($file, strlen('dist/uploads/'));
+        $isUpload = true;
+    }
+
+    if (str_starts_with($file, 'dist/assets/')) {
+        $file = substr($file, strlen('dist/assets/'));
+    }
+
+    if ($file === '') {
+        return [];
+    }
+
+    if (str_starts_with($file, 'uploads/')) {
+        $file = substr($file, strlen('uploads/'));
+        $isUpload = true;
+    }
+
+    if (str_starts_with($file, 'img/')) {
+        $candidate = starter_image_variant_file($file, $size, dist_assets_root());
+
+        return [
+            'file' => $candidate,
+            'root' => dist_assets_root(),
+            'url' => dist_asset_url($candidate),
+        ];
+    }
+
+    if ($isUpload) {
+        $upload = starter_image_variant_file($file, $size, dist_uploads_root());
+        return [
+            'file' => $upload,
+            'root' => dist_uploads_root(),
+            'url' => dist_upload_url($upload),
+        ];
+    }
+
+    $asset = starter_image_variant_file('img/' . $file, $size, dist_assets_root());
+    if (is_file(dist_assets_root() . '/' . $asset)) {
+        return [
+            'file' => $asset,
+            'root' => dist_assets_root(),
+            'url' => dist_asset_url($asset),
+        ];
+    }
+
+    return [
+        'file' => $asset,
+        'root' => dist_assets_root(),
+        'url' => dist_asset_url($asset),
+    ];
+}
+
+function enqueue_template_style(mixed $template): void
+{
+    $template = ltrim(str_replace('\\', '/', (string) $template), '/');
+    $template = preg_replace('#\.php$#', '', $template);
+    $basename = basename($template);
+
+    if ($basename === '') {
+        return;
+    }
+
+    enqueue_dist_style($template . '.css');
+
+    if (!str_contains($template, '/')) {
+        enqueue_dist_style($template . '/' . $basename . '.css');
+        enqueue_dist_style('common/' . $template . '/' . $basename . '.css');
+    }
+}
+
+function normalize_dist_file(mixed $file): string
+{
+    $file = ltrim(str_replace('\\', '/', (string) $file), '/');
+    $file = preg_replace('#/+#', '/', $file);
+    $file = preg_replace('#^\./+#', '', $file);
+
+    if ($file === '' || has_unsafe_path_segments($file)) {
+        return '';
+    }
+
+    return $file;
+}
+
+
+
+
+
 
 
 /**
- * 
- * pas dans wp mais utliser dans les fakes functions
- * 
+ * helper commun | starter - WP
  */
+
+function normalize_args(mixed $args, array $defaults = []): array
+{
+    return array_replace($defaults, is_array($args) ? $args : []);
+}
+
+function normalize_template_slug(mixed $slug): string
+{
+    $slug = trim(str_replace('\\', '/', (string) $slug), '/');
+    $slug = preg_replace('#\.php$#', '', $slug);
+    $slug = preg_replace('#/+#', '/', $slug);
+
+    if ($slug === '' || has_unsafe_path_segments($slug)) {
+        return '';
+    }
+
+    return preg_match('#^[A-Za-z0-9_/-]+$#', $slug) ? $slug : '';
+}
 
 function has_unsafe_path_segments(mixed $path): bool
 {
@@ -171,38 +349,6 @@ function sanitize_class_list(mixed $classes): string
     return implode(' ', array_unique($classes));
 }
 
-
-
-
-function starter_attributes(mixed $attributes): string
-{
-    if (is_string($attributes)) {
-        return trim($attributes);
-    }
-
-    if (!is_array($attributes)) {
-        return '';
-    }
-
-    $html = [];
-
-    foreach ($attributes as $name => $value) {
-        $name = strtolower((string) $name);
-
-        if (!preg_match('/^[a-z][a-z0-9_:-]*$/', $name) || $value === null || $value === false) {
-            continue;
-        }
-
-        if ($value === true) {
-            $html[] = esc_attr($name);
-            continue;
-        }
-
-        $html[] = esc_attr($name) . '="' . esc_attr($value) . '"';
-    }
-
-    return implode(' ', $html);
-}
 
 function options(mixed $classes, array $args = []): string
 {
@@ -258,6 +404,40 @@ function options(mixed $classes, array $args = []): string
     return starter_attributes($attributes);
 }
 
+function component(string $name, array $args = []): void
+{
+    get_template_part("components/{$name}/{$name}", null, $args);
+}
+
+function common(string $name, array $args = []): void
+{
+    $name = trim($name);
+    if ($name === '' || str_contains($name, '/') || str_contains($name, '..')) return;
+
+    get_template_part("common/{$name}/{$name}", null, $args);
+}
+
+function hero(string $name, array $args = []): void
+{
+    get_template_part("heros/hero-{$name}/hero-{$name}", null, $args);
+}
+
+function strate(string $name, array $args = []): void
+{
+    $name = str_replace('-', '_', $name);
+    get_template_part("strates/strate-{$name}/strate-{$name}", null, $args);
+}
+
+function card(mixed $name, mixed $args = []): void
+{
+    $name = is_scalar($name) ? trim((string) $name) : '';
+
+    if ($name === '' || str_contains($name, '/') || str_contains($name, '..')) return;
+
+    get_template_part("cards/{$name}/{$name}", null, is_array($args) ? $args : []);
+}
+
+
 function youtube_id_from_url(mixed $url): string
 {
     $parts = parse_url((string) $url);
@@ -280,18 +460,73 @@ function youtube_id_from_url(mixed $url): string
     return preg_match('/^[A-Za-z0-9_-]{11}$/', $id) ? $id : "";
 }
 
-function component(string $name, array $args = []): void
+
+
+
+// verif
+function starter_attributes(mixed $attributes): string
 {
-    get_template_part("components/{$name}/{$name}", null, $args);
+    if (is_string($attributes)) {
+        return trim($attributes);
+    }
+
+    if (!is_array($attributes)) {
+        return '';
+    }
+
+    $html = [];
+
+    foreach ($attributes as $name => $value) {
+        $name = strtolower((string) $name);
+
+        if (!preg_match('/^[a-z][a-z0-9_:-]*$/', $name) || $value === null || $value === false) {
+            continue;
+        }
+
+        if ($value === true) {
+            $html[] = esc_attr($name);
+            continue;
+        }
+
+        $html[] = esc_attr($name) . '="' . esc_attr($value) . '"';
+    }
+
+    return implode(' ', $html);
 }
 
-function hero(string $name, array $args = []): void
+// verisf
+function starter_sanitize_dom_node(DOMNode $node, array $allowed_tags): string
 {
-    get_template_part("heros/hero-{$name}/hero-{$name}", null, $args);
+    if ($node instanceof DOMText) {
+        return htmlspecialchars($node->wholeText, ENT_QUOTES, 'UTF-8');
+    }
+
+    if (!$node instanceof DOMElement) {
+        return '';
+    }
+
+    $tag = strtolower($node->tagName);
+    if (in_array($tag, ['script', 'style', 'iframe', 'object', 'embed'], true)) {
+        return '';
+    }
+
+    $children = '';
+
+    foreach ($node->childNodes as $child) {
+        $children .= starter_sanitize_dom_node($child, $allowed_tags);
+    }
+
+    if (!isset($allowed_tags[$tag])) {
+        return $children;
+    }
+
+    $attributes = starter_sanitize_dom_attributes($node, $allowed_tags[$tag]);
+
+    if ($tag === 'br') {
+        return '<br>';
+    }
+
+    return '<' . $tag . $attributes . '>' . $children . '</' . $tag . '>';
 }
 
-function strate(string $name, array $args = []): void
-{
-    $name = str_replace('-', '_', $name);
-    get_template_part("strates/strate-{$name}/strate-{$name}", null, $args);
-}
+

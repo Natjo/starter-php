@@ -46,7 +46,7 @@ if (empty($items)) return;
         <ul class="slider-content" role="list">
             <?php foreach ($items as $item) : ?>
                 <li class="item">
-                    <?php component::card($card, $item) ?>
+                    <?php card($card, $item) ?>
                 </li>
             <?php endforeach ?>
         </ul>

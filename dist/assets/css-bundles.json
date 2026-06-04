@@ -6,8 +6,6 @@
   "bundledFiles": [
     "common/footer/footer.css",
     "common/header-nav/header-nav.css",
-    "components/btn/btn.css",
-    "components/link/link.css",
     "components/list/list.css",
     "components/slider/slider.css",
     "components/tag/tag.css",
@@ -20,8 +18,6 @@
   "fileBundles": {
     "common/footer/footer.css": "common",
     "common/header-nav/header-nav.css": "common",
-    "components/btn/btn.css": "components",
-    "components/link/link.css": "components",
     "components/list/list.css": "components",
     "components/slider/slider.css": "components",
     "components/tag/tag.css": "components",

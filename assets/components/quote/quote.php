@@ -14,7 +14,7 @@ $caption = trim(implode(" - ", array_filter([$role, $source], static fn($value) 
 
 <figure class="<?= $classes ?>"<?= $attributes ?>>
     <blockquote class="quote-text">
-        <?= starter_kses_post($text) ?>
+        <?= wp_kses_post($text) ?>
     </blockquote>
 
     <?php if ($author !== '' || $caption !== '') : ?>

@@ -23,6 +23,9 @@ $file = dist_page_file($uri);
 if (is_file($file)) {
     ob_start();
     require $file;
+    $content = ob_get_clean();
+    ob_start();
+    get_template_part('layout', null, compact('content'));
     echo render_dist_style_placeholders(ob_get_clean());
     exit;
 }
@@ -33,6 +36,9 @@ $notFound = WEB_ROOT . '/404/index.php';
 if (is_file($notFound)) {
     ob_start();
     require $notFound;
+    $content = ob_get_clean();
+    ob_start();
+    get_template_part('layout', null, compact('content'));
     echo render_dist_style_placeholders(ob_get_clean());
     exit;
 }

@@ -11,7 +11,7 @@ $hx = "h" . $level;
 $classes = component::classes("title", $args["classes"] ?? "");
 $attributes = component::attributes($args["attributes"] ?? []);
 $html = array_key_exists("html", $args) ? (bool) $args["html"] : true;
-$content = $html ? starter_kses_post($title) : esc_html($title);
+$content = $html ? wp_kses_post($title) : esc_html($title);
 ?>
 
 <<?= $hx ?> class="<?= $classes ?>"<?= $attributes ?>><?= $content ?></<?= $hx ?>>

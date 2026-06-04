@@ -34,7 +34,7 @@ $arg = [
     "is_compact" => true,
     "is_featured" => false
 ];
- <?php component::card("news",$args) ?>
+ <?php card("news",$args) ?>
 ```
 
 ## CSS

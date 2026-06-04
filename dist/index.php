@@ -1,9 +1,7 @@
-<?php
-get_template_part('header');
-get_template_part('header-nav', null);
-?>
+<?php common('header-nav'); ?>
 
-<main>
+<main id="main">
+
     <?php
     hero("homepage", [
         "title" => "lorem",
@@ -107,5 +105,6 @@ get_template_part('header-nav', null);
     ]);
     ?>
 </main>
+  
 
-<?php get_template_part('footer'); ?>
+<?php common('footer'); ?>

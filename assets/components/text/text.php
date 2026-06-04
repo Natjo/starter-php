@@ -5,7 +5,7 @@ $text = is_scalar($text) ? trim((string) $text) : "";
 $classes = component::classes("text", $args["classes"] ?? "");
 $attributes = component::attributes($args["attributes"] ?? []);
 $html = array_key_exists("html", $args) ? (bool) $args["html"] : true;
-$content = $html ? starter_kses_post($text) : esc_html($text);
+$content = $html ? wp_kses_post($text) : esc_html($text);
 
 if ($text === "") return;
 ?>

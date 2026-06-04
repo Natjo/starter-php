@@ -35,7 +35,7 @@ if (empty($items)) return;
 
             <div id="<?= esc_attr($panel_id) ?>" class="details-content" aria-labelledby="<?= esc_attr($summary_id) ?>" aria-hidden="<?= $is_open ? "false" : "true" ?>">
                 <div class="text rte">
-                    <?= starter_kses_post($text) ?>
+                    <?= wp_kses_post($text) ?>
                 </div>
             </div>
         </div>

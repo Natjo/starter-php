@@ -111,15 +111,6 @@ class component
         ]);
     }
 
-    public static function card(mixed $name, mixed $args = []): void
-    {
-        $name = normalize_template_slug($name);
-
-        if ($name === "" || str_contains($name, "/")) return;
-
-        get_template_part("cards/{$name}/{$name}", null, is_array($args) ? $args : []);
-    }
-
     public static function slider(
         mixed $items,
         mixed $card = "card-news",

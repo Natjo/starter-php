@@ -1,9 +1,6 @@
-<?php
-get_template_part('header');
-get_template_part('header-nav', null);
-?>
+<?php common('header-nav'); ?>
 
-<main>
+<main id="main">
     <?php
     hero("homepage", [
         "title" => "Components",
@@ -225,4 +222,4 @@ get_template_part('header-nav', null);
     </div>
 </main>
 
-<?php get_template_part('footer'); ?>
+<?php common('footer'); ?>

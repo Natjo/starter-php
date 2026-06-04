@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 $root = dirname(__DIR__);
 $uploadsDir = $root . '/dist/uploads';
+$assetsDir = $root . '/dist/assets';
 $sizesFile = $root . '/image-sizes.json';
-$menusFile = $root . '/menus.json';
 $manifestFile = __DIR__ . '/.image-sizes-generated.json';
 $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
 $convertExtensions = ['jpg', 'jpeg', 'png'];
@@ -14,109 +14,60 @@ function admin_escape(mixed $value): string
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
 
-function admin_menu_location(mixed $location): string
+function admin_format_bytes(int $bytes): string
 {
-    $location = preg_replace('/[^A-Za-z0-9_-]/', '-', (string) $location);
-    $location = trim((string) $location, '-');
+    if ($bytes < 1024) {
+        return $bytes . ' o';
+    }
 
-    return $location;
+    return round($bytes / 1024, 1) . ' Ko';
 }
 
-function admin_menus(string $file): array
+function admin_asset_size(string $assetsDir, string $file): ?int
 {
-    if (!is_file($file)) {
+    $path = rtrim($assetsDir, '/') . '/' . ltrim($file, '/');
+
+    return is_file($path) ? filesize($path) : null;
+}
+
+function admin_css_bundle_manifest(string $assetsDir): array
+{
+    $path = rtrim($assetsDir, '/') . '/css-bundles.json';
+    if (!is_file($path)) {
         return [];
     }
 
-    $json = json_decode((string) file_get_contents($file), true);
-    $menus = is_array($json['menus'] ?? null) ? $json['menus'] : [];
-    $clean = [];
+    $json = json_decode((string) file_get_contents($path), true);
 
-    foreach ($menus as $menu) {
-        if (!is_array($menu)) {
-            continue;
-        }
-
-        $location = admin_menu_location($menu['theme_location'] ?? '');
-        if ($location === '') {
-            continue;
-        }
-
-        $title = trim((string) ($menu['title'] ?? $location));
-        $items = [];
-
-        foreach (($menu['items'] ?? []) as $item) {
-            if (!is_array($item)) {
-                continue;
-            }
-
-            $itemTitle = trim((string) ($item['title'] ?? ''));
-            $itemUrl = trim((string) ($item['url'] ?? ''));
-
-            if ($itemTitle === '' || $itemUrl === '') {
-                continue;
-            }
-
-            $items[] = [
-                'title' => $itemTitle,
-                'url' => $itemUrl,
-            ];
-        }
-
-        $clean[] = [
-            'title' => $title !== '' ? $title : $location,
-            'theme_location' => $location,
-            'items' => $items,
-        ];
-    }
-
-    return $clean;
+    return is_array($json) ? $json : [];
 }
 
-function save_admin_menus(string $file, array $post): void
+function admin_asset_gauge(string $assetsDir, string $label, string $file, int $maxSize, ?bool $used = null): array
 {
-    $titles = is_array($post['menu_title'] ?? null) ? $post['menu_title'] : [];
-    $locations = is_array($post['menu_location'] ?? null) ? $post['menu_location'] : [];
-    $itemTitles = is_array($post['item_title'] ?? null) ? $post['item_title'] : [];
-    $itemUrls = is_array($post['item_url'] ?? null) ? $post['item_url'] : [];
-    $menus = [];
-    $usedLocations = [];
+    $size = admin_asset_size($assetsDir, $file);
+    $percent = $size !== null ? min(100, round(($size / $maxSize) * 100, 1)) : 0;
+    $class = 'admin-gauge';
+    $status = $size !== null ? null : 'non généré';
 
-    foreach ($titles as $index => $title) {
-        $title = trim((string) $title);
-        $location = admin_menu_location($locations[$index] ?? '');
-
-        if ($title === '' || $location === '' || isset($usedLocations[$location])) {
-            continue;
-        }
-
-        $items = [];
-        $titlesForMenu = is_array($itemTitles[$index] ?? null) ? $itemTitles[$index] : [];
-        $urlsForMenu = is_array($itemUrls[$index] ?? null) ? $itemUrls[$index] : [];
-
-        foreach ($titlesForMenu as $itemIndex => $itemTitle) {
-            $itemTitle = trim((string) $itemTitle);
-            $itemUrl = trim((string) ($urlsForMenu[$itemIndex] ?? ''));
-
-            if ($itemTitle === '' || $itemUrl === '') {
-                continue;
-            }
-
-            $items[] = [
-                'title' => $itemTitle,
-                'url' => $itemUrl,
-            ];
-        }
-
-        $menus[] = [
-            'title' => $title,
-            'theme_location' => $location,
-            'items' => $items,
-        ];
-        $usedLocations[$location] = true;
+    if ($percent >= 100) {
+        $class .= ' is-danger';
+    } elseif ($percent >= 75) {
+        $class .= ' is-warning';
     }
 
-    file_put_contents($file, json_encode(['menus' => $menus], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+    if ($size === null && $used === false) {
+        $status = 'non utilisé';
+    }
+
+    return [
+        'label' => $label,
+        'file' => $file,
+        'size' => $size,
+        'max' => $maxSize,
+        'percent' => $percent,
+        'class' => $class,
+        'status' => $status,
+    ];
 }
 
 function generate(bool $force = false): array
@@ -723,9 +674,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'save_settings') {
         save_image_settings($sizesFile, $_POST);
         $message = 'Réglages enregistrés.';
-    } elseif ($action === 'save_menus') {
-        save_admin_menus($menusFile, $_POST);
-        $message = 'Menus enregistrés.';
     } else {
         $result = match ($action) {
             'regenerate' => generate(true),
@@ -739,7 +687,15 @@ $config = image_config($sizesFile);
 $defaults = $config['defaults'];
 $sizes = $config['sizes'];
 $sizes[''] = array_replace($defaults, ['width' => '', 'height' => '']);
-$menus = admin_menus($menusFile);
+$cssBundleManifest = admin_css_bundle_manifest($assetsDir);
+$cssBundles = is_array($cssBundleManifest['bundles'] ?? null) ? $cssBundleManifest['bundles'] : [];
+$assetGauges = [
+    admin_asset_gauge($assetsDir, 'CSS critique', 'critical.css', 14 * 1024),
+    admin_asset_gauge($assetsDir, 'Bundle common CSS', $cssBundles['common'] ?? 'common.css', 80 * 1024, isset($cssBundles['common'])),
+    admin_asset_gauge($assetsDir, 'Bundle components CSS', $cssBundles['components'] ?? 'components.css', 80 * 1024, isset($cssBundles['components'])),
+    admin_asset_gauge($assetsDir, 'Bundle modules CSS', $cssBundles['modules'] ?? 'modules.css', 80 * 1024, isset($cssBundles['modules'])),
+    admin_asset_gauge($assetsDir, 'Bundle app JS', 'app.js', 120 * 1024),
+];
 ?>
 
 <!doctype html>
@@ -749,14 +705,38 @@ $menus = admin_menus($menusFile);
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Generate images</title>
     <style>
-        .admin-layout { display: grid; gap: 2rem; grid-template-columns: 20rem 1fr; align-items: start; }
-        .admin-sidebar { position: sticky; top: 1rem; display: grid; gap: 1rem; }
-        .admin-menu-list { display: grid; gap: .5rem; margin: 0; padding: 0; list-style: none; }
-        .admin-menu-panel { display: grid; gap: 1rem; margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; }
-        .admin-menu-head,
-        .admin-menu-row { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; align-items: end; }
-        .admin-field { display: grid; gap: .35rem; }
-        .admin-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+        .admin-gauge {
+            display: grid;
+            gap: .5rem;
+            max-width: 32rem;
+        }
+
+        .admin-gauge-track {
+            height: .75rem;
+            overflow: hidden;
+            background: #e5e5e5;
+            border-radius: 999px;
+        }
+
+        .admin-gauge-meta {
+            color: #555;
+            font-size: .875rem;
+        }
+
+        .admin-gauge-value {
+            display: block;
+            height: 100%;
+            width: var(--value, 0%);
+            background: #1f7a4d;
+        }
+
+        .admin-gauge.is-warning .admin-gauge-value {
+            background: #b7791f;
+        }
+
+        .admin-gauge.is-danger .admin-gauge-value {
+            background: #c53030;
+        }
     </style>
 </head>
 <body>
@@ -766,7 +746,7 @@ $menus = admin_menus($menusFile);
         <nav aria-label="Admin sections">
             <ul>
                 <li><a href="#images">Images</a></li>
-                <li><a href="#menus">Menus</a></li>
+                <li><a href="#assets">Assets</a></li>
             </ul>
         </nav>
 
@@ -857,188 +837,29 @@ $menus = admin_menus($menusFile);
             </form>
         </section>
 
-        <section id="menus">
-            <h2>Menus</h2>
+        <section id="assets">
+            <h2>Assets</h2>
 
-            <form method="post" data-menus-form>
-                <div class="admin-layout">
-                    <aside class="admin-sidebar">
-                        <button type="button" data-add-menu>Add menu</button>
+            <?php foreach ($assetGauges as $gauge) : ?>
+                <div class="<?= admin_escape($gauge['class']) ?>">
+                    <p>
+                        <?= admin_escape($gauge['label']) ?>:
+                        <?= $gauge['size'] !== null ? admin_escape(admin_format_bytes($gauge['size'])) : admin_escape((string) $gauge['status']) ?>
+                        / <?= admin_escape(admin_format_bytes($gauge['max'])) ?>
+                    </p>
+                    <p class="admin-gauge-meta">
+                        Fichier: <?= admin_escape($gauge['file']) ?>.
+                        Max conseillé: <?= admin_escape(admin_format_bytes($gauge['max'])) ?>.
+                        Utilisation: <?= admin_escape((string) $gauge['percent']) ?>%.
+                    </p>
 
-                        <ul class="admin-menu-list" data-menu-sidebar>
-                            <?php foreach ($menus as $menuIndex => $menu) : ?>
-                                <li><a href="#menu-<?= (int) $menuIndex ?>"><?= admin_escape($menu['title'] ?? '') ?></a></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </aside>
-
-                    <div data-menu-panels>
-                        <?php foreach ($menus as $menuIndex => $menu) : ?>
-                            <section class="admin-menu-panel" id="menu-<?= (int) $menuIndex ?>" data-menu-panel>
-                                <div class="admin-menu-head">
-                                    <label class="admin-field">
-                                        Titre
-                                        <input name="menu_title[<?= (int) $menuIndex ?>]" value="<?= admin_escape($menu['title'] ?? '') ?>" required>
-                                    </label>
-
-                                    <label class="admin-field">
-                                        Theme location
-                                        <input name="menu_location[<?= (int) $menuIndex ?>]" value="<?= admin_escape($menu['theme_location'] ?? '') ?>" required>
-                                    </label>
-
-                                    <button type="button" data-remove-menu>Supprimer</button>
-                                </div>
-
-                                <div data-menu-items>
-                                    <?php foreach (($menu['items'] ?? []) as $item) : ?>
-                                        <div class="admin-menu-row" data-menu-item>
-                                            <label class="admin-field">
-                                                Titre
-                                                <input name="item_title[<?= (int) $menuIndex ?>][]" value="<?= admin_escape($item['title'] ?? '') ?>">
-                                            </label>
-
-                                            <label class="admin-field">
-                                                URL
-                                                <input name="item_url[<?= (int) $menuIndex ?>][]" value="<?= admin_escape($item['url'] ?? '') ?>">
-                                            </label>
-
-                                            <button type="button" data-remove-item>Supprimer</button>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-
-                                <div class="admin-actions">
-                                    <button type="button" data-add-item>Ajouter une ligne</button>
-                                </div>
-                            </section>
-                        <?php endforeach; ?>
+                    <div class="admin-gauge-track" role="meter" aria-valuemin="0" aria-valuemax="<?= (int) $gauge['max'] ?>" aria-valuenow="<?= (int) ($gauge['size'] ?? 0) ?>" aria-label="Poids <?= admin_escape($gauge['label']) ?>">
+                        <span class="admin-gauge-value" style="--value: <?= admin_escape((string) $gauge['percent']) ?>%"></span>
                     </div>
                 </div>
-
-                <button type="submit" name="action" value="save_menus">Save menus</button>
-            </form>
+            <?php endforeach; ?>
         </section>
+
     </main>
-
-    <template data-menu-template>
-        <section class="admin-menu-panel" data-menu-panel>
-            <div class="admin-menu-head">
-                <label class="admin-field">
-                    Titre
-                    <input data-name="menu_title" value="Nouveau menu" required>
-                </label>
-
-                <label class="admin-field">
-                    Theme location
-                    <input data-name="menu_location" value="menu-footer" required>
-                </label>
-
-                <button type="button" data-remove-menu>Supprimer</button>
-            </div>
-
-            <div data-menu-items></div>
-
-            <div class="admin-actions">
-                <button type="button" data-add-item>Ajouter une ligne</button>
-            </div>
-        </section>
-    </template>
-
-    <template data-menu-item-template>
-        <div class="admin-menu-row" data-menu-item>
-            <label class="admin-field">
-                Titre
-                <input data-name="item_title">
-            </label>
-
-            <label class="admin-field">
-                URL
-                <input data-name="item_url">
-            </label>
-
-            <button type="button" data-remove-item>Supprimer</button>
-        </div>
-    </template>
-
-    <script>
-        (() => {
-            const form = document.querySelector('[data-menus-form]');
-            if (!form) return;
-
-            const panels = form.querySelector('[data-menu-panels]');
-            const sidebar = form.querySelector('[data-menu-sidebar]');
-            const menuTemplate = document.querySelector('[data-menu-template]');
-            const itemTemplate = document.querySelector('[data-menu-item-template]');
-            let nextIndex = <?= count($menus) ?>;
-
-            const inputName = (key, index) => key.startsWith('item_') ? `${key}[${index}][]` : `${key}[${index}]`;
-
-            const assignInputNames = (element, index) => {
-                element.querySelectorAll('[data-name]').forEach(input => {
-                    input.name = inputName(input.dataset.name, index);
-                    input.removeAttribute('data-name');
-                });
-            };
-
-            const titleFor = panel => panel.querySelector('input[name^="menu_title"]')?.value.trim() || 'Menu';
-
-            const rebuildSidebar = () => {
-                sidebar.innerHTML = '';
-                panels.querySelectorAll('[data-menu-panel]').forEach(panel => {
-                    const item = document.createElement('li');
-                    const link = document.createElement('a');
-                    link.href = `#${panel.id}`;
-                    link.textContent = titleFor(panel);
-                    item.append(link);
-                    sidebar.append(item);
-                });
-            };
-
-            const addItem = panel => {
-                const index = panel.id.replace('menu-', '');
-                const item = itemTemplate.content.firstElementChild.cloneNode(true);
-                assignInputNames(item, index);
-                panel.querySelector('[data-menu-items]').append(item);
-            };
-
-            form.addEventListener('click', event => {
-                const button = event.target.closest('button');
-                if (!button) return;
-
-                if (button.matches('[data-add-menu]')) {
-                    const index = nextIndex++;
-                    const panel = menuTemplate.content.firstElementChild.cloneNode(true);
-                    panel.id = `menu-${index}`;
-                    assignInputNames(panel, index);
-                    panels.append(panel);
-                    addItem(panel);
-                    rebuildSidebar();
-                    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    return;
-                }
-
-                if (button.matches('[data-remove-menu]')) {
-                    button.closest('[data-menu-panel]')?.remove();
-                    rebuildSidebar();
-                    return;
-                }
-
-                if (button.matches('[data-add-item]')) {
-                    addItem(button.closest('[data-menu-panel]'));
-                    return;
-                }
-
-                if (button.matches('[data-remove-item]')) {
-                    button.closest('[data-menu-item]')?.remove();
-                }
-            });
-
-            form.addEventListener('input', event => {
-                if (event.target.matches('input[name^="menu_title"]')) {
-                    rebuildSidebar();
-                }
-            });
-        })();
-    </script>
 </body>
 </html>

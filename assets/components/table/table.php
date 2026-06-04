@@ -199,7 +199,7 @@ if (!function_exists('sg_table_render_cell')) {
         $content = '';
 
         if (!empty($cell['html'])) {
-            $content = starter_kses_post($cell['html']);
+            $content = wp_kses_post($cell['html']);
         } elseif (isset($cell['text'])) {
             $content = esc_html((string) $cell['text']);
         }

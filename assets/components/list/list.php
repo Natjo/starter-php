@@ -18,7 +18,7 @@ if (empty($items)) {
     <ul class="list__items" role="list">
         <?php foreach ($items as $item) : ?>
             <li class="list__item">
-                <?php component::card($card, is_array($item) ? $item : []); ?>
+                <?php card($card, is_array($item) ? $item : []); ?>
             </li>
         <?php endforeach; ?>
     </ul>

@@ -25,6 +25,6 @@ bundle components
 @import "components/tag/tag.css" components;
 @import "components/title/title.css" critical;
 @import "components/text/text.css" critical;
-@import "components/btn/btn.css" components;
-@import "components/link/link.css" components;
+@import "components/btn/btn.css" critical;
+@import "components/link/link.css" critical;
 @import "components/list/list.css" components;

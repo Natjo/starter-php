@@ -88,7 +88,7 @@ $tablist_id = "tablist-{$uid}";
             aria-labelledby="<?= esc_attr($tab_id) ?>"
             class="<?= $panel_classes ?>"
         >
-            <?= starter_kses_post($content) ?>
+            <?= wp_kses_post($content) ?>
         </div>
     <?php endforeach ?>
 </div>
