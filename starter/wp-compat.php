@@ -76,10 +76,8 @@ function get_template_part(mixed $slug, mixed $name = null, array $args = []): v
     }
 
     $directories = array_filter([
-        APP_ROOT,
-        APP_ROOT . '/assets',
-        WEB_ROOT,
-    ], static fn($directory) => is_dir($directory));
+        defined('ASSETS_ROOT') ? ASSETS_ROOT : null,
+    ], static fn($directory) => is_string($directory) && is_dir($directory));
 
     foreach ($templates as $template) {
         foreach ($directories as $directory) {

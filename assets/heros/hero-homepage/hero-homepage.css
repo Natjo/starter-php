@@ -1,32 +1,38 @@
 .hero-homepage {
-    align-content: center;
-    min-height: 58rem;
-    padding-block: var(--margin-lg);
     background: var(--color-3);
-    color: var(--color-1);
+    color: #fff;
 
-    .title,
-    p {
-        grid-column: ctr-sm;
-        max-width: 86rem;
+    .hero-content {
+        align-self: center;
+        grid-row: 1;
+        grid-column: ctr;
+        z-index: 1;
     }
 
     .title {
-        margin-bottom: 2rem;
-        font-family: var(--font-2);
-        font-size: clamp(4rem, 8vw, 10rem);
-        font-weight: 700;
-        line-height: .95;
-        text-transform: uppercase;
+       
     }
 
-    p {
-        font-size: clamp(1.8rem, 1.4rem + 1vw, 2.8rem);
-        line-height: 1.35;
-        color: var(--color-text);
+    .text {
+     
     }
+
+    picture {
+        grid-column: full;
+        grid-row: 1;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
 
     @media (--breakpoint-md-up) {
-        min-height: 72rem;
+        height: 100vh;
     }
 }

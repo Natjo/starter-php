@@ -12,6 +12,7 @@ Les CSS page-aware restent hors d'app.css et sont chargés selon les templates u
 @import "styles/fonts.css" critical;
 @import "styles/classes.css" critical;
 @import "styles/print.css" common;
+@import "styles/starter.css" common;
 
 // vendors
 @import "vendors/lenis/lenis.css" common;

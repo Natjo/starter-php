@@ -2,48 +2,48 @@
 
 <main id="main">
     <?php
-    hero("homepage", [
-        "title" => "Components",
-        "text" => ""
+    hero("page", [
+        "title" => "Components"
     ]);
     ?>
 
     <div class="strate">
-        <?php component::text("text","rte") ?>
+        <?php component::text("text", "rte") ?>
     </div>
-<?php component::date("2026-06-02"); ?>
-<?php component::date("2026-06-02", "d F Y"); ?>
-<?php component::date([
-    "date" => "2026-06-02",
-    "label" => "2 juin 2026",
-    "classes" => "date-news",
-]); ?>
+
+    <div class="strate">
+        <?php component::date("2026-06-02"); ?>
+        <?php component::date("2026-06-02", "d F Y"); ?>
+        <?php component::date([
+            "date" => "2026-06-02",
+            "label" => "2 juin 2026",
+            "classes" => "date-news",
+        ]); ?>
+    </div>
+
     <div class="strate">
         <?php component::btn("ret") ?>
-         <?php component::btn([
+        <?php component::btn([
             "link" => [
                 "title" => "test",
                 "url" => "/contact"
             ]
-         ]) ?>
+        ]) ?>
     </div>
-
 
     <div class="strate">
         <?php component::badge("badge") ?>
     </div>
 
     <div class="strate">
-
         <?php component::dialog("<p>dialog lorem</p>", ['btn', 'Open dialog', null]); ?>
     </div>
+
     <div class="strate">
-
-        <?php component::form('text', 'Label', 'name', true, null, 'Remplir ce champs'); ?>
-
+        <?php form('text', 'Label', 'name', true, null, 'Remplir ce champs'); ?>
     </div>
-    <div class="strate">
 
+    <div class="strate">
         <?php component::navanchor([
             [
                 "anchor" => "section-1",
@@ -59,12 +59,12 @@
             ]
         ], null, null, 'Table des matières'); ?>
     </div>
-    <div class="strate">
 
+    <div class="strate">
         <?php component::picto('youtube'); ?>
     </div>
-    <div class="strate">
 
+    <div class="strate">
         <?php component::select_custom([
             [
                 "name" => "Option 1",
@@ -86,8 +86,8 @@
             ]
         ], 'Mon select', 'mon-select'); ?>
     </div>
-    <div class="strate">
 
+    <div class="strate">
         <?php component::select_custom_full([
             [
                 "name" => "Option 1",
@@ -110,7 +110,6 @@
     </div>
 
     <div class="strate">
-
         <?php component::shares(['email', 'copy', 'facebook', 'x', 'whatsapp']); ?>
     </div>
 
@@ -169,17 +168,19 @@
         ], 'news'); ?>
     </div>
 
-  <div class="strate">
-    <h2>Picture</h2>
-     <?php  component::picture(THEME_UPLOADS . "image2.jpg")  ?>
-  </div>
+    <div class="strate">
+        <h2>Picture</h2>
+        <?php component::picture(THEME_UPLOADS . "image2.jpg")  ?>
+    </div>
 
     <div class="strate">
         <?php component::image(THEME_ASSETS . "img/63-1400x1024.jpg", 'full'); ?>
     </div>
+    
     <div class="strate">
         <?php component::image(THEME_UPLOADS . "image1.jpg", '130x87'); ?>
     </div>
+
     <div class="strate">
         <?php component::tag('tag Lorem ipsum dolor sit amet'); ?>
     </div>

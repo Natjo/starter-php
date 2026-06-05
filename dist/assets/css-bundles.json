@@ -13,6 +13,7 @@
     "strates/strate-text/strate-text.css",
     "strates/strate-text_image/strate-text_image.css",
     "styles/print.css",
+    "styles/starter.css",
     "vendors/lenis/lenis.css"
   ],
   "fileBundles": {
@@ -25,6 +26,7 @@
     "strates/strate-text/strate-text.css": "common",
     "strates/strate-text_image/strate-text_image.css": "common",
     "styles/print.css": "common",
+    "styles/starter.css": "common",
     "vendors/lenis/lenis.css": "common"
   }
 }

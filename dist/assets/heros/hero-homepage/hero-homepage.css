@@ -1,2 +1,40 @@
-.hero-homepage{align-content:center;background:var(--color-3);color:var(--color-1);min-height:58rem;padding-block:var(--margin-lg);.title,p{grid-column:ctr-sm;max-width:86rem}.title{font-family:var(--font-2);font-size:clamp(4rem,8vw,10rem);font-weight:700;line-height:.95;margin-bottom:2rem;text-transform:uppercase}p{color:var(--color-text);font-size:clamp(1.8rem,1.4rem + 1vw,2.8rem);line-height:1.35}@media (min-width:841px){min-height:72rem}}
+.hero-homepage {
+    background: var(--color-3);
+    color: #fff;
+
+    .hero-content {
+        align-self: center;
+        grid-row: 1;
+        grid-column: ctr;
+        z-index: 1;
+    }
+
+    .title {
+       
+    }
+
+    .text {
+     
+    }
+
+    picture {
+        grid-column: full;
+        grid-row: 1;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    img {
+        width: 100%;
+        height: 100%;
+        -o-object-fit: cover;
+           object-fit: cover;
+    }
+
+
+    @media (min-width: 841px) {
+        height: 100vh;
+    }
+}
 /*# sourceMappingURL=hero-homepage.css.map */

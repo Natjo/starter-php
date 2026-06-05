@@ -1,13 +1,19 @@
 <?php common('header-nav'); ?>
 
 <main id="main">
+    <?php
+    hero("page", [
+        "title" => "Form"
+    ]);
+    ?>
+
     <div class="strate">
         <h1>Contact</h1>
 
-        <form class="form" method="post" action="/contact" data-module="components/form">
+        <form class="form" method="post" action="/contact" data-module="form/form">
             <fieldset>
 
-                <?php component::form([
+                <?php form([
                     "type" => "text",
                     "label" => "Nom",
                     "name" => "name",
@@ -20,7 +26,7 @@
                     "hint" => "Minimum 2 caractères.",
                 ]); ?>
 
-                <?php component::form([
+                <?php form([
                     "type" => "email",
                     "label" => "E-mail",
                     "name" => "email",
@@ -31,27 +37,27 @@
                     "typemismatch" => "L'e-mail n'est pas valide.",
                 ]); ?>
 
-                <?php component::form([
+                <?php form([
                     "type" => "url",
                     "label" => "Site web",
                     "name" => "website",
-                     "required" => true,
+                    "required" => true,
                     "placeholder" => "https://example.com",
                     "typemismatch" => "L'URL n'est pas valide.",
                 ]); ?>
 
-                <?php component::form([
+                <?php form([
                     "type" => "tel",
                     "label" => "Téléphone",
                     "name" => "phone",
-                     "required" => true,
+                    "required" => true,
                     "placeholder" => "0600000000",
                     "autocomplete" => "tel",
                     "pattern" => "[0-9+ .-]{8,}",
                     "data_patternmismatch" => "Le numéro de téléphone n'est pas valide.",
                 ]); ?>
 
-                <?php component::form([
+                <?php form([
                     "type" => "password",
                     "label" => "Mot de passe",
                     "name" => "password",
@@ -63,7 +69,7 @@
             </fieldset>
 
             <fieldset>
-                <?php component::form([
+                <?php form([
                     "type" => "number",
                     "label" => "Nombre",
                     "name" => "people",
@@ -75,7 +81,7 @@
                     "typemismatch" => "Le nombre doit être compris entre 1 et 10.",
                 ]); ?>
 
-                <?php component::form([
+                <?php form([
                     "type" => "date",
                     "label" => "Date",
                     "name" => "date",
@@ -86,7 +92,7 @@
             </fieldset>
 
             <fieldset>
-                <?php component::form([
+                <?php form([
                     "type" => "select",
                     "label" => "Select",
                     "name" => "subject",
@@ -101,7 +107,7 @@
                     ],
                 ]); ?>
 
-                <?php component::form([
+                <?php form([
                     "type" => "select-custom",
                     "label" => "Select custom",
                     "name" => "timeline",
@@ -115,7 +121,7 @@
                     ],
                 ]); ?>
 
-                <?php component::form([
+                <?php form([
                     "type" => "select-custom-full",
                     "label" => "Select custom full",
                     "name" => "budget",
@@ -129,7 +135,7 @@
                     ],
                 ]); ?>
 
-                <?php component::form([
+                <?php form([
                     "type" => "radios",
                     "label" => "Radios",
                     "name" => "contact_preference",
@@ -141,7 +147,7 @@
                     ],
                 ]); ?>
 
-                <?php component::form([
+                <?php form([
                     "type" => "checkboxes",
                     "label" => "Checkboxes",
                     "name" => "services",
@@ -154,7 +160,7 @@
                     ],
                 ]); ?>
 
-                <?php component::form([
+                <?php form([
                     "type" => "checkbox",
                     "label" => "J'accepte les conditions",
                     "name" => "terms",
@@ -164,7 +170,7 @@
             </fieldset>
 
             <fieldset>
-                <?php component::form([
+                <?php form([
                     "type" => "textarea",
                     "label" => "Message",
                     "name" => "message",

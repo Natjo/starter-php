@@ -26,7 +26,8 @@ const cssBundles = {
 const cssImportTargetNames = new Set(['critical', ...Object.keys(cssBundles)]);
 const cssManifestFile = 'css-bundles.json';
 const bundledCssSourceDirs = new Set([...Object.keys(cssBundles), 'vendors', 'strates']);
-const excludedCopyDirs = new Set(['common', 'components', 'heros', 'modules', 'strates']);
+const templateSourceDirs = new Set(['cards', 'common', 'components', 'form', 'heros', 'strates']);
+const excludedCopyDirs = new Set([...templateSourceDirs, 'modules', 'styles']);
 const importAliases = {
     'common': path.join(src, 'common'),
     '@common': path.join(src, 'common'),
@@ -44,18 +45,26 @@ let cssManifest = {
     fileBundles: {},
 };
 const rebuildTimers = new Map();
+const rebuildSignatures = new Map();
 let fullBuildTimer = null;
 let sourceSnapshot = new Map();
+let currentSourceFiles = null;
 const shouldWatch = process.argv.includes('--watch');
 const isProd = process.argv.includes('--prod');
+let displayBuildStatus = !shouldWatch && !isProd;
 
-const processor = postcss([
-    cssnano,
+const postcssPlugins = [
     postcssExtendRule,
     postcssGlobalData({ files: [path.join(src, 'styles/customMedias.css')] }),
     cssCustomMedia(),
     autoprefixer({ add: true }),
-]);
+];
+
+if (isProd) {
+    postcssPlugins.unshift(cssnano);
+}
+
+const processor = postcss(postcssPlugins);
 
 const toPosix = file => file.split(path.sep).join('/');
 
@@ -86,6 +95,7 @@ const isCopiedDirFile = file => {
 
 const isVendorFile = file => topLevelDir(file) === 'vendors';
 const isStylesSourceFile = file => topLevelDir(file) === 'styles';
+const isTemplateFile = file => templateSourceDirs.has(topLevelDir(file)) && path.extname(file) === '.php';
 const isJsFile = file => path.extname(file) === '.js';
 const isCssFile = file => path.extname(file) === '.css';
 
@@ -165,7 +175,11 @@ const jsVersionHash = file => {
     return fileHash(versionedFile);
 };
 
-const versionedImport = (from, to) => `${relativeImport(from, to)}?v=${jsVersionHash(to)}`;
+const jsImportPath = (from, to) => {
+    const relative = relativeImport(from, to);
+
+    return isProd ? `${relative}?v=${jsVersionHash(to)}` : relative;
+};
 
 const babelAliasPlugin = () => ({
     visitor: {
@@ -177,7 +191,7 @@ const babelAliasPlugin = () => ({
             const resolved = resolveJsImport(state.file.opts.filename, source.value);
 
             if (resolved) {
-                source.value = versionedImport(state.file.opts.filename, resolved);
+                source.value = jsImportPath(state.file.opts.filename, resolved);
             }
         },
     },
@@ -193,7 +207,7 @@ const appBundlePlugin = {
             return { path: resolved };
         });
 
-        build.onResolve({ filter: /^\.\/(common|components|modules|strates)\// }, args => ({
+        build.onResolve({ filter: /^\.\/(common|components|form|modules|strates)\// }, args => ({
             path: args.path,
             external: true,
         }));
@@ -201,13 +215,37 @@ const appBundlePlugin = {
 };
 
 const display = (file, status) => {
+    if (!displayBuildStatus && status !== 'error') return;
+
     const colors = {
         add: '36m',
         remove: '31m',
         update: '32m',
         error: '31m',
     };
-    console.log(`\x1b[1m${file}\x1b[22m`, `\x1b[${colors[status] || '90m'}${status}\x1b[39m`);
+    console.log(`\x1b[1m${displayFileLabel(file)}\x1b[22m`, `\x1b[${colors[status] || '90m'}${status}\x1b[39m`);
+};
+
+const cssTargetLabel = target => {
+    const colors = {
+        critical: '35m',
+        common: '36m',
+        components: '33m',
+        modules: '34m',
+    };
+
+    return `\x1b[${colors[target] || '90m'}${target}\x1b[39m`;
+};
+
+const displayFileLabel = file => {
+    const parts = String(file).split('/');
+    const scopedRoots = new Set(['cards', 'components', 'heros', 'strates']);
+
+    if (parts.length > 1 && scopedRoots.has(parts[0])) {
+        return `${parts[0]} - ${parts[parts.length - 1]}`;
+    }
+
+    return file;
 };
 
 async function runPostcss(css, from, to) {
@@ -369,7 +407,7 @@ function writeCssManifest() {
     fs.writeJsonSync(path.join(dist, cssManifestFile), cssManifest, { spaces: 2 });
 }
 
-async function compileAppCss() {
+function refreshAppCssImports() {
     const file = sourceAppCss();
 
     if (!fs.existsSync(file)) {
@@ -390,10 +428,16 @@ async function compileAppCss() {
         bundledFiles: [],
         fileBundles: {},
     };
+
+    return { file, source };
+}
+
+async function compileAppCss() {
+    const { file, source } = refreshAppCssImports();
     const css = inlineImports(source);
 
     await runPostcss(css, file, path.join(dist, criticalCss));
-    display(`${path.basename(file)} -> ${criticalCss}`, 'update');
+    display(`${path.basename(file)} - ${cssTargetLabel('critical')} -> ${criticalCss}`, 'update');
 }
 
 async function compileCss(file) {
@@ -448,7 +492,7 @@ async function compileCssBundle(name) {
         if (fs.existsSync(`${compiled}.map`)) fs.removeSync(`${compiled}.map`);
     });
 
-    display(`${name} -> ${outputFile}`, 'update');
+    display(`${path.basename(sourceAppCss())} - ${cssTargetLabel(name)} -> ${outputFile}`, 'update');
 }
 
 async function compileCssBundles() {
@@ -485,7 +529,6 @@ async function compileCssBundleForFile(file) {
 async function compileCssAfterAppCssChange() {
     await compileAppCss();
     await compileCssBundles();
-    await compileCssInBundledDirs();
 }
 
 async function compileCssAfterStylesChange(file) {
@@ -504,7 +547,7 @@ async function compileJs(file) {
     const out = outputPath(file);
 
     if (isAppJs(file)) {
-        const moduleVersions = moduleVersionMap();
+        const moduleVersions = isProd ? moduleVersionMap() : {};
 
         await esbuild.build({
             entryPoints: [file],
@@ -513,7 +556,7 @@ async function compileJs(file) {
             format: 'esm',
             platform: 'browser',
             target: ['es2020'],
-            minify: true,
+            minify: isProd,
             drop: isProd ? ['console', 'debugger'] : [],
             define: {
                 __MODULE_VERSIONS__: JSON.stringify(moduleVersions),
@@ -525,7 +568,7 @@ async function compileJs(file) {
     }
 
     const result = babel.transformFileSync(file, {
-        minified: true,
+        minified: isProd,
         comments: false,
         sourceMaps: false,
         plugins: [babelAliasPlugin],
@@ -547,6 +590,34 @@ async function compileAppJs() {
     await compileJs(path.join(src, 'app.js'));
 }
 
+function appJsDependencyFiles() {
+    const entry = path.join(src, 'app.js');
+    const visited = new Set();
+    const dependencies = new Set();
+
+    function visit(file) {
+        const resolvedFile = path.resolve(file);
+
+        if (visited.has(resolvedFile) || !fs.existsSync(resolvedFile)) return;
+        visited.add(resolvedFile);
+
+        for (const dependency of jsDependencies(resolvedFile)) {
+            dependencies.add(dependency);
+            visit(dependency);
+        }
+    }
+
+    visit(entry);
+
+    return dependencies;
+}
+
+function shouldCompileAppJsAfterJsChange(file) {
+    if (isProd) return true;
+
+    return appJsDependencyFiles().has(path.resolve(file));
+}
+
 function jsImportSpecifiers(file) {
     const source = fs.readFileSync(file, 'utf8');
     const specifiers = [];
@@ -566,16 +637,31 @@ function jsDependencies(file) {
         .map(dependency => path.resolve(dependency));
 }
 
-function sourceJsFiles() {
-    return getFiles(src)
+function sourceFiles() {
+    return currentSourceFiles || getFiles(src);
+}
+
+function sourceJsFiles(files = sourceFiles()) {
+    return files
         .filter(file => isJsFile(file))
         .filter(file => !isAppJs(file))
         .filter(file => !isVendorFile(file));
 }
 
+function jsDependencyMap(files) {
+    const map = new Map();
+
+    files.forEach(file => {
+        map.set(path.resolve(file), jsDependencies(file));
+    });
+
+    return map;
+}
+
 async function compileAllJsModules() {
     const files = sourceJsFiles().map(file => path.resolve(file));
     const fileSet = new Set(files);
+    const dependencyMap = jsDependencyMap(files);
     const visited = new Set();
 
     async function visit(file) {
@@ -583,7 +669,7 @@ async function compileAllJsModules() {
 
         visited.add(file);
 
-        for (const dependency of jsDependencies(file)) {
+        for (const dependency of dependencyMap.get(file) || []) {
             if (fileSet.has(dependency)) {
                 await visit(dependency);
             }
@@ -597,36 +683,44 @@ async function compileAllJsModules() {
     }
 }
 
-function jsImportersOf(targetFile) {
+function jsImportersOf(targetFile, files = sourceJsFiles().map(file => path.resolve(file)), dependencyMap = jsDependencyMap(files)) {
     const target = path.resolve(targetFile);
 
-    return sourceJsFiles()
-        .map(file => path.resolve(file))
+    return files
         .filter(file => file !== target)
-        .filter(file => jsDependencies(file).includes(target));
+        .filter(file => (dependencyMap.get(file) || []).includes(target));
 }
 
-async function compileJsImporters(file, visited = new Set()) {
+async function compileJsImporters(file, visited = new Set(), files = null, dependencyMap = null) {
     const target = path.resolve(file);
 
     if (visited.has(target)) return;
     visited.add(target);
 
-    for (const importer of jsImportersOf(target)) {
+    files = files || sourceJsFiles().map(item => path.resolve(item));
+    dependencyMap = dependencyMap || jsDependencyMap(files);
+
+    for (const importer of jsImportersOf(target, files, dependencyMap)) {
         await compileJs(importer);
-        await compileJsImporters(importer, visited);
+        await compileJsImporters(importer, visited, files, dependencyMap);
     }
 }
 
 async function compileJsWithDependents(file) {
     await compileJs(file);
-    await compileJsImporters(file);
-    await compileAppJs();
+
+    if (isProd) {
+        await compileJsImporters(file);
+    }
+
+    if (shouldCompileAppJsAfterJsChange(file)) {
+        await compileAppJs();
+    }
 }
 
 function moduleVersionMap() {
     const versions = {};
-    const moduleRoots = ['common', 'components', 'heros', 'modules', 'strates'];
+    const moduleRoots = ['common', 'components', 'form', 'heros', 'modules', 'strates'];
 
     moduleRoots.forEach(rootDir => {
         const directory = path.join(dist, rootDir);
@@ -686,6 +780,11 @@ async function compileFile(file) {
     if (isVendorFile(file)) return;
 
     const ext = path.extname(file);
+    if (isTemplateFile(file)) {
+        copyStatic(file);
+        return;
+    }
+
     if (ext === '.css') {
         await compileCss(file);
         return;
@@ -724,28 +823,44 @@ function snapshotSourceFiles() {
     return snapshot;
 }
 
+function rebuildSignature(file) {
+    if (!fs.existsSync(file)) return 'missing';
+
+    const stat = fs.statSync(file);
+    const type = stat.isDirectory() ? 'dir' : 'file';
+
+    return `${type}:${stat.mtimeMs}:${stat.size}`;
+}
+
 async function build({ clean = true } = {}) {
-    if (clean) {
-        cleanDistAssets();
-    } else {
-        fs.ensureDirSync(dist);
+    currentSourceFiles = getFiles(src);
+
+    try {
+        if (clean) {
+            cleanDistAssets();
+        } else {
+            fs.ensureDirSync(dist);
+        }
+
+        syncCopiedDirs();
+
+        refreshAppCssImports();
+
+        for (const file of currentSourceFiles) {
+            if (isAppCss(file)) continue;
+            if (isAppJs(file)) continue;
+            if (isJsFile(file)) continue;
+            if (isCopiedDirFile(file) && path.extname(file) !== '.js' && !isCssFile(file)) continue;
+            await compileFile(file);
+        }
+
+        await compileAllJsModules();
+        await compileAppJs();
+        await compileAppCss();
+        await compileCssBundles();
+    } finally {
+        currentSourceFiles = null;
     }
-
-    syncCopiedDirs();
-
-    await compileAppCss();
-    await compileCssBundles();
-
-    for (const file of getFiles(src)) {
-        if (isAppCss(file)) continue;
-        if (isAppJs(file)) continue;
-        if (isJsFile(file)) continue;
-        if (isCopiedDirFile(file) && path.extname(file) !== '.js' && !isCssFile(file)) continue;
-        await compileFile(file);
-    }
-
-    await compileAllJsModules();
-    await compileAppJs();
 }
 
 function cleanDistAssets() {
@@ -769,8 +884,10 @@ async function rebuild(file, evt = 'update') {
             await compileAppCss();
         }
         if (isJsFile(absoluteFile) && !isAppJs(absoluteFile)) {
-            await compileJsImporters(absoluteFile);
-            await compileAppJs();
+            if (isProd) {
+                await compileJsImporters(absoluteFile);
+                await compileAppJs();
+            }
         }
         display(toPosix(path.relative(src, absoluteFile)), 'remove');
         return;
@@ -792,7 +909,9 @@ async function rebuild(file, evt = 'update') {
             if (!isVendorFile(absoluteFile)) {
                 await compileJsInDir(absoluteFile);
                 await compileCssInDir(absoluteFile);
-                await compileAppJs();
+                if (isProd) {
+                    await compileAppJs();
+                }
             }
         }
 
@@ -840,14 +959,26 @@ async function rebuild(file, evt = 'update') {
     }
 
     if (isJsFile(absoluteFile) && !isAppJs(absoluteFile)) {
-        await compileJsImporters(absoluteFile);
-        await compileAppJs();
+        if (isProd) {
+            await compileJsImporters(absoluteFile);
+        }
+
+        if (shouldCompileAppJsAfterJsChange(absoluteFile)) {
+            await compileAppJs();
+        }
     }
 }
 
 function scheduleRebuild(evt, file) {
     const absoluteFile = path.isAbsolute(file) ? file : path.join(root, file);
     const key = path.resolve(absoluteFile);
+    const signature = rebuildSignature(absoluteFile);
+
+    if (rebuildSignatures.get(key) === signature) {
+        return;
+    }
+
+    rebuildSignatures.set(key, signature);
 
     if (fs.existsSync(absoluteFile) && fs.statSync(absoluteFile).isFile()) {
         const stat = fs.statSync(absoluteFile);
@@ -911,9 +1042,16 @@ function startPollingRescan() {
 
 build()
     .then(() => {
-        if (!shouldWatch) return;
+        if (!shouldWatch) {
+            if (isProd) {
+                console.log("I'm watching you...");
+            }
+
+            return;
+        }
 
         console.log("I'm watching you...");
+        displayBuildStatus = true;
 
         chokidar
             .watch(src, {
@@ -947,7 +1085,6 @@ build()
                 console.error(error.message);
             });
 
-        startPollingRescan();
     })
     .catch(error => {
         display('build', 'error');

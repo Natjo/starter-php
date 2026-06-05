@@ -1,3 +1,14 @@
 #footer {
-    background-color: red;
+    padding: 4rem var(--ctr-offset);
+    background-color: var(--color-2);
+    color: #fff;
+    display:flex;
+    justify-content: space-between;
+
+    nav{
+        ul{
+            display: flex;
+            gap: 1rem;
+        }
+    }
 }

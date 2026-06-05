@@ -1,12 +1,15 @@
 .header-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 2rem;
     min-height: var(--header-height);
     padding-inline: var(--ctr-offset);
-    background: #fff;
-    border-bottom: 1px solid var(--color-gray-dark);
+    background: rgba(255,255,255,.95);
+   
 }
 
 .header-nav-brand {

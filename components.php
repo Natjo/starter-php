@@ -100,8 +100,19 @@ class component
             $mobileSize = "full";
         }
 
+        $images = $args;
+        if (is_array($args)) {
+            if (array_key_exists("images", $args)) {
+                $images = $args["images"];
+            } elseif (array_key_exists("desktop", $args) || array_key_exists("mobile", $args) || array_keys($args) === range(0, count($args) - 1)) {
+                $images = $args;
+            } else {
+                $images = null;
+            }
+        }
+
         get_template_part('components/picture/picture', null, [
-            "images" => is_array($args) ? ($args["images"] ?? $args) : $args,
+            "images" => $images,
             "classes" => $classes,
             "lazy" => $lazy,
             "breakpoint" => $breakpoint,
@@ -369,42 +380,7 @@ class component
         mixed $classes = null,
         mixed $attributes = null
     ): void {
-        if (is_array($type)) {
-            $field_args = $type;
-
-            if ($label !== null) {
-                $field_args['classes'] = $label;
-            }
-
-            if ($name !== null) {
-                $field_args['attributes'] = $name;
-            }
-        } else {
-            $field_args = is_array($args) ? $args : [];
-            $field_args['type'] = $type;
-            $field_args['label'] = $label;
-            $field_args['name'] = $name;
-            $field_args['required'] = (bool) $required;
-            $field_args['mandatory'] = $mandatory;
-            $field_args['placeholder'] = $placeholder;
-            $field_args['options'] = is_array($options) ? $options : [];
-
-            if ($classes !== null) {
-                $field_args['classes'] = $classes;
-            }
-
-            if ($attributes !== null) {
-                $field_args['attributes'] = $attributes;
-            }
-        }
-
-        if (!isset($field_args['mandatory_msg'])) {
-            $field_args['mandatory_msg'] = $mandatory_msg;
-        }
-
-        if (empty($field_args['name']) || trim((string) $field_args['name']) === '') return;
-
-        get_template_part('components/form/form', null, $field_args);
+        form($type, $label, $name, $required, $mandatory, $mandatory_msg, $placeholder, $options, $args, $classes, $attributes);
     }
 
     public static function navanchor(

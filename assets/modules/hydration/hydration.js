@@ -28,6 +28,7 @@ const importModule = async (moduleName) => {
         try {
             if (dir === 'common') modulePath = `./common/${file}.js`;
             if (dir === 'components') modulePath = `./components/${file}.js`;
+            if (dir === 'form') modulePath = `./form/${file}.js`;
             if (dir === 'modules') modulePath = `./modules/${file}.js`;
             if (dir === 'strates') modulePath = `./strates/${file}.js`;
 

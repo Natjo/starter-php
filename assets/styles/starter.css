@@ -1,0 +1,240 @@
+/*
+Les styles pour le starter kit pour pas poluer l'integration.
+Ce fichier ne doit pas etre pris en compte et effacer
+*/
+
+.starter-styleguide {
+    --starter-border: color-mix(in srgb, var(--color-text) 18%, transparent);
+    --starter-surface: #fff;
+    --starter-muted: color-mix(in srgb, var(--color-text) 68%, transparent);
+    row-gap: var(--margin-md);
+}
+
+.starter-section {
+    display: grid;
+    gap: 2.4rem;
+}
+
+.starter-section-header {
+    display: grid;
+    gap: 1rem;
+    max-width: 76rem;
+
+    p {
+        color: var(--starter-muted);
+        line-height: 1.55;
+    }
+}
+
+.starter-grid {
+    display: grid;
+    gap: var(--gap);
+
+    @media (--breakpoint-md-up) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.starter-grid-compact {
+    margin-top: var(--gap);
+}
+
+.starter-panel {
+    background: var(--starter-surface);
+    border: 1px solid var(--starter-border);
+    border-radius: .8rem;
+    box-sizing: border-box;
+    display: grid;
+    gap: 1.8rem;
+    min-width: 0;
+    padding: 2rem;
+
+    small,
+    p {
+        line-height: 1.55;
+    }
+}
+
+.starter-stack {
+    display: grid;
+    gap: 1.2rem;
+}
+
+.starter-font-preview {
+    border-top: 1px solid var(--starter-border);
+    font-family: var(--font-1);
+    font-size: 3.2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    padding-top: 1.6rem;
+}
+
+.starter-spec-list {
+    display: grid;
+    gap: 1rem;
+
+    p {
+        align-items: baseline;
+        border-bottom: 1px solid var(--starter-border);
+        display: flex;
+        gap: 1.2rem;
+        justify-content: space-between;
+        line-height: 1.4;
+        padding-bottom: 1rem;
+    }
+
+    p:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    span {
+        color: var(--starter-muted);
+        text-align: right;
+    }
+}
+
+.starter-table {
+    border-collapse: collapse;
+    border: 1px solid var(--starter-border);
+    border-radius: .8rem;
+    display: block;
+    overflow-x: auto;
+    width: 100%;
+
+    thead,
+    tbody,
+    tr {
+        width: 100%;
+    }
+
+    th,
+    td {
+        border-bottom: 1px solid var(--starter-border);
+        padding: 1.4rem;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    th {
+        color: var(--starter-muted);
+        font-size: 1.3rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    td:first-child {
+        min-width: 16rem;
+        width: 28%;
+    }
+
+    tr:last-child td {
+        border-bottom: 0;
+    }
+
+    code {
+        color: var(--color-2);
+        font-size: 1.3rem;
+        white-space: nowrap;
+    }
+
+    p {
+        line-height: 1.35;
+    }
+}
+
+.starter-swatches {
+    display: grid;
+    gap: var(--gap);
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+}
+
+.starter-swatch {
+    border: 1px solid var(--starter-border);
+    border-radius: .8rem;
+    display: grid;
+    gap: .8rem;
+    overflow: hidden;
+
+    span {
+        background: var(--swatch);
+        display: block;
+        min-height: 9rem;
+    }
+
+    strong,
+    code {
+        margin-inline: 1.2rem;
+    }
+
+    code {
+        color: var(--starter-muted);
+        font-size: 1.3rem;
+        margin-bottom: 1.2rem;
+        overflow-wrap: anywhere;
+    }
+}
+
+.starter-backgrounds {
+    display: grid;
+    gap: var(--gap);
+
+    @media (--breakpoint-md-up) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.starter-background {
+    border-radius: .8rem;
+    display: grid;
+    gap: .8rem;
+    min-height: 14rem;
+    padding: 2rem;
+    place-content: end start;
+
+    span {
+        line-height: 1.45;
+    }
+}
+
+.starter-layout-demo {
+    background: var(--color-gray-light);
+    border-radius: .8rem;
+    display: grid;
+    gap: 1.2rem;
+    padding: 2rem;
+}
+
+.starter-layout-row {
+    align-items: center;
+    display: grid;
+    gap: 1.2rem;
+    grid-template-columns: 7rem 1fr;
+
+    span {
+        color: var(--starter-muted);
+        font-size: 1.4rem;
+    }
+}
+
+.starter-layout-bar {
+    background: var(--color-2);
+    border-radius: 999rem;
+    height: 1.2rem;
+}
+
+.starter-layout-full {
+    width: 100%;
+}
+
+.starter-layout-fluid {
+    width: 88%;
+}
+
+.starter-layout-ctr {
+    width: 72%;
+}
+
+.starter-layout-ctr-sm {
+    width: 54%;
+}

@@ -1,1 +1,1228 @@
-var X=Object.defineProperty;var Y=(t,e,i)=>e in t?X(t,e,{enumerable:!0,configurable:!0,writable:!0,value:i}):t[e]=i;var r=(t,e,i)=>Y(t,typeof e!="symbol"?e+"":e,i);var L={"common/header-nav/header-nav.js":"75fb2db44b","components/accordion/accordion.js":"658c3fcf36","components/autocomplete/autocomplete.js":"98ba486093","components/dialog/dialog.js":"0e63ab4c16","components/form/form.js":"d0ec50dd76","components/navanchor/navanchor.js":"05593affaa","components/select-custom-full/select-custom-full.js":"37176d7231","components/shares/shares.js":"a62a5ab8a6","components/slider/slider.js":"d88dd09797","components/tab/tab.js":"73cff4a68c","components/video/video.js":"441ba33669","modules/hydration/hydration.js":"43bf3794bc","strates/strate-slider/strate-slider.js":"9b4de6ab5c"};var _="1.3.18";function x(t,e,i){return Math.max(t,Math.min(e,i))}function I(t,e,i){return(1-i)*t+i*e}function P(t,e,i,s){return I(t,e,1-Math.exp(-i*s))}function B(t,e){return(t%e+e)%e}var $=class{constructor(){r(this,"isRunning",!1);r(this,"value",0);r(this,"from",0);r(this,"to",0);r(this,"currentTime",0);r(this,"lerp");r(this,"duration");r(this,"easing");r(this,"onUpdate")}advance(t){if(!this.isRunning)return;let e=!1;if(this.duration&&this.easing){this.currentTime+=t;let i=x(0,this.currentTime/this.duration,1);e=i>=1;let s=e?1:this.easing(i);this.value=this.from+(this.to-this.from)*s}else this.lerp?(this.value=P(this.value,this.to,this.lerp*60,t),Math.round(this.value)===this.to&&(this.value=this.to,e=!0)):(this.value=this.to,e=!0);e&&this.stop(),this.onUpdate?.(this.value,e)}stop(){this.isRunning=!1}fromTo(t,e,{lerp:i,duration:s,easing:o,onStart:h,onUpdate:l}){this.from=this.value=t,this.to=e,this.lerp=i,this.duration=s,this.easing=o,this.currentTime=0,this.isRunning=!0,h?.(),this.onUpdate=l}};function q(t,e){let i;return function(...s){clearTimeout(i),i=setTimeout(()=>{i=void 0,t.apply(this,s)},e)}}var U=class{constructor(t,e,{autoResize:i=!0,debounce:s=250}={}){r(this,"width",0);r(this,"height",0);r(this,"scrollHeight",0);r(this,"scrollWidth",0);r(this,"debouncedResize");r(this,"wrapperResizeObserver");r(this,"contentResizeObserver");r(this,"resize",()=>{this.onWrapperResize(),this.onContentResize()});r(this,"onWrapperResize",()=>{this.wrapper instanceof Window?(this.width=window.innerWidth,this.height=window.innerHeight):(this.width=this.wrapper.clientWidth,this.height=this.wrapper.clientHeight)});r(this,"onContentResize",()=>{this.wrapper instanceof Window?(this.scrollHeight=this.content.scrollHeight,this.scrollWidth=this.content.scrollWidth):(this.scrollHeight=this.wrapper.scrollHeight,this.scrollWidth=this.wrapper.scrollWidth)});this.wrapper=t,this.content=e,i&&(this.debouncedResize=q(this.resize,s),this.wrapper instanceof Window?window.addEventListener("resize",this.debouncedResize):(this.wrapperResizeObserver=new ResizeObserver(this.debouncedResize),this.wrapperResizeObserver.observe(this.wrapper)),this.contentResizeObserver=new ResizeObserver(this.debouncedResize),this.contentResizeObserver.observe(this.content)),this.resize()}destroy(){this.wrapperResizeObserver?.disconnect(),this.contentResizeObserver?.disconnect(),this.wrapper===window&&this.debouncedResize&&window.removeEventListener("resize",this.debouncedResize)}get limit(){return{x:this.scrollWidth-this.width,y:this.scrollHeight-this.height}}},k=class{constructor(){r(this,"events",{})}emit(t,...e){let i=this.events[t]||[];for(let s=0,o=i.length;s<o;s++)i[s]?.(...e)}on(t,e){return this.events[t]?this.events[t].push(e):this.events[t]=[e],()=>{this.events[t]=this.events[t]?.filter(i=>e!==i)}}off(t,e){this.events[t]=this.events[t]?.filter(i=>e!==i)}destroy(){this.events={}}},F=100/6,g={passive:!1};function R(t,e){return t===1?F:t===2?e:1}var G=class{constructor(t,e={wheelMultiplier:1,touchMultiplier:1}){r(this,"touchStart",{x:0,y:0});r(this,"lastDelta",{x:0,y:0});r(this,"window",{width:0,height:0});r(this,"emitter",new k);r(this,"onTouchStart",t=>{let{clientX:e,clientY:i}=t.targetTouches?t.targetTouches[0]:t;this.touchStart.x=e,this.touchStart.y=i,this.lastDelta={x:0,y:0},this.emitter.emit("scroll",{deltaX:0,deltaY:0,event:t})});r(this,"onTouchMove",t=>{let{clientX:e,clientY:i}=t.targetTouches?t.targetTouches[0]:t,s=-(e-this.touchStart.x)*this.options.touchMultiplier,o=-(i-this.touchStart.y)*this.options.touchMultiplier;this.touchStart.x=e,this.touchStart.y=i,this.lastDelta={x:s,y:o},this.emitter.emit("scroll",{deltaX:s,deltaY:o,event:t})});r(this,"onTouchEnd",t=>{this.emitter.emit("scroll",{deltaX:this.lastDelta.x,deltaY:this.lastDelta.y,event:t})});r(this,"onWheel",t=>{let{deltaX:e,deltaY:i,deltaMode:s}=t,o=R(s,this.window.width),h=R(s,this.window.height);e*=o,i*=h,e*=this.options.wheelMultiplier,i*=this.options.wheelMultiplier,this.emitter.emit("scroll",{deltaX:e,deltaY:i,event:t})});r(this,"onWindowResize",()=>{this.window={width:window.innerWidth,height:window.innerHeight}});this.element=t,this.options=e,window.addEventListener("resize",this.onWindowResize),this.onWindowResize(),this.element.addEventListener("wheel",this.onWheel,g),this.element.addEventListener("touchstart",this.onTouchStart,g),this.element.addEventListener("touchmove",this.onTouchMove,g),this.element.addEventListener("touchend",this.onTouchEnd,g)}on(t,e){return this.emitter.on(t,e)}destroy(){this.emitter.destroy(),window.removeEventListener("resize",this.onWindowResize),this.element.removeEventListener("wheel",this.onWheel,g),this.element.removeEventListener("touchstart",this.onTouchStart,g),this.element.removeEventListener("touchmove",this.onTouchMove,g),this.element.removeEventListener("touchend",this.onTouchEnd,g)}},W=t=>Math.min(1,1.001-2**(-10*t)),C=class{constructor({wrapper:t=window,content:e=document.documentElement,eventsTarget:i=t,smoothWheel:s=!0,syncTouch:o=!1,syncTouchLerp:h=.075,touchInertiaExponent:l=1.7,duration:c,easing:u,lerp:p=.1,infinite:w=!1,orientation:m="vertical",gestureOrientation:n=m==="horizontal"?"both":"vertical",touchMultiplier:d=1,wheelMultiplier:a=1,autoResize:S=!0,prevent:v,virtualScroll:f,overscroll:b=!0,autoRaf:E=!1,anchors:T=!1,autoToggle:z=!1,allowNestedScroll:M=!1,__experimental__naiveDimensions:y=!1,naiveDimensions:j=y,stopInertiaOnNavigate:A=!1}={}){r(this,"_isScrolling",!1);r(this,"_isStopped",!1);r(this,"_isLocked",!1);r(this,"_preventNextNativeScrollEvent",!1);r(this,"_resetVelocityTimeout",null);r(this,"_rafId",null);r(this,"isTouching");r(this,"time",0);r(this,"userData",{});r(this,"lastVelocity",0);r(this,"velocity",0);r(this,"direction",0);r(this,"options");r(this,"targetScroll");r(this,"animatedScroll");r(this,"animate",new $);r(this,"emitter",new k);r(this,"dimensions");r(this,"virtualScroll");r(this,"onScrollEnd",t=>{t instanceof CustomEvent||(this.isScrolling==="smooth"||this.isScrolling===!1)&&t.stopPropagation()});r(this,"dispatchScrollendEvent",()=>{this.options.wrapper.dispatchEvent(new CustomEvent("scrollend",{bubbles:this.options.wrapper===window,detail:{lenisScrollEnd:!0}}))});r(this,"onTransitionEnd",t=>{t.propertyName.includes("overflow")&&this.checkOverflow()});r(this,"onClick",t=>{let i=t.composedPath().filter(s=>s instanceof HTMLAnchorElement&&s.getAttribute("href"));if(this.options.anchors){let s=i.find(o=>o.getAttribute("href")?.includes("#"));if(s){let o=s.getAttribute("href");if(o){let h=typeof this.options.anchors=="object"&&this.options.anchors?this.options.anchors:void 0,l=`#${o.split("#")[1]}`;this.scrollTo(l,h)}}}this.options.stopInertiaOnNavigate&&i.find(o=>o.host===window.location.host)&&this.reset()});r(this,"onPointerDown",t=>{t.button===1&&this.reset()});r(this,"onVirtualScroll",t=>{if(typeof this.options.virtualScroll=="function"&&this.options.virtualScroll(t)===!1)return;let{deltaX:e,deltaY:i,event:s}=t;if(this.emitter.emit("virtual-scroll",{deltaX:e,deltaY:i,event:s}),s.ctrlKey||s.lenisStopPropagation)return;let o=s.type.includes("touch"),h=s.type.includes("wheel");this.isTouching=s.type==="touchstart"||s.type==="touchmove";let l=e===0&&i===0;if(this.options.syncTouch&&o&&s.type==="touchstart"&&l&&!this.isStopped&&!this.isLocked){this.reset();return}let u=this.options.gestureOrientation==="vertical"&&i===0||this.options.gestureOrientation==="horizontal"&&e===0;if(l||u)return;let p=s.composedPath();p=p.slice(0,p.indexOf(this.rootElement));let w=this.options.prevent,m=Math.abs(e)>=Math.abs(i)?"horizontal":"vertical";if(p.find(f=>f instanceof HTMLElement&&(typeof w=="function"&&w?.(f)||f.hasAttribute?.("data-lenis-prevent")||m==="vertical"&&f.hasAttribute?.("data-lenis-prevent-vertical")||m==="horizontal"&&f.hasAttribute?.("data-lenis-prevent-horizontal")||o&&f.hasAttribute?.("data-lenis-prevent-touch")||h&&f.hasAttribute?.("data-lenis-prevent-wheel")||this.options.allowNestedScroll&&this.hasNestedScroll(f,{deltaX:e,deltaY:i}))))return;if(this.isStopped||this.isLocked){s.cancelable&&s.preventDefault();return}if(!(this.options.syncTouch&&o||this.options.smoothWheel&&h)){this.isScrolling="native",this.animate.stop(),s.lenisStopPropagation=!0;return}let d=i;this.options.gestureOrientation==="both"?d=Math.abs(i)>Math.abs(e)?i:e:this.options.gestureOrientation==="horizontal"&&(d=e),(!this.options.overscroll||this.options.infinite||this.options.wrapper!==window&&this.limit>0&&(this.animatedScroll>0&&this.animatedScroll<this.limit||this.animatedScroll===0&&i>0||this.animatedScroll===this.limit&&i<0))&&(s.lenisStopPropagation=!0),s.cancelable&&s.preventDefault();let a=o&&this.options.syncTouch,v=o&&s.type==="touchend";v&&(d=Math.sign(this.velocity)*Math.abs(this.velocity)**this.options.touchInertiaExponent),this.scrollTo(this.targetScroll+d,{programmatic:!1,...a?{lerp:v?this.options.syncTouchLerp:1}:{lerp:this.options.lerp,duration:this.options.duration,easing:this.options.easing}})});r(this,"onNativeScroll",()=>{if(this._resetVelocityTimeout!==null&&(clearTimeout(this._resetVelocityTimeout),this._resetVelocityTimeout=null),this._preventNextNativeScrollEvent){this._preventNextNativeScrollEvent=!1;return}if(this.isScrolling===!1||this.isScrolling==="native"){let t=this.animatedScroll;this.animatedScroll=this.targetScroll=this.actualScroll,this.lastVelocity=this.velocity,this.velocity=this.animatedScroll-t,this.direction=Math.sign(this.animatedScroll-t),this.isStopped||(this.isScrolling="native"),this.emit(),this.velocity!==0&&(this._resetVelocityTimeout=setTimeout(()=>{this.lastVelocity=this.velocity,this.velocity=0,this.isScrolling=!1,this.emit()},400))}});r(this,"raf",t=>{let e=t-(this.time||t);this.time=t,this.animate.advance(e*.001),this.options.autoRaf&&(this._rafId=requestAnimationFrame(this.raf))});window.lenisVersion=_,window.lenis||(window.lenis={}),window.lenis.version=_,m==="horizontal"&&(window.lenis.horizontal=!0),(!t||t===document.documentElement)&&(t=window),typeof c=="number"&&typeof u!="function"?u=W:typeof u=="function"&&typeof c!="number"&&(c=1),this.options={wrapper:t,content:e,eventsTarget:i,smoothWheel:s,syncTouch:o,syncTouchLerp:h,touchInertiaExponent:l,duration:c,easing:u,lerp:p,infinite:w,gestureOrientation:n,orientation:m,touchMultiplier:d,wheelMultiplier:a,autoResize:S,prevent:v,virtualScroll:f,overscroll:b,autoRaf:E,anchors:T,autoToggle:z,allowNestedScroll:M,naiveDimensions:j,stopInertiaOnNavigate:A},this.dimensions=new U(t,e,{autoResize:S}),this.updateClassName(),this.targetScroll=this.animatedScroll=this.actualScroll,this.options.wrapper.addEventListener("scroll",this.onNativeScroll),this.options.wrapper.addEventListener("scrollend",this.onScrollEnd,{capture:!0}),(this.options.anchors||this.options.stopInertiaOnNavigate)&&this.options.wrapper.addEventListener("click",this.onClick),this.options.wrapper.addEventListener("pointerdown",this.onPointerDown),this.virtualScroll=new G(i,{touchMultiplier:d,wheelMultiplier:a}),this.virtualScroll.on("scroll",this.onVirtualScroll),this.options.autoToggle&&(this.checkOverflow(),this.rootElement.addEventListener("transitionend",this.onTransitionEnd)),this.options.autoRaf&&(this._rafId=requestAnimationFrame(this.raf))}destroy(){this.emitter.destroy(),this.options.wrapper.removeEventListener("scroll",this.onNativeScroll),this.options.wrapper.removeEventListener("scrollend",this.onScrollEnd,{capture:!0}),this.options.wrapper.removeEventListener("pointerdown",this.onPointerDown),(this.options.anchors||this.options.stopInertiaOnNavigate)&&this.options.wrapper.removeEventListener("click",this.onClick),this.virtualScroll.destroy(),this.dimensions.destroy(),this.cleanUpClassName(),this._rafId&&cancelAnimationFrame(this._rafId)}on(t,e){return this.emitter.on(t,e)}off(t,e){return this.emitter.off(t,e)}get overflow(){let t=this.isHorizontal?"overflow-x":"overflow-y";return getComputedStyle(this.rootElement)[t]}checkOverflow(){["hidden","clip"].includes(this.overflow)?this.internalStop():this.internalStart()}setScroll(t){this.isHorizontal?this.options.wrapper.scrollTo({left:t,behavior:"instant"}):this.options.wrapper.scrollTo({top:t,behavior:"instant"})}resize(){this.dimensions.resize(),this.animatedScroll=this.targetScroll=this.actualScroll,this.emit()}emit(){this.emitter.emit("scroll",this)}reset(){this.isLocked=!1,this.isScrolling=!1,this.animatedScroll=this.targetScroll=this.actualScroll,this.lastVelocity=this.velocity=0,this.animate.stop()}start(){if(this.isStopped){if(this.options.autoToggle){this.rootElement.style.removeProperty("overflow");return}this.internalStart()}}internalStart(){this.isStopped&&(this.reset(),this.isStopped=!1,this.emit())}stop(){if(!this.isStopped){if(this.options.autoToggle){this.rootElement.style.setProperty("overflow","clip");return}this.internalStop()}}internalStop(){this.isStopped||(this.reset(),this.isStopped=!0,this.emit())}scrollTo(t,{offset:e=0,immediate:i=!1,lock:s=!1,programmatic:o=!0,lerp:h=o?this.options.lerp:void 0,duration:l=o?this.options.duration:void 0,easing:c=o?this.options.easing:void 0,onStart:u,onComplete:p,force:w=!1,userData:m}={}){if((this.isStopped||this.isLocked)&&!w)return;let n=t,d=e;if(typeof n=="string"&&["top","left","start","#"].includes(n))n=0;else if(typeof n=="string"&&["bottom","right","end"].includes(n))n=this.limit;else{let a=null;if(typeof n=="string"?(a=document.querySelector(n),a||(n==="#top"?n=0:console.warn("Lenis: Target not found",n))):n instanceof HTMLElement&&n?.nodeType&&(a=n),a){if(this.options.wrapper!==window){let v=this.rootElement.getBoundingClientRect();d-=this.isHorizontal?v.left:v.top}let S=a.getBoundingClientRect();n=(this.isHorizontal?S.left:S.top)+this.animatedScroll}}if(typeof n=="number"){if(n+=d,n=Math.round(n),this.options.infinite){if(o){this.targetScroll=this.animatedScroll=this.scroll;let a=n-this.animatedScroll;a>this.limit/2?n-=this.limit:a<-this.limit/2&&(n+=this.limit)}}else n=x(0,n,this.limit);if(n===this.targetScroll){u?.(this),p?.(this);return}if(this.userData=m??{},i){this.animatedScroll=this.targetScroll=n,this.setScroll(this.scroll),this.reset(),this.preventNextNativeScrollEvent(),this.emit(),p?.(this),this.userData={},requestAnimationFrame(()=>{this.dispatchScrollendEvent()});return}o||(this.targetScroll=n),typeof l=="number"&&typeof c!="function"?c=W:typeof c=="function"&&typeof l!="number"&&(l=1),this.animate.fromTo(this.animatedScroll,n,{duration:l,easing:c,lerp:h,onStart:()=>{s&&(this.isLocked=!0),this.isScrolling="smooth",u?.(this)},onUpdate:(a,S)=>{this.isScrolling="smooth",this.lastVelocity=this.velocity,this.velocity=a-this.animatedScroll,this.direction=Math.sign(this.velocity),this.animatedScroll=a,this.setScroll(this.scroll),o&&(this.targetScroll=a),S||this.emit(),S&&(this.reset(),this.emit(),p?.(this),this.userData={},requestAnimationFrame(()=>{this.dispatchScrollendEvent()}),this.preventNextNativeScrollEvent())}})}}preventNextNativeScrollEvent(){this._preventNextNativeScrollEvent=!0,requestAnimationFrame(()=>{this._preventNextNativeScrollEvent=!1})}hasNestedScroll(t,{deltaX:e,deltaY:i}){let s=Date.now();t._lenis||(t._lenis={});let o=t._lenis,h,l,c,u,p,w,m,n,d,a;if(s-(o.time??0)>2e3){o.time=Date.now();let y=window.getComputedStyle(t);if(o.computedStyle=y,h=["auto","overlay","scroll"].includes(y.overflowX),l=["auto","overlay","scroll"].includes(y.overflowY),p=["auto"].includes(y.overscrollBehaviorX),w=["auto"].includes(y.overscrollBehaviorY),o.hasOverflowX=h,o.hasOverflowY=l,!(h||l))return!1;m=t.scrollWidth,n=t.scrollHeight,d=t.clientWidth,a=t.clientHeight,c=m>d,u=n>a,o.isScrollableX=c,o.isScrollableY=u,o.scrollWidth=m,o.scrollHeight=n,o.clientWidth=d,o.clientHeight=a,o.hasOverscrollBehaviorX=p,o.hasOverscrollBehaviorY=w}else c=o.isScrollableX,u=o.isScrollableY,h=o.hasOverflowX,l=o.hasOverflowY,m=o.scrollWidth,n=o.scrollHeight,d=o.clientWidth,a=o.clientHeight,p=o.hasOverscrollBehaviorX,w=o.hasOverscrollBehaviorY;if(!(h&&c||l&&u))return!1;let S=Math.abs(e)>=Math.abs(i)?"horizontal":"vertical",v,f,b,E,T,z;if(S==="horizontal")v=Math.round(t.scrollLeft),f=m-d,b=e,E=h,T=c,z=p;else if(S==="vertical")v=Math.round(t.scrollTop),f=n-a,b=i,E=l,T=u,z=w;else return!1;return!z&&(v>=f||v<=0)?!0:(b>0?v<f:v>0)&&E&&T}get rootElement(){return this.options.wrapper===window?document.documentElement:this.options.wrapper}get limit(){return this.options.naiveDimensions?this.isHorizontal?this.rootElement.scrollWidth-this.rootElement.clientWidth:this.rootElement.scrollHeight-this.rootElement.clientHeight:this.dimensions.limit[this.isHorizontal?"x":"y"]}get isHorizontal(){return this.options.orientation==="horizontal"}get actualScroll(){let t=this.options.wrapper;return this.isHorizontal?t.scrollX??t.scrollLeft:t.scrollY??t.scrollTop}get scroll(){return this.options.infinite?B(this.animatedScroll,this.limit):this.animatedScroll}get progress(){return this.limit===0?1:this.scroll/this.limit}get isScrolling(){return this._isScrolling}set isScrolling(t){this._isScrolling!==t&&(this._isScrolling=t,this.updateClassName())}get isStopped(){return this._isStopped}set isStopped(t){this._isStopped!==t&&(this._isStopped=t,this.updateClassName())}get isLocked(){return this._isLocked}set isLocked(t){this._isLocked!==t&&(this._isLocked=t,this.updateClassName())}get isSmooth(){return this.isScrolling==="smooth"}get className(){let t="lenis";return this.options.autoToggle&&(t+=" lenis-autoToggle"),this.isStopped&&(t+=" lenis-stopped"),this.isLocked&&(t+=" lenis-locked"),this.isScrolling&&(t+=" lenis-scrolling"),this.isScrolling==="smooth"&&(t+=" lenis-smooth"),t}updateClassName(){this.cleanUpClassName(),this.rootElement.className=`${this.rootElement.className} ${this.className}`.trim()}cleanUpClassName(){this.rootElement.className=this.rootElement.className.replace(/lenis(-\w+)?/g,"").trim()}};function O(t=document){if(t===document&&document.readyState==="loading"){document.addEventListener("DOMContentLoaded",()=>{O()},{once:!0});return}(t instanceof Element&&t.matches(".header-nav")?[t]:t.querySelectorAll(".header-nav")).forEach(i=>{if(i.dataset.headerNavHydrated==="true")return;let s=i.querySelector(".header-nav-toggle");s&&(s.addEventListener("click",()=>{let o=i.classList.toggle("is-open");s.setAttribute("aria-expanded",String(o))}),i.dataset.headerNavHydrated="true")})}var K=L,N=new Map,J=t=>{let e=K[t.replace(/^\.\//,"")];return e?`${t}?v=${e}`:t},Q=t=>{let e=t.split("/").filter(Boolean),i=e[e.length-1];return[i?`${t}/${i}`:null,t].filter(Boolean)},Z=async t=>{let e;for(let i of Q(t)){let[s,...o]=i.split("/"),h=o.join("/"),l="";try{if(s==="common"&&(l=`./common/${h}.js`),s==="components"&&(l=`./components/${h}.js`),s==="modules"&&(l=`./modules/${h}.js`),s==="strates"&&(l=`./strates/${h}.js`),l)return l=J(l),N.has(l)||N.set(l,import(l)),await N.get(l);throw new Error(`Pr\xE9fixe de module inconnu : ${s}`)}catch(c){e=c}}throw e},D=t=>{if(t.dataset.moduleHydrated==="true")return;let e=t.dataset.module;e&&Z(e).then(i=>{let s=i.default;typeof s=="function"&&(s(t),t.dataset.moduleHydrated="true")}).catch(i=>{console.error(`Module introuvable : ${e}`,i)})},tt=t=>/\B@visible\s+true\b/.test(t.dataset.context||"");function H(){let t=document.querySelectorAll("[data-module]");if(t.length===0)return;let e="IntersectionObserver"in window?new IntersectionObserver(i=>{i.forEach(s=>{s.isIntersecting&&(e.unobserve(s.target),D(s.target))})},{rootMargin:"200px 0px"}):null;t.forEach(i=>{if(tt(i)&&e){e.observe(i);return}D(i)})}var et=()=>!window.matchMedia("(prefers-reduced-motion: reduce)").matches&&window.matchMedia("(pointer: fine)").matches,it=()=>{et()&&(window.lenis=new C({autoRaf:!0}))};it();H();O();
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+
+// <define:__MODULE_VERSIONS__>
+var define_MODULE_VERSIONS_default = {};
+
+// assets/vendors/lenis/lenis.mjs
+var version = "1.3.18";
+function clamp(min, input, max) {
+  return Math.max(min, Math.min(input, max));
+}
+function lerp(x, y, t) {
+  return (1 - t) * x + t * y;
+}
+function damp(x, y, lambda, deltaTime) {
+  return lerp(x, y, 1 - Math.exp(-lambda * deltaTime));
+}
+function modulo(n, d) {
+  return (n % d + d) % d;
+}
+var Animate = class {
+  constructor() {
+    __publicField(this, "isRunning", false);
+    __publicField(this, "value", 0);
+    __publicField(this, "from", 0);
+    __publicField(this, "to", 0);
+    __publicField(this, "currentTime", 0);
+    // These are instanciated in the fromTo method
+    __publicField(this, "lerp");
+    __publicField(this, "duration");
+    __publicField(this, "easing");
+    __publicField(this, "onUpdate");
+  }
+  /**
+   * Advance the animation by the given delta time
+   *
+   * @param deltaTime - The time in seconds to advance the animation
+   */
+  advance(deltaTime) {
+    if (!this.isRunning) return;
+    let completed = false;
+    if (this.duration && this.easing) {
+      this.currentTime += deltaTime;
+      const linearProgress = clamp(0, this.currentTime / this.duration, 1);
+      completed = linearProgress >= 1;
+      const easedProgress = completed ? 1 : this.easing(linearProgress);
+      this.value = this.from + (this.to - this.from) * easedProgress;
+    } else if (this.lerp) {
+      this.value = damp(this.value, this.to, this.lerp * 60, deltaTime);
+      if (Math.round(this.value) === this.to) {
+        this.value = this.to;
+        completed = true;
+      }
+    } else {
+      this.value = this.to;
+      completed = true;
+    }
+    if (completed) {
+      this.stop();
+    }
+    this.onUpdate?.(this.value, completed);
+  }
+  /** Stop the animation */
+  stop() {
+    this.isRunning = false;
+  }
+  /**
+   * Set up the animation from a starting value to an ending value
+   * with optional parameters for lerping, duration, easing, and onUpdate callback
+   *
+   * @param from - The starting value
+   * @param to - The ending value
+   * @param options - Options for the animation
+   */
+  fromTo(from, to, { lerp: lerp2, duration, easing, onStart, onUpdate }) {
+    this.from = this.value = from;
+    this.to = to;
+    this.lerp = lerp2;
+    this.duration = duration;
+    this.easing = easing;
+    this.currentTime = 0;
+    this.isRunning = true;
+    onStart?.();
+    this.onUpdate = onUpdate;
+  }
+};
+function debounce(callback, delay) {
+  let timer;
+  return function(...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      timer = void 0;
+      callback.apply(this, args);
+    }, delay);
+  };
+}
+var Dimensions = class {
+  constructor(wrapper, content, { autoResize = true, debounce: debounceValue = 250 } = {}) {
+    __publicField(this, "width", 0);
+    __publicField(this, "height", 0);
+    __publicField(this, "scrollHeight", 0);
+    __publicField(this, "scrollWidth", 0);
+    // These are instanciated in the constructor as they need information from the options
+    __publicField(this, "debouncedResize");
+    __publicField(this, "wrapperResizeObserver");
+    __publicField(this, "contentResizeObserver");
+    __publicField(this, "resize", () => {
+      this.onWrapperResize();
+      this.onContentResize();
+    });
+    __publicField(this, "onWrapperResize", () => {
+      if (this.wrapper instanceof Window) {
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+      } else {
+        this.width = this.wrapper.clientWidth;
+        this.height = this.wrapper.clientHeight;
+      }
+    });
+    __publicField(this, "onContentResize", () => {
+      if (this.wrapper instanceof Window) {
+        this.scrollHeight = this.content.scrollHeight;
+        this.scrollWidth = this.content.scrollWidth;
+      } else {
+        this.scrollHeight = this.wrapper.scrollHeight;
+        this.scrollWidth = this.wrapper.scrollWidth;
+      }
+    });
+    this.wrapper = wrapper;
+    this.content = content;
+    if (autoResize) {
+      this.debouncedResize = debounce(this.resize, debounceValue);
+      if (this.wrapper instanceof Window) {
+        window.addEventListener("resize", this.debouncedResize);
+      } else {
+        this.wrapperResizeObserver = new ResizeObserver(this.debouncedResize);
+        this.wrapperResizeObserver.observe(this.wrapper);
+      }
+      this.contentResizeObserver = new ResizeObserver(this.debouncedResize);
+      this.contentResizeObserver.observe(this.content);
+    }
+    this.resize();
+  }
+  destroy() {
+    this.wrapperResizeObserver?.disconnect();
+    this.contentResizeObserver?.disconnect();
+    if (this.wrapper === window && this.debouncedResize) {
+      window.removeEventListener("resize", this.debouncedResize);
+    }
+  }
+  get limit() {
+    return {
+      x: this.scrollWidth - this.width,
+      y: this.scrollHeight - this.height
+    };
+  }
+};
+var Emitter = class {
+  constructor() {
+    __publicField(this, "events", {});
+  }
+  /**
+   * Emit an event with the given data
+   * @param event Event name
+   * @param args Data to pass to the event handlers
+   */
+  emit(event, ...args) {
+    const callbacks = this.events[event] || [];
+    for (let i = 0, length = callbacks.length; i < length; i++) {
+      callbacks[i]?.(...args);
+    }
+  }
+  /**
+   * Add a callback to the event
+   * @param event Event name
+   * @param cb Callback function
+   * @returns Unsubscribe function
+   */
+  on(event, cb) {
+    if (this.events[event]) {
+      this.events[event].push(cb);
+    } else {
+      this.events[event] = [cb];
+    }
+    return () => {
+      this.events[event] = this.events[event]?.filter((i) => cb !== i);
+    };
+  }
+  /**
+   * Remove a callback from the event
+   * @param event Event name
+   * @param callback Callback function
+   */
+  off(event, callback) {
+    this.events[event] = this.events[event]?.filter((i) => callback !== i);
+  }
+  /**
+   * Remove all event listeners and clean up
+   */
+  destroy() {
+    this.events = {};
+  }
+};
+var LINE_HEIGHT = 100 / 6;
+var listenerOptions = { passive: false };
+function getDeltaMultiplier(deltaMode, size) {
+  if (deltaMode === 1) return LINE_HEIGHT;
+  if (deltaMode === 2) return size;
+  return 1;
+}
+var VirtualScroll = class {
+  constructor(element, options = { wheelMultiplier: 1, touchMultiplier: 1 }) {
+    __publicField(this, "touchStart", {
+      x: 0,
+      y: 0
+    });
+    __publicField(this, "lastDelta", {
+      x: 0,
+      y: 0
+    });
+    __publicField(this, "window", {
+      width: 0,
+      height: 0
+    });
+    __publicField(this, "emitter", new Emitter());
+    /**
+     * Event handler for 'touchstart' event
+     *
+     * @param event Touch event
+     */
+    __publicField(this, "onTouchStart", (event) => {
+      const { clientX, clientY } = event.targetTouches ? event.targetTouches[0] : event;
+      this.touchStart.x = clientX;
+      this.touchStart.y = clientY;
+      this.lastDelta = {
+        x: 0,
+        y: 0
+      };
+      this.emitter.emit("scroll", {
+        deltaX: 0,
+        deltaY: 0,
+        event
+      });
+    });
+    /** Event handler for 'touchmove' event */
+    __publicField(this, "onTouchMove", (event) => {
+      const { clientX, clientY } = event.targetTouches ? event.targetTouches[0] : event;
+      const deltaX = -(clientX - this.touchStart.x) * this.options.touchMultiplier;
+      const deltaY = -(clientY - this.touchStart.y) * this.options.touchMultiplier;
+      this.touchStart.x = clientX;
+      this.touchStart.y = clientY;
+      this.lastDelta = {
+        x: deltaX,
+        y: deltaY
+      };
+      this.emitter.emit("scroll", {
+        deltaX,
+        deltaY,
+        event
+      });
+    });
+    __publicField(this, "onTouchEnd", (event) => {
+      this.emitter.emit("scroll", {
+        deltaX: this.lastDelta.x,
+        deltaY: this.lastDelta.y,
+        event
+      });
+    });
+    /** Event handler for 'wheel' event */
+    __publicField(this, "onWheel", (event) => {
+      let { deltaX, deltaY, deltaMode } = event;
+      const multiplierX = getDeltaMultiplier(deltaMode, this.window.width);
+      const multiplierY = getDeltaMultiplier(deltaMode, this.window.height);
+      deltaX *= multiplierX;
+      deltaY *= multiplierY;
+      deltaX *= this.options.wheelMultiplier;
+      deltaY *= this.options.wheelMultiplier;
+      this.emitter.emit("scroll", { deltaX, deltaY, event });
+    });
+    __publicField(this, "onWindowResize", () => {
+      this.window = {
+        width: window.innerWidth,
+        height: window.innerHeight
+      };
+    });
+    this.element = element;
+    this.options = options;
+    window.addEventListener("resize", this.onWindowResize);
+    this.onWindowResize();
+    this.element.addEventListener("wheel", this.onWheel, listenerOptions);
+    this.element.addEventListener(
+      "touchstart",
+      this.onTouchStart,
+      listenerOptions
+    );
+    this.element.addEventListener(
+      "touchmove",
+      this.onTouchMove,
+      listenerOptions
+    );
+    this.element.addEventListener("touchend", this.onTouchEnd, listenerOptions);
+  }
+  /**
+   * Add an event listener for the given event and callback
+   *
+   * @param event Event name
+   * @param callback Callback function
+   */
+  on(event, callback) {
+    return this.emitter.on(event, callback);
+  }
+  /** Remove all event listeners and clean up */
+  destroy() {
+    this.emitter.destroy();
+    window.removeEventListener("resize", this.onWindowResize);
+    this.element.removeEventListener("wheel", this.onWheel, listenerOptions);
+    this.element.removeEventListener(
+      "touchstart",
+      this.onTouchStart,
+      listenerOptions
+    );
+    this.element.removeEventListener(
+      "touchmove",
+      this.onTouchMove,
+      listenerOptions
+    );
+    this.element.removeEventListener(
+      "touchend",
+      this.onTouchEnd,
+      listenerOptions
+    );
+  }
+};
+var defaultEasing = (t) => Math.min(1, 1.001 - 2 ** (-10 * t));
+var Lenis = class {
+  constructor({
+    wrapper = window,
+    content = document.documentElement,
+    eventsTarget = wrapper,
+    smoothWheel = true,
+    syncTouch = false,
+    syncTouchLerp = 0.075,
+    touchInertiaExponent = 1.7,
+    duration,
+    // in seconds
+    easing,
+    lerp: lerp2 = 0.1,
+    infinite = false,
+    orientation = "vertical",
+    // vertical, horizontal
+    gestureOrientation = orientation === "horizontal" ? "both" : "vertical",
+    // vertical, horizontal, both
+    touchMultiplier = 1,
+    wheelMultiplier = 1,
+    autoResize = true,
+    prevent,
+    virtualScroll,
+    overscroll = true,
+    autoRaf = false,
+    anchors = false,
+    autoToggle = false,
+    // https://caniuse.com/?search=transition-behavior
+    allowNestedScroll = false,
+    __experimental__naiveDimensions = false,
+    naiveDimensions = __experimental__naiveDimensions,
+    stopInertiaOnNavigate = false
+  } = {}) {
+    __publicField(this, "_isScrolling", false);
+    // true when scroll is animating
+    __publicField(this, "_isStopped", false);
+    // true if user should not be able to scroll - enable/disable programmatically
+    __publicField(this, "_isLocked", false);
+    // same as isStopped but enabled/disabled when scroll reaches target
+    __publicField(this, "_preventNextNativeScrollEvent", false);
+    __publicField(this, "_resetVelocityTimeout", null);
+    __publicField(this, "_rafId", null);
+    /**
+     * Whether or not the user is touching the screen
+     */
+    __publicField(this, "isTouching");
+    /**
+     * The time in ms since the lenis instance was created
+     */
+    __publicField(this, "time", 0);
+    /**
+     * User data that will be forwarded through the scroll event
+     *
+     * @example
+     * lenis.scrollTo(100, {
+     *   userData: {
+     *     foo: 'bar'
+     *   }
+     * })
+     */
+    __publicField(this, "userData", {});
+    /**
+     * The last velocity of the scroll
+     */
+    __publicField(this, "lastVelocity", 0);
+    /**
+     * The current velocity of the scroll
+     */
+    __publicField(this, "velocity", 0);
+    /**
+     * The direction of the scroll
+     */
+    __publicField(this, "direction", 0);
+    /**
+     * The options passed to the lenis instance
+     */
+    __publicField(this, "options");
+    /**
+     * The target scroll value
+     */
+    __publicField(this, "targetScroll");
+    /**
+     * The animated scroll value
+     */
+    __publicField(this, "animatedScroll");
+    // These are instanciated here as they don't need information from the options
+    __publicField(this, "animate", new Animate());
+    __publicField(this, "emitter", new Emitter());
+    // These are instanciated in the constructor as they need information from the options
+    __publicField(this, "dimensions");
+    // This is not private because it's used in the Snap class
+    __publicField(this, "virtualScroll");
+    __publicField(this, "onScrollEnd", (e) => {
+      if (!(e instanceof CustomEvent)) {
+        if (this.isScrolling === "smooth" || this.isScrolling === false) {
+          e.stopPropagation();
+        }
+      }
+    });
+    __publicField(this, "dispatchScrollendEvent", () => {
+      this.options.wrapper.dispatchEvent(
+        new CustomEvent("scrollend", {
+          bubbles: this.options.wrapper === window,
+          // cancelable: false,
+          detail: {
+            lenisScrollEnd: true
+          }
+        })
+      );
+    });
+    __publicField(this, "onTransitionEnd", (event) => {
+      if (event.propertyName.includes("overflow")) {
+        this.checkOverflow();
+      }
+    });
+    __publicField(this, "onClick", (event) => {
+      const path = event.composedPath();
+      const anchorElements = path.filter(
+        (node) => node instanceof HTMLAnchorElement && node.getAttribute("href")
+      );
+      if (this.options.anchors) {
+        const anchor = anchorElements.find(
+          (node) => node.getAttribute("href")?.includes("#")
+        );
+        if (anchor) {
+          const href = anchor.getAttribute("href");
+          if (href) {
+            const options = typeof this.options.anchors === "object" && this.options.anchors ? this.options.anchors : void 0;
+            const target = `#${href.split("#")[1]}`;
+            this.scrollTo(target, options);
+          }
+        }
+      }
+      if (this.options.stopInertiaOnNavigate) {
+        const internalLink = anchorElements.find(
+          (node) => node.host === window.location.host
+        );
+        if (internalLink) {
+          this.reset();
+        }
+      }
+    });
+    __publicField(this, "onPointerDown", (event) => {
+      if (event.button === 1) {
+        this.reset();
+      }
+    });
+    __publicField(this, "onVirtualScroll", (data) => {
+      if (typeof this.options.virtualScroll === "function" && this.options.virtualScroll(data) === false)
+        return;
+      const { deltaX, deltaY, event } = data;
+      this.emitter.emit("virtual-scroll", { deltaX, deltaY, event });
+      if (event.ctrlKey) return;
+      if (event.lenisStopPropagation) return;
+      const isTouch = event.type.includes("touch");
+      const isWheel = event.type.includes("wheel");
+      this.isTouching = event.type === "touchstart" || event.type === "touchmove";
+      const isClickOrTap = deltaX === 0 && deltaY === 0;
+      const isTapToStop = this.options.syncTouch && isTouch && event.type === "touchstart" && isClickOrTap && !this.isStopped && !this.isLocked;
+      if (isTapToStop) {
+        this.reset();
+        return;
+      }
+      const isUnknownGesture = this.options.gestureOrientation === "vertical" && deltaY === 0 || this.options.gestureOrientation === "horizontal" && deltaX === 0;
+      if (isClickOrTap || isUnknownGesture) {
+        return;
+      }
+      let composedPath = event.composedPath();
+      composedPath = composedPath.slice(0, composedPath.indexOf(this.rootElement));
+      const prevent = this.options.prevent;
+      const gestureOrientation = Math.abs(deltaX) >= Math.abs(deltaY) ? "horizontal" : "vertical";
+      if (composedPath.find(
+        (node) => node instanceof HTMLElement && (typeof prevent === "function" && prevent?.(node) || node.hasAttribute?.("data-lenis-prevent") || gestureOrientation === "vertical" && node.hasAttribute?.("data-lenis-prevent-vertical") || gestureOrientation === "horizontal" && node.hasAttribute?.("data-lenis-prevent-horizontal") || isTouch && node.hasAttribute?.("data-lenis-prevent-touch") || isWheel && node.hasAttribute?.("data-lenis-prevent-wheel") || this.options.allowNestedScroll && this.hasNestedScroll(node, {
+          deltaX,
+          deltaY
+        }))
+      ))
+        return;
+      if (this.isStopped || this.isLocked) {
+        if (event.cancelable) {
+          event.preventDefault();
+        }
+        return;
+      }
+      const isSmooth = this.options.syncTouch && isTouch || this.options.smoothWheel && isWheel;
+      if (!isSmooth) {
+        this.isScrolling = "native";
+        this.animate.stop();
+        event.lenisStopPropagation = true;
+        return;
+      }
+      let delta = deltaY;
+      if (this.options.gestureOrientation === "both") {
+        delta = Math.abs(deltaY) > Math.abs(deltaX) ? deltaY : deltaX;
+      } else if (this.options.gestureOrientation === "horizontal") {
+        delta = deltaX;
+      }
+      if (!this.options.overscroll || this.options.infinite || this.options.wrapper !== window && this.limit > 0 && (this.animatedScroll > 0 && this.animatedScroll < this.limit || this.animatedScroll === 0 && deltaY > 0 || this.animatedScroll === this.limit && deltaY < 0)) {
+        event.lenisStopPropagation = true;
+      }
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+      const isSyncTouch = isTouch && this.options.syncTouch;
+      const isTouchEnd = isTouch && event.type === "touchend";
+      const hasTouchInertia = isTouchEnd;
+      if (hasTouchInertia) {
+        delta = Math.sign(this.velocity) * Math.abs(this.velocity) ** this.options.touchInertiaExponent;
+      }
+      this.scrollTo(this.targetScroll + delta, {
+        programmatic: false,
+        ...isSyncTouch ? {
+          lerp: hasTouchInertia ? this.options.syncTouchLerp : 1
+        } : {
+          lerp: this.options.lerp,
+          duration: this.options.duration,
+          easing: this.options.easing
+        }
+      });
+    });
+    __publicField(this, "onNativeScroll", () => {
+      if (this._resetVelocityTimeout !== null) {
+        clearTimeout(this._resetVelocityTimeout);
+        this._resetVelocityTimeout = null;
+      }
+      if (this._preventNextNativeScrollEvent) {
+        this._preventNextNativeScrollEvent = false;
+        return;
+      }
+      if (this.isScrolling === false || this.isScrolling === "native") {
+        const lastScroll = this.animatedScroll;
+        this.animatedScroll = this.targetScroll = this.actualScroll;
+        this.lastVelocity = this.velocity;
+        this.velocity = this.animatedScroll - lastScroll;
+        this.direction = Math.sign(
+          this.animatedScroll - lastScroll
+        );
+        if (!this.isStopped) {
+          this.isScrolling = "native";
+        }
+        this.emit();
+        if (this.velocity !== 0) {
+          this._resetVelocityTimeout = setTimeout(() => {
+            this.lastVelocity = this.velocity;
+            this.velocity = 0;
+            this.isScrolling = false;
+            this.emit();
+          }, 400);
+        }
+      }
+    });
+    /**
+     * RequestAnimationFrame for lenis
+     *
+     * @param time The time in ms from an external clock like `requestAnimationFrame` or Tempus
+     */
+    __publicField(this, "raf", (time) => {
+      const deltaTime = time - (this.time || time);
+      this.time = time;
+      this.animate.advance(deltaTime * 1e-3);
+      if (this.options.autoRaf) {
+        this._rafId = requestAnimationFrame(this.raf);
+      }
+    });
+    window.lenisVersion = version;
+    if (!window.lenis) {
+      window.lenis = {};
+    }
+    window.lenis.version = version;
+    if (orientation === "horizontal") {
+      window.lenis.horizontal = true;
+    }
+    if (!wrapper || wrapper === document.documentElement) {
+      wrapper = window;
+    }
+    if (typeof duration === "number" && typeof easing !== "function") {
+      easing = defaultEasing;
+    } else if (typeof easing === "function" && typeof duration !== "number") {
+      duration = 1;
+    }
+    this.options = {
+      wrapper,
+      content,
+      eventsTarget,
+      smoothWheel,
+      syncTouch,
+      syncTouchLerp,
+      touchInertiaExponent,
+      duration,
+      easing,
+      lerp: lerp2,
+      infinite,
+      gestureOrientation,
+      orientation,
+      touchMultiplier,
+      wheelMultiplier,
+      autoResize,
+      prevent,
+      virtualScroll,
+      overscroll,
+      autoRaf,
+      anchors,
+      autoToggle,
+      allowNestedScroll,
+      naiveDimensions,
+      stopInertiaOnNavigate
+    };
+    this.dimensions = new Dimensions(wrapper, content, { autoResize });
+    this.updateClassName();
+    this.targetScroll = this.animatedScroll = this.actualScroll;
+    this.options.wrapper.addEventListener("scroll", this.onNativeScroll);
+    this.options.wrapper.addEventListener("scrollend", this.onScrollEnd, {
+      capture: true
+    });
+    if (this.options.anchors || this.options.stopInertiaOnNavigate) {
+      this.options.wrapper.addEventListener(
+        "click",
+        this.onClick
+      );
+    }
+    this.options.wrapper.addEventListener(
+      "pointerdown",
+      this.onPointerDown
+    );
+    this.virtualScroll = new VirtualScroll(eventsTarget, {
+      touchMultiplier,
+      wheelMultiplier
+    });
+    this.virtualScroll.on("scroll", this.onVirtualScroll);
+    if (this.options.autoToggle) {
+      this.checkOverflow();
+      this.rootElement.addEventListener("transitionend", this.onTransitionEnd);
+    }
+    if (this.options.autoRaf) {
+      this._rafId = requestAnimationFrame(this.raf);
+    }
+  }
+  /**
+   * Destroy the lenis instance, remove all event listeners and clean up the class name
+   */
+  destroy() {
+    this.emitter.destroy();
+    this.options.wrapper.removeEventListener("scroll", this.onNativeScroll);
+    this.options.wrapper.removeEventListener("scrollend", this.onScrollEnd, {
+      capture: true
+    });
+    this.options.wrapper.removeEventListener(
+      "pointerdown",
+      this.onPointerDown
+    );
+    if (this.options.anchors || this.options.stopInertiaOnNavigate) {
+      this.options.wrapper.removeEventListener(
+        "click",
+        this.onClick
+      );
+    }
+    this.virtualScroll.destroy();
+    this.dimensions.destroy();
+    this.cleanUpClassName();
+    if (this._rafId) {
+      cancelAnimationFrame(this._rafId);
+    }
+  }
+  on(event, callback) {
+    return this.emitter.on(event, callback);
+  }
+  off(event, callback) {
+    return this.emitter.off(event, callback);
+  }
+  get overflow() {
+    const property = this.isHorizontal ? "overflow-x" : "overflow-y";
+    return getComputedStyle(this.rootElement)[property];
+  }
+  checkOverflow() {
+    if (["hidden", "clip"].includes(this.overflow)) {
+      this.internalStop();
+    } else {
+      this.internalStart();
+    }
+  }
+  setScroll(scroll) {
+    if (this.isHorizontal) {
+      this.options.wrapper.scrollTo({ left: scroll, behavior: "instant" });
+    } else {
+      this.options.wrapper.scrollTo({ top: scroll, behavior: "instant" });
+    }
+  }
+  /**
+   * Force lenis to recalculate the dimensions
+   */
+  resize() {
+    this.dimensions.resize();
+    this.animatedScroll = this.targetScroll = this.actualScroll;
+    this.emit();
+  }
+  emit() {
+    this.emitter.emit("scroll", this);
+  }
+  reset() {
+    this.isLocked = false;
+    this.isScrolling = false;
+    this.animatedScroll = this.targetScroll = this.actualScroll;
+    this.lastVelocity = this.velocity = 0;
+    this.animate.stop();
+  }
+  /**
+   * Start lenis scroll after it has been stopped
+   */
+  start() {
+    if (!this.isStopped) return;
+    if (this.options.autoToggle) {
+      this.rootElement.style.removeProperty("overflow");
+      return;
+    }
+    this.internalStart();
+  }
+  internalStart() {
+    if (!this.isStopped) return;
+    this.reset();
+    this.isStopped = false;
+    this.emit();
+  }
+  /**
+   * Stop lenis scroll
+   */
+  stop() {
+    if (this.isStopped) return;
+    if (this.options.autoToggle) {
+      this.rootElement.style.setProperty("overflow", "clip");
+      return;
+    }
+    this.internalStop();
+  }
+  internalStop() {
+    if (this.isStopped) return;
+    this.reset();
+    this.isStopped = true;
+    this.emit();
+  }
+  /**
+   * Scroll to a target value
+   *
+   * @param target The target value to scroll to
+   * @param options The options for the scroll
+   *
+   * @example
+   * lenis.scrollTo(100, {
+   *   offset: 100,
+   *   duration: 1,
+   *   easing: (t) => 1 - Math.cos((t * Math.PI) / 2),
+   *   lerp: 0.1,
+   *   onStart: () => {
+   *     console.log('onStart')
+   *   },
+   *   onComplete: () => {
+   *     console.log('onComplete')
+   *   },
+   * })
+   */
+  scrollTo(_target, {
+    offset = 0,
+    immediate = false,
+    lock = false,
+    programmatic = true,
+    // called from outside of the class
+    lerp: lerp2 = programmatic ? this.options.lerp : void 0,
+    duration = programmatic ? this.options.duration : void 0,
+    easing = programmatic ? this.options.easing : void 0,
+    onStart,
+    onComplete,
+    force = false,
+    // scroll even if stopped
+    userData
+  } = {}) {
+    if ((this.isStopped || this.isLocked) && !force) return;
+    let target = _target;
+    let adjustedOffset = offset;
+    if (typeof target === "string" && ["top", "left", "start", "#"].includes(target)) {
+      target = 0;
+    } else if (typeof target === "string" && ["bottom", "right", "end"].includes(target)) {
+      target = this.limit;
+    } else {
+      let node = null;
+      if (typeof target === "string") {
+        node = document.querySelector(target);
+        if (!node) {
+          if (target === "#top") {
+            target = 0;
+          } else {
+            console.warn("Lenis: Target not found", target);
+          }
+        }
+      } else if (target instanceof HTMLElement && target?.nodeType) {
+        node = target;
+      }
+      if (node) {
+        if (this.options.wrapper !== window) {
+          const wrapperRect = this.rootElement.getBoundingClientRect();
+          adjustedOffset -= this.isHorizontal ? wrapperRect.left : wrapperRect.top;
+        }
+        const rect = node.getBoundingClientRect();
+        target = (this.isHorizontal ? rect.left : rect.top) + this.animatedScroll;
+      }
+    }
+    if (typeof target !== "number") return;
+    target += adjustedOffset;
+    target = Math.round(target);
+    if (this.options.infinite) {
+      if (programmatic) {
+        this.targetScroll = this.animatedScroll = this.scroll;
+        const distance = target - this.animatedScroll;
+        if (distance > this.limit / 2) {
+          target -= this.limit;
+        } else if (distance < -this.limit / 2) {
+          target += this.limit;
+        }
+      }
+    } else {
+      target = clamp(0, target, this.limit);
+    }
+    if (target === this.targetScroll) {
+      onStart?.(this);
+      onComplete?.(this);
+      return;
+    }
+    this.userData = userData ?? {};
+    if (immediate) {
+      this.animatedScroll = this.targetScroll = target;
+      this.setScroll(this.scroll);
+      this.reset();
+      this.preventNextNativeScrollEvent();
+      this.emit();
+      onComplete?.(this);
+      this.userData = {};
+      requestAnimationFrame(() => {
+        this.dispatchScrollendEvent();
+      });
+      return;
+    }
+    if (!programmatic) {
+      this.targetScroll = target;
+    }
+    if (typeof duration === "number" && typeof easing !== "function") {
+      easing = defaultEasing;
+    } else if (typeof easing === "function" && typeof duration !== "number") {
+      duration = 1;
+    }
+    this.animate.fromTo(this.animatedScroll, target, {
+      duration,
+      easing,
+      lerp: lerp2,
+      onStart: () => {
+        if (lock) this.isLocked = true;
+        this.isScrolling = "smooth";
+        onStart?.(this);
+      },
+      onUpdate: (value, completed) => {
+        this.isScrolling = "smooth";
+        this.lastVelocity = this.velocity;
+        this.velocity = value - this.animatedScroll;
+        this.direction = Math.sign(this.velocity);
+        this.animatedScroll = value;
+        this.setScroll(this.scroll);
+        if (programmatic) {
+          this.targetScroll = value;
+        }
+        if (!completed) this.emit();
+        if (completed) {
+          this.reset();
+          this.emit();
+          onComplete?.(this);
+          this.userData = {};
+          requestAnimationFrame(() => {
+            this.dispatchScrollendEvent();
+          });
+          this.preventNextNativeScrollEvent();
+        }
+      }
+    });
+  }
+  preventNextNativeScrollEvent() {
+    this._preventNextNativeScrollEvent = true;
+    requestAnimationFrame(() => {
+      this._preventNextNativeScrollEvent = false;
+    });
+  }
+  hasNestedScroll(node, { deltaX, deltaY }) {
+    const time = Date.now();
+    if (!node._lenis) node._lenis = {};
+    const cache = node._lenis;
+    let hasOverflowX;
+    let hasOverflowY;
+    let isScrollableX;
+    let isScrollableY;
+    let hasOverscrollBehaviorX;
+    let hasOverscrollBehaviorY;
+    let scrollWidth;
+    let scrollHeight;
+    let clientWidth;
+    let clientHeight;
+    if (time - (cache.time ?? 0) > 2e3) {
+      cache.time = Date.now();
+      const computedStyle = window.getComputedStyle(node);
+      cache.computedStyle = computedStyle;
+      hasOverflowX = ["auto", "overlay", "scroll"].includes(
+        computedStyle.overflowX
+      );
+      hasOverflowY = ["auto", "overlay", "scroll"].includes(
+        computedStyle.overflowY
+      );
+      hasOverscrollBehaviorX = ["auto"].includes(
+        computedStyle.overscrollBehaviorX
+      );
+      hasOverscrollBehaviorY = ["auto"].includes(
+        computedStyle.overscrollBehaviorY
+      );
+      cache.hasOverflowX = hasOverflowX;
+      cache.hasOverflowY = hasOverflowY;
+      if (!(hasOverflowX || hasOverflowY)) return false;
+      scrollWidth = node.scrollWidth;
+      scrollHeight = node.scrollHeight;
+      clientWidth = node.clientWidth;
+      clientHeight = node.clientHeight;
+      isScrollableX = scrollWidth > clientWidth;
+      isScrollableY = scrollHeight > clientHeight;
+      cache.isScrollableX = isScrollableX;
+      cache.isScrollableY = isScrollableY;
+      cache.scrollWidth = scrollWidth;
+      cache.scrollHeight = scrollHeight;
+      cache.clientWidth = clientWidth;
+      cache.clientHeight = clientHeight;
+      cache.hasOverscrollBehaviorX = hasOverscrollBehaviorX;
+      cache.hasOverscrollBehaviorY = hasOverscrollBehaviorY;
+    } else {
+      isScrollableX = cache.isScrollableX;
+      isScrollableY = cache.isScrollableY;
+      hasOverflowX = cache.hasOverflowX;
+      hasOverflowY = cache.hasOverflowY;
+      scrollWidth = cache.scrollWidth;
+      scrollHeight = cache.scrollHeight;
+      clientWidth = cache.clientWidth;
+      clientHeight = cache.clientHeight;
+      hasOverscrollBehaviorX = cache.hasOverscrollBehaviorX;
+      hasOverscrollBehaviorY = cache.hasOverscrollBehaviorY;
+    }
+    if (!(hasOverflowX && isScrollableX || hasOverflowY && isScrollableY)) {
+      return false;
+    }
+    const orientation = Math.abs(deltaX) >= Math.abs(deltaY) ? "horizontal" : "vertical";
+    let scroll;
+    let maxScroll;
+    let delta;
+    let hasOverflow;
+    let isScrollable;
+    let hasOverscrollBehavior;
+    if (orientation === "horizontal") {
+      scroll = Math.round(node.scrollLeft);
+      maxScroll = scrollWidth - clientWidth;
+      delta = deltaX;
+      hasOverflow = hasOverflowX;
+      isScrollable = isScrollableX;
+      hasOverscrollBehavior = hasOverscrollBehaviorX;
+    } else if (orientation === "vertical") {
+      scroll = Math.round(node.scrollTop);
+      maxScroll = scrollHeight - clientHeight;
+      delta = deltaY;
+      hasOverflow = hasOverflowY;
+      isScrollable = isScrollableY;
+      hasOverscrollBehavior = hasOverscrollBehaviorY;
+    } else {
+      return false;
+    }
+    if (!hasOverscrollBehavior && (scroll >= maxScroll || scroll <= 0)) {
+      return true;
+    }
+    const willScroll = delta > 0 ? scroll < maxScroll : scroll > 0;
+    return willScroll && hasOverflow && isScrollable;
+  }
+  /**
+   * The root element on which lenis is instanced
+   */
+  get rootElement() {
+    return this.options.wrapper === window ? document.documentElement : this.options.wrapper;
+  }
+  /**
+   * The limit which is the maximum scroll value
+   */
+  get limit() {
+    if (this.options.naiveDimensions) {
+      if (this.isHorizontal) {
+        return this.rootElement.scrollWidth - this.rootElement.clientWidth;
+      }
+      return this.rootElement.scrollHeight - this.rootElement.clientHeight;
+    }
+    return this.dimensions.limit[this.isHorizontal ? "x" : "y"];
+  }
+  /**
+   * Whether or not the scroll is horizontal
+   */
+  get isHorizontal() {
+    return this.options.orientation === "horizontal";
+  }
+  /**
+   * The actual scroll value
+   */
+  get actualScroll() {
+    const wrapper = this.options.wrapper;
+    return this.isHorizontal ? wrapper.scrollX ?? wrapper.scrollLeft : wrapper.scrollY ?? wrapper.scrollTop;
+  }
+  /**
+   * The current scroll value
+   */
+  get scroll() {
+    return this.options.infinite ? modulo(this.animatedScroll, this.limit) : this.animatedScroll;
+  }
+  /**
+   * The progress of the scroll relative to the limit
+   */
+  get progress() {
+    return this.limit === 0 ? 1 : this.scroll / this.limit;
+  }
+  /**
+   * Current scroll state
+   */
+  get isScrolling() {
+    return this._isScrolling;
+  }
+  set isScrolling(value) {
+    if (this._isScrolling !== value) {
+      this._isScrolling = value;
+      this.updateClassName();
+    }
+  }
+  /**
+   * Check if lenis is stopped
+   */
+  get isStopped() {
+    return this._isStopped;
+  }
+  set isStopped(value) {
+    if (this._isStopped !== value) {
+      this._isStopped = value;
+      this.updateClassName();
+    }
+  }
+  /**
+   * Check if lenis is locked
+   */
+  get isLocked() {
+    return this._isLocked;
+  }
+  set isLocked(value) {
+    if (this._isLocked !== value) {
+      this._isLocked = value;
+      this.updateClassName();
+    }
+  }
+  /**
+   * Check if lenis is smooth scrolling
+   */
+  get isSmooth() {
+    return this.isScrolling === "smooth";
+  }
+  /**
+   * The class name applied to the wrapper element
+   */
+  get className() {
+    let className = "lenis";
+    if (this.options.autoToggle) className += " lenis-autoToggle";
+    if (this.isStopped) className += " lenis-stopped";
+    if (this.isLocked) className += " lenis-locked";
+    if (this.isScrolling) className += " lenis-scrolling";
+    if (this.isScrolling === "smooth") className += " lenis-smooth";
+    return className;
+  }
+  updateClassName() {
+    this.cleanUpClassName();
+    this.rootElement.className = `${this.rootElement.className} ${this.className}`.trim();
+  }
+  cleanUpClassName() {
+    this.rootElement.className = this.rootElement.className.replace(/lenis(-\w+)?/g, "").trim();
+  }
+};
+
+// assets/common/header-nav/header-nav.js
+function HeaderNav(root = document) {
+  if (root === document && document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      HeaderNav();
+    }, { once: true });
+    return;
+  }
+  const navs = root instanceof Element && root.matches(".header-nav") ? [root] : root.querySelectorAll(".header-nav");
+  navs.forEach((el) => {
+    if (el.dataset.headerNavHydrated === "true") return;
+    const toggle = el.querySelector(".header-nav-toggle");
+    if (!toggle) return;
+    toggle.addEventListener("click", () => {
+      const isOpen = el.classList.toggle("is-open");
+      toggle.setAttribute("aria-expanded", String(isOpen));
+    });
+    el.dataset.headerNavHydrated = "true";
+  });
+}
+
+// assets/modules/hydration/hydration.js
+var moduleVersions = define_MODULE_VERSIONS_default;
+var moduleCache = /* @__PURE__ */ new Map();
+var versionedModulePath = (modulePath) => {
+  const version2 = moduleVersions[modulePath.replace(/^\.\//, "")];
+  return version2 ? `${modulePath}?v=${version2}` : modulePath;
+};
+var moduleCandidates = (moduleName) => {
+  const parts = moduleName.split("/").filter(Boolean);
+  const last = parts[parts.length - 1];
+  return [
+    last ? `${moduleName}/${last}` : null,
+    moduleName
+  ].filter(Boolean);
+};
+var importModule = async (moduleName) => {
+  let lastError;
+  for (const candidate of moduleCandidates(moduleName)) {
+    const [dir, ...rest] = candidate.split("/");
+    const file = rest.join("/");
+    let modulePath = "";
+    try {
+      if (dir === "common") modulePath = `./common/${file}.js`;
+      if (dir === "components") modulePath = `./components/${file}.js`;
+      if (dir === "form") modulePath = `./form/${file}.js`;
+      if (dir === "modules") modulePath = `./modules/${file}.js`;
+      if (dir === "strates") modulePath = `./strates/${file}.js`;
+      if (modulePath) {
+        modulePath = versionedModulePath(modulePath);
+        if (!moduleCache.has(modulePath)) {
+          moduleCache.set(modulePath, import(modulePath));
+        }
+        return await moduleCache.get(modulePath);
+      }
+      throw new Error(`Pr\xE9fixe de module inconnu : ${dir}`);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError;
+};
+var hydrateModule = (el) => {
+  if (el.dataset.moduleHydrated === "true") return;
+  const moduleName = el.dataset.module;
+  if (!moduleName) return;
+  importModule(moduleName).then((module) => {
+    const hydrate = module.default;
+    if (typeof hydrate === "function") {
+      hydrate(el);
+      el.dataset.moduleHydrated = "true";
+    }
+  }).catch((error) => {
+    console.error(`Module introuvable : ${moduleName}`, error);
+  });
+};
+var shouldHydrateOnVisible = (el) => /\B@visible\s+true\b/.test(el.dataset.context || "");
+function ModulesHydration() {
+  const modules = document.querySelectorAll("[data-module]");
+  if (modules.length === 0) return;
+  const visibleObserver = "IntersectionObserver" in window ? new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      visibleObserver.unobserve(entry.target);
+      hydrateModule(entry.target);
+    });
+  }, { rootMargin: "200px 0px" }) : null;
+  modules.forEach((el) => {
+    if (shouldHydrateOnVisible(el)) {
+      if (visibleObserver) {
+        visibleObserver.observe(el);
+        return;
+      }
+    }
+    hydrateModule(el);
+  });
+}
+
+// assets/app.js
+var supportsSmoothScroll = () => {
+  return !window.matchMedia("(prefers-reduced-motion: reduce)").matches && window.matchMedia("(pointer: fine)").matches;
+};
+var initLenis = () => {
+  if (!supportsSmoothScroll()) return;
+  window.lenis = new Lenis({ autoRaf: true });
+};
+initLenis();
+ModulesHydration();
+HeaderNav();

@@ -157,7 +157,65 @@ function card(mixed $name, mixed $args = []): void
 
     if ($name === '' || str_contains($name, '/') || str_contains($name, '..')) return;
 
+    $name = str_starts_with($name, 'card-') ? $name : 'card-' . $name;
+    if (is_numeric($args)) {
+        // recuperation des données du post
+        $post_id = (int) $args;
+        $args = [];
+    }
+
     get_template_part("cards/{$name}/{$name}", null, is_array($args) ? $args : []);
+}
+
+function form(
+    mixed $type = 'text',
+    mixed $label = null,
+    mixed $name = null,
+    mixed $required = false,
+    mixed $mandatory = null,
+    mixed $mandatory_msg = "Ce champ est obligatoire.",
+    mixed $placeholder = null,
+    mixed $options = null,
+    mixed $args = null,
+    mixed $classes = null,
+    mixed $attributes = null
+): void {
+    if (is_array($type)) {
+        $field_args = $type;
+
+        if ($label !== null) {
+            $field_args['classes'] = $label;
+        }
+
+        if ($name !== null) {
+            $field_args['attributes'] = $name;
+        }
+    } else {
+        $field_args = is_array($args) ? $args : [];
+        $field_args['type'] = $type;
+        $field_args['label'] = $label;
+        $field_args['name'] = $name;
+        $field_args['required'] = (bool) $required;
+        $field_args['mandatory'] = $mandatory;
+        $field_args['placeholder'] = $placeholder;
+        $field_args['options'] = is_array($options) ? $options : [];
+
+        if ($classes !== null) {
+            $field_args['classes'] = $classes;
+        }
+
+        if ($attributes !== null) {
+            $field_args['attributes'] = $attributes;
+        }
+    }
+
+    if (!isset($field_args['mandatory_msg'])) {
+        $field_args['mandatory_msg'] = $mandatory_msg;
+    }
+
+    if (empty($field_args['name']) || trim((string) $field_args['name']) === '') return;
+
+    get_template_part('form/form', null, $field_args);
 }
 
 function youtube_id_from_url(mixed $url): string

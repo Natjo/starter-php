@@ -5,7 +5,8 @@
     <?php
     hero("homepage", [
         "title" => "lorem",
-        "text" => "lorem"
+        "text" => "lorem",
+        "images" => THEME_UPLOADS."image3.jpg"
     ]);
     ?>
 
