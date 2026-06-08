@@ -1,28 +1,21 @@
 <?php
 declare(strict_types=1);
 
-define('STARTER_ROOT', __DIR__);
-define('APP_ROOT', dirname(__DIR__));
-define('WEB_ROOT', APP_ROOT . '/dist');
-define('ASSETS_ROOT', WEB_ROOT . '/assets');
-define('UPLOADS_ROOT', WEB_ROOT . '/uploads');
-define('ENV_LOCAL', isset($_SERVER['SERVER_NAME']) && false !== strrpos($_SERVER['SERVER_NAME'], '.code'));
-
-$scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
-$basePath = $scriptName === '' ? '' : rtrim(str_replace('\\', '/', dirname($scriptName)), '/');
-$baseUrl = $basePath === '' ? '' : $basePath;
-define('THEME_ASSETS', $baseUrl . '/dist/assets/');
-define('THEME_UPLOADS', $baseUrl . '/dist/uploads/');
-
+require_once __DIR__ . '/config.php';
 require_once STARTER_ROOT . '/method.php';
 require_once STARTER_ROOT . '/wp-compat.php';
 require_once STARTER_ROOT . '/functions.php';
-require_once APP_ROOT . '/components.php';
+require_once STARTER_ROOT . '/components.php';
 
 $uri = safe_request_path($_SERVER['REQUEST_URI'] ?? '/');
 $file = page_file($uri);
 
 if (is_file($file)) {
+    if ($uri === 'admin' || str_starts_with((string) $uri, 'admin/')) {
+        require $file;
+        exit;
+    }
+
     ob_start();
     require $file;
     $content = ob_get_clean();
@@ -70,14 +63,79 @@ function page_file($uri): string
         return '';
     }
 
+    if ($uri === 'admin' || str_starts_with($uri, 'admin/')) {
+        return admin_page_file($uri);
+    }
+
     if ($uri === 'styleguide' || str_starts_with($uri, 'styleguide/')) {
         return safe_page_file(APP_ROOT . '/' . $uri . '/index.php', APP_ROOT . '/styleguide');
     }
 
-    return dist_page_file($uri);
+    return web_page_file($uri);
 }
 
-function dist_page_file($uri): string
+function admin_page_file($uri): string
+{
+    if ($uri === null) {
+        return '';
+    }
+
+    $adminRoot = APP_ROOT . '/admin';
+    $route = trim(substr($uri, strlen('admin')), '/');
+
+    if ($route === '') {
+        $_GET['page'] = 'dashboard';
+
+        return safe_page_file($adminRoot . '/index.php', $adminRoot);
+    }
+
+    if ($route === 'performance') {
+        $_GET['page'] = 'performance';
+
+        return safe_page_file($adminRoot . '/index.php', $adminRoot);
+    }
+
+    if ($route === 'ux') {
+        $_GET['page'] = 'ux';
+
+        return safe_page_file($adminRoot . '/index.php', $adminRoot);
+    }
+
+    if ($route === 'wordpress') {
+        $_GET['page'] = 'wordpress';
+
+        return safe_page_file($adminRoot . '/index.php', $adminRoot);
+    }
+
+    if ($route === 'accessibilite') {
+        $_GET['page'] = 'accessibilite';
+
+        return safe_page_file($adminRoot . '/index.php', $adminRoot);
+    }
+
+    if ($route === 'seo') {
+        $_GET['page'] = 'seo';
+
+        return safe_page_file($adminRoot . '/index.php', $adminRoot);
+    }
+
+    if ($route === 'images') {
+        $_GET['page'] = 'images';
+
+        return safe_page_file($adminRoot . '/index.php', $adminRoot);
+    }
+
+    if ($route === 'specification' || str_starts_with($route, 'specification/')) {
+        $_GET['page'] = 'specifications';
+        $_GET['route'] = trim(substr($route, strlen('specification')), '/');
+
+        return safe_page_file($adminRoot . '/index.php', $adminRoot);
+    }
+
+    return '';
+}
+
+function web_page_file($uri): string
 {
     if ($uri === null) {
         return '';

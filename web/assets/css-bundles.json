@@ -1,0 +1,47 @@
+{
+  "bundles": {
+    "common": "common.css"
+  },
+  "bundledFiles": [
+    "cards/card-news/card-news.css",
+    "common/footer/footer.css",
+    "common/header-nav/header-nav.css",
+    "common/lightdark/lightdark.css",
+    "common/prefooter/prefooter.css",
+    "components/badge/badge.css",
+    "components/eyebrow/eyebrow.css",
+    "components/list/list.css",
+    "components/marquee/marquee.css",
+    "components/newsletter/newsletter.css",
+    "components/notification/notification.css",
+    "components/pagination/pagination.css",
+    "components/select-lang/select-lang.css",
+    "components/slider/slider.css",
+    "components/tag/tag.css",
+    "form/form.css",
+    "styles/print.css",
+    "styles/starter.css",
+    "vendors/lenis/lenis.css"
+  ],
+  "fileBundles": {
+    "cards/card-news/card-news.css": "common",
+    "common/footer/footer.css": "common",
+    "common/header-nav/header-nav.css": "common",
+    "common/lightdark/lightdark.css": "common",
+    "common/prefooter/prefooter.css": "common",
+    "components/badge/badge.css": "common",
+    "components/eyebrow/eyebrow.css": "common",
+    "components/list/list.css": "common",
+    "components/marquee/marquee.css": "common",
+    "components/newsletter/newsletter.css": "common",
+    "components/notification/notification.css": "common",
+    "components/pagination/pagination.css": "common",
+    "components/select-lang/select-lang.css": "common",
+    "components/slider/slider.css": "common",
+    "components/tag/tag.css": "common",
+    "form/form.css": "common",
+    "styles/print.css": "common",
+    "styles/starter.css": "common",
+    "vendors/lenis/lenis.css": "common"
+  }
+}

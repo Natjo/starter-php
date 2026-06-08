@@ -1,47 +1,8 @@
 # Starter kit
 
-## CSS/JS – principe de build & chargement
+## Documentation
 
-Ce starterkit met en place un chargement CSS optimisé, basé sur une **collecte des styles utilisés** pendant le rendu PHP.
-
-### CSS critique inline (head)
-
-Dans `front/methods.php` → `styles()` :
-
-- `assets/styles.css` (issu de `assets/app.css`) est **inliné** dans `<style id="critical-css">`.
-- Le CSS du **hero de la page** (dossier `assets/heros/...`) est ajouté dans **la même balise** (pas de requête réseau).
-
-### Bundles CSS (components/cards/strates)
-
-Pour éviter trop de requêtes, on génère des bundles pilotés par des fichiers *entry* :
-
-- `assets/components.css`
-- `assets/cards.css`
-- `assets/strates.css`
-- `assets/modules.css`
-
-Le chargement se fait **uniquement si** le groupe est demandé par `addStyle()`, avec `preload` puis `stylesheet`, dans l’ordre :
-**modules → components → cards → strates**.
-
-### Manifest bundles (bundle vs on-demand)
-
-Le builder génère `assets/css-bundles.json` dans le thème compilé.
-
-Ce manifest liste, par dossier (`modules/components/cards/strates`), quels fichiers `assets/<folder>/<name>/<name>.css` sont inclus dans le bundle.
-
-Règle côté PHP (`addStyle()`):
-
-- si un fichier est listé dans le manifest → on charge **le bundle** (`<folder>.css`)
-- sinon → on charge **le fichier on-demand** `assets/<folder>/<name>/<name>.css`
-
-### Builder (Node)
-
-Le script `builder.js` :
-
-- compile les `@import` de `assets/app.css` → `assets/styles.css`
-- compile chaque CSS individuel (postcss + cssnano)
-- compile les bundles `modules.css/components.css/cards.css/strates.css` en résolvant leurs `@import`
-- écrit le manifest `assets/css-bundles.json` (utilisé par `addStyle()`)
+- [Gestion du CSS](README-CSS.md)
 
 ## Configuration
 
@@ -160,5 +121,3 @@ password: my.cnf password
 shh host: lonsdale-preprod.ovh.bearstech.com  
 ssh user: [le user du projet]  
 ssh key: user key id_rsa  
-
-

@@ -40,14 +40,25 @@
         transition: grid-template-rows .3s;
         overflow: clip;
 
-        .text {
+        .details-content-inner {
+            min-height: 0;
             overflow: hidden;
+            visibility: hidden;
+            transition: visibility 0s .3s;
+        }
+
+        .text {
             padding: 1rem;
             box-sizing: border-box;
         }
 
         &[aria-hidden="false"] {
             grid-template-rows: 1fr;
+
+            .details-content-inner {
+                visibility: visible;
+                transition-delay: 0s;
+            }
         }
     }
 
@@ -67,7 +78,8 @@
 
     @media (prefers-reduced-motion: reduce) {
         .summary .accordion-caret,
-        .details-content {
+        .details-content,
+        .details-content-inner {
             transition: none;
         }
     }

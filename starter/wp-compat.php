@@ -76,7 +76,7 @@ function get_template_part(mixed $slug, mixed $name = null, array $args = []): v
     }
 
     $directories = array_filter([
-        defined('ASSETS_ROOT') ? ASSETS_ROOT : null,
+        defined('WEB_ASSETS_ROOT') ? WEB_ASSETS_ROOT : null,
     ], static fn($directory) => is_string($directory) && is_dir($directory));
 
     foreach ($templates as $template) {
@@ -197,13 +197,13 @@ function image_source(mixed $image, mixed $size = 'full'): array
         }
     }
 
-    if (str_starts_with($file, 'dist/uploads/')) {
-        $file = substr($file, strlen('dist/uploads/'));
+    if (str_starts_with($file, 'web/uploads/')) {
+        $file = substr($file, strlen('web/uploads/'));
         $isUpload = true;
     }
 
-    if (str_starts_with($file, 'dist/assets/')) {
-        $file = substr($file, strlen('dist/assets/'));
+    if (str_starts_with($file, 'web/assets/')) {
+        $file = substr($file, strlen('web/assets/'));
     }
 
     if ($file === '') {

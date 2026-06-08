@@ -1,0 +1,53 @@
+{
+    "updatedAt": "2026-06-07T09:23:24+00:00",
+    "pages": {
+        "/": {
+            "label": "Accueil",
+            "path": "/",
+            "url": "https://project.code/",
+            "samples": 6,
+            "updatedAt": "2026-06-07T09:23:24+00:00",
+            "metrics": {
+                "lcp": 0.05,
+                "cls": 0,
+                "inp": null
+            }
+        },
+        "/styles": {
+            "label": "/styles",
+            "path": "/styles",
+            "url": "https://project.code/styles",
+            "samples": 3,
+            "updatedAt": "2026-06-07T08:26:26+00:00",
+            "metrics": {
+                "lcp": 0.06,
+                "cls": 0,
+                "inp": null
+            }
+        },
+        "/components": {
+            "label": "/components",
+            "path": "/components",
+            "url": "https://project.code/components",
+            "samples": 2,
+            "updatedAt": "2026-06-07T08:19:47+00:00",
+            "metrics": {
+                "lcp": 95,
+                "cls": 0,
+                "inp": null
+            }
+        },
+        "/strates": {
+            "label": "/strates",
+            "path": "/strates",
+            "url": "https://project.code/strates",
+            "samples": 2,
+            "updatedAt": "2026-06-07T09:23:21+00:00",
+            "metrics": {
+                "lcp": 0.05,
+                "cls": 0,
+                "inp": null
+            }
+        }
+    }
+}

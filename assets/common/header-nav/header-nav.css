@@ -8,13 +8,20 @@
     gap: 2rem;
     min-height: var(--header-height);
     padding-inline: var(--ctr-offset);
-    background: rgba(255,255,255,.95);
-   
+    background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent);
+    backdrop-filter: blur(14px);
 }
 
 .header-nav-brand {
     font-weight: 700;
     color: var(--color-1);
+}
+
+.header-nav-actions {
+    align-items: center;
+    display: flex;
+    gap: 1.2rem;
 }
 
 .header-nav-menu {
@@ -30,6 +37,29 @@
 
 .header-nav-link.is-active {
     color: var(--color-2);
+}
+
+.header-nav-toggle {
+    align-items: center;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    color: var(--color-text);
+    display: inline-flex;
+    gap: .8rem;
+    min-height: 4rem;
+    padding: 0 1.4rem;
+    transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+}
+.header-nav-toggle:hover {
+    background: var(--color-surface-alt);
+}
+
+.header-nav-toggle:focus-visible,
+.header-nav-link:focus-visible,
+.header-nav-brand:focus-visible {
+    outline: 2px solid var(--color-2);
+    outline-offset: 2px;
 }
 
 .header-nav-toggle {
@@ -54,8 +84,8 @@
         flex-direction: column;
         align-items: flex-start;
         padding: 2rem var(--ctr-offset);
-        background: #fff;
-        border-bottom: 1px solid var(--color-gray-dark);
+        background: var(--color-surface);
+        border-bottom: 1px solid var(--color-border);
     }
 
     .header-nav.is-open .header-nav-menu {

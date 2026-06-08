@@ -142,13 +142,49 @@ function common(string $name, array $args = []): void
 
 function hero(string $name, array $args = []): void
 {
+    $template = 'heros/hero-' . $name . '/hero-' . $name . '.css';
+    starter_enqueue_critical_style($template);
     get_template_part("heros/hero-{$name}/hero-{$name}", null, $args);
 }
 
 function strate(string $name, array $args = []): void
 {
-    $name = str_replace('-', '_', $name);
-    get_template_part("strates/strate-{$name}/strate-{$name}", null, $args);
+    $name = str_replace('-', '_', trim($name));
+
+    if ($name === '' || !preg_match('/^[A-Za-z0-9_]+$/', $name)) return;
+
+    $template = "strates/strate-{$name}/strate-{$name}";
+    $style = $template . '.css';
+    $manifest = starter_dist_css_manifest();
+    $is_bundled = in_array($style, $manifest['bundledFiles'], true);
+    $was_enqueued = !empty($GLOBALS['starter_dist_enqueued_styles'][$style]);
+
+    ob_start();
+    get_template_part($template, null, $args);
+    $html = (string) ob_get_clean();
+
+    if (trim($html) === '') return;
+
+    $is_first = empty($GLOBALS['starter_rendered_strate_count']);
+
+    if (!$is_bundled && !$was_enqueued) {
+        unset($GLOBALS['starter_dist_enqueued_styles'][$style]);
+    }
+
+    if ($is_first) {
+        starter_enqueue_dist_style($style);
+    } elseif (
+        !$is_bundled
+        && !$was_enqueued
+        && starter_dist_css_file_exists($style)
+        && empty($GLOBALS['starter_dist_rendered_body_styles'][$style])
+    ) {
+        $GLOBALS['starter_dist_rendered_body_styles'][$style] = true;
+        echo starter_dist_style_link($style);
+    }
+
+    $GLOBALS['starter_rendered_strate_count'] = (int) ($GLOBALS['starter_rendered_strate_count'] ?? 0) + 1;
+    echo $html;
 }
 
 function card(mixed $name, mixed $args = []): void

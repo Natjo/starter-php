@@ -1,0 +1,61 @@
+.marquee {
+    --marquee-gap: clamp(2.4rem, 5vw, 7rem);
+
+    position: relative;
+    overflow: hidden;
+}
+
+.marquee-viewport {
+    overflow: hidden;
+    cursor: grab;
+    touch-action: pan-y;
+    user-select: none;
+
+    &:focus-visible {
+        outline: 0.2rem solid var(--color-2);
+        outline-offset: -0.2rem;
+    }
+
+    .marquee.is-dragging & {
+        cursor: grabbing;
+    }
+}
+
+.marquee-track {
+    display: flex;
+    width: max-content;
+    gap: var(--marquee-gap);
+    will-change: transform;
+}
+
+.marquee-group {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--marquee-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.marquee-item {
+    flex: none;
+
+    img,
+    picture,
+    svg {
+        pointer-events: none;
+        user-select: none;
+        -webkit-user-drag: none;
+    }
+
+    a {
+        color: inherit;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .marquee-track {
+        will-change: auto;
+    }
+}

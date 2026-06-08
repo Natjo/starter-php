@@ -1,0 +1,165 @@
+{
+    "updatedAt": "2026-06-08T06:46:23+00:00",
+    "source": "local",
+    "profile": "desktop-local",
+    "status": "success",
+    "message": "Mesure locale terminee.",
+    "summary": {
+        "lcp": 0.12,
+        "inp": null,
+        "cls": 0,
+        "tbt": 22
+    },
+    "pages": [
+        {
+            "label": "Accueil",
+            "url": "http://nginx/",
+            "lcp": 0.12,
+            "inp": null,
+            "cls": 0,
+            "tbt": 0,
+            "diagnostics": {
+                "lcp": [
+                    "Element LCP : <img src=\"http://nginx/web/uploads/image3.webp\" alt=\"\" width=\"1440\" height=\"700\" fetchpriority=\"high\">",
+                    "Delai de rendu de l element : 67 ms",
+                    "Ajouter fetchpriority=\"high\" a la requete de preload de l image",
+                    "Ressource LCP : <img src=\"http://nginx/web/uploads/image3.webp\" alt=\"\" width=\"1440\" height=\"700\" fetchpriority=\"high\">"
+                ],
+                "cls": [],
+                "tbt": []
+            },
+            "updatedAt": "2026-06-08T06:44:11+00:00",
+            "source": "lighthouse-local"
+        },
+        {
+            "label": "Cards",
+            "url": "http://nginx/cards",
+            "lcp": 0.04,
+            "inp": null,
+            "cls": 0,
+            "tbt": 0,
+            "diagnostics": {
+                "lcp": [
+                    "Element LCP : <img src=\"/web/assets/img/63-1400x1024.jpg\" alt=\"\" width=\"1400\" height=\"1024\" fetchpriority=\"high\">",
+                    "Delai de rendu de l element : 30 ms",
+                    "Ressource LCP : <img src=\"/web/assets/img/63-1400x1024.jpg\" alt=\"\" width=\"1400\" height=\"1024\" fetchpriority=\"high\">"
+                ],
+                "cls": [],
+                "tbt": []
+            },
+            "updatedAt": "2026-06-08T06:44:30+00:00",
+            "source": "lighthouse-local"
+        },
+        {
+            "label": "Components",
+            "url": "http://nginx/components",
+            "lcp": 0.12,
+            "inp": null,
+            "cls": 0,
+            "tbt": 22,
+            "diagnostics": {
+                "lcp": [
+                    "Element LCP : <h2 class=\"title title-2\">",
+                    "Delai de rendu de l element : 105 ms"
+                ],
+                "cls": [],
+                "tbt": [
+                    "Tache longue : 72 ms - /web/assets/components/navanchor/navanchor.js",
+                    "Tache longue : 61 ms - /components"
+                ]
+            },
+            "updatedAt": "2026-06-08T06:44:49+00:00",
+            "source": "lighthouse-local"
+        },
+        {
+            "label": "Form",
+            "url": "http://nginx/form",
+            "lcp": 0.07,
+            "inp": null,
+            "cls": 0,
+            "tbt": 0,
+            "diagnostics": {
+                "lcp": [
+                    "Element LCP : <h1>",
+                    "Delai de rendu de l element : 57 ms"
+                ],
+                "cls": [],
+                "tbt": []
+            },
+            "updatedAt": "2026-06-08T06:45:08+00:00",
+            "source": "lighthouse-local"
+        },
+        {
+            "label": "Layout",
+            "url": "http://nginx/layout",
+            "lcp": 0.04,
+            "inp": null,
+            "cls": 0,
+            "tbt": 0,
+            "diagnostics": {
+                "lcp": [
+                    "Element LCP : <h1 class=\"title title-1\">",
+                    "Delai de rendu de l element : 33 ms"
+                ],
+                "cls": [],
+                "tbt": []
+            },
+            "updatedAt": "2026-06-08T06:45:27+00:00",
+            "source": "lighthouse-local"
+        },
+        {
+            "label": "Strates",
+            "url": "http://nginx/strates",
+            "lcp": 0.05,
+            "inp": null,
+            "cls": 0,
+            "tbt": 0,
+            "diagnostics": {
+                "lcp": [
+                    "Element LCP : <h1 class=\"title title-1\">",
+                    "Delai de rendu de l element : 38 ms"
+                ],
+                "cls": [],
+                "tbt": []
+            },
+            "updatedAt": "2026-06-08T06:45:46+00:00",
+            "source": "lighthouse-local"
+        },
+        {
+            "label": "Styles",
+            "url": "http://nginx/styles",
+            "lcp": 0.05,
+            "inp": null,
+            "cls": 0,
+            "tbt": 0,
+            "diagnostics": {
+                "lcp": [
+                    "Element LCP : <p>",
+                    "Delai de rendu de l element : 42 ms"
+                ],
+                "cls": [],
+                "tbt": []
+            },
+            "updatedAt": "2026-06-08T06:46:05+00:00",
+            "source": "lighthouse-local"
+        },
+        {
+            "label": "Theme",
+            "url": "http://nginx/theme",
+            "lcp": 0.03,
+            "inp": null,
+            "cls": 0,
+            "tbt": 0,
+            "diagnostics": {
+                "lcp": [
+                    "Element LCP : <h1 class=\"title title-1\">",
+                    "Delai de rendu de l element : 27 ms"
+                ],
+                "cls": [],
+                "tbt": []
+            },
+            "updatedAt": "2026-06-08T06:46:23+00:00",
+            "source": "lighthouse-local"
+        }
+    ]
+}

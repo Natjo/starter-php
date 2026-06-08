@@ -14,20 +14,33 @@ const chokidar = require('chokidar');
 
 const root = __dirname;
 const src = path.join(root, 'assets');
-const dist = path.join(root, 'dist', 'assets');
+const webAssets = path.join(root, 'web', 'assets');
 const fromCss = 'app.css';
 const legacyFromCss = 'styles.css';
 const criticalCss = 'critical.css';
 const cssBundles = {
     common: 'common.css',
-    components: 'components.css',
-    modules: 'modules.css',
 };
 const cssImportTargetNames = new Set(['critical', ...Object.keys(cssBundles)]);
 const cssManifestFile = 'css-bundles.json';
-const bundledCssSourceDirs = new Set([...Object.keys(cssBundles), 'vendors', 'strates']);
+const buildManifestFile = 'build.json';
+const versionedAssetExtensions = new Set([
+    '.css',
+    '.js',
+    '.avif',
+    '.gif',
+    '.ico',
+    '.jpeg',
+    '.jpg',
+    '.png',
+    '.svg',
+    '.webp',
+    '.woff',
+    '.woff2',
+]);
+const bundledCssSourceDirs = new Set(['cards', 'common', 'components', 'modules', 'strates', 'vendors']);
 const templateSourceDirs = new Set(['cards', 'common', 'components', 'form', 'heros', 'strates']);
-const excludedCopyDirs = new Set([...templateSourceDirs, 'modules', 'styles']);
+const excludedCopyDirs = new Set([...templateSourceDirs, 'modules', 'pages', 'styles']);
 const importAliases = {
     'common': path.join(src, 'common'),
     '@common': path.join(src, 'common'),
@@ -99,7 +112,7 @@ const isTemplateFile = file => templateSourceDirs.has(topLevelDir(file)) && path
 const isJsFile = file => path.extname(file) === '.js';
 const isCssFile = file => path.extname(file) === '.css';
 
-const outputPath = file => path.join(dist, path.relative(src, file));
+const outputPath = file => path.join(webAssets, path.relative(src, file));
 
 const autoBundleGroupForRelativeCss = file => {
     return null;
@@ -278,7 +291,7 @@ const rewriteCssUrls = (css = '', fromFile, toFile) => {
         const sourceRelative = path.resolve(sourceDir, trimmed);
         const rootRelative = path.resolve(src, trimmed);
         const absolute = fs.existsSync(sourceRelative) ? sourceRelative : rootRelative;
-        const asset = absolute.startsWith(src) ? path.join(dist, path.relative(src, absolute)) : absolute;
+        const asset = absolute.startsWith(src) ? path.join(webAssets, path.relative(src, absolute)) : absolute;
         const relative = toPosix(path.relative(outputDir, asset));
         const rewritten = relative.startsWith('.') ? relative : `./${relative}`;
 
@@ -364,7 +377,7 @@ function inlineImports(css = '') {
             return '';
         }
 
-        const out = path.join(dist, criticalCss);
+        const out = path.join(webAssets, criticalCss);
         return resolveCssImport(normalized)
             .map(importedPath => rewriteCssUrls(fs.readFileSync(importedPath, 'utf8'), importedPath, out))
             .join('\n') + '\n';
@@ -403,8 +416,8 @@ function writeCssManifest() {
         }
     });
 
-    fs.ensureDirSync(dist);
-    fs.writeJsonSync(path.join(dist, cssManifestFile), cssManifest, { spaces: 2 });
+    fs.ensureDirSync(webAssets);
+    fs.writeJsonSync(path.join(webAssets, cssManifestFile), cssManifest, { spaces: 2 });
 }
 
 function refreshAppCssImports() {
@@ -436,7 +449,7 @@ async function compileAppCss() {
     const { file, source } = refreshAppCssImports();
     const css = inlineImports(source);
 
-    await runPostcss(css, file, path.join(dist, criticalCss));
+    await runPostcss(css, file, path.join(webAssets, criticalCss));
     display(`${path.basename(file)} - ${cssTargetLabel('critical')} -> ${criticalCss}`, 'update');
 }
 
@@ -464,7 +477,7 @@ async function compileCssBundle(name) {
 
     if (!outputFile) return;
 
-    const out = path.join(dist, outputFile);
+    const out = path.join(webAssets, outputFile);
     const files = [...bundledCssImports]
         .filter(file => bundleGroupForRelativeCss(file) === name)
         .map(file => path.join(src, file))
@@ -723,18 +736,42 @@ function moduleVersionMap() {
     const moduleRoots = ['common', 'components', 'form', 'heros', 'modules', 'strates'];
 
     moduleRoots.forEach(rootDir => {
-        const directory = path.join(dist, rootDir);
+        const directory = path.join(webAssets, rootDir);
 
         if (!fs.existsSync(directory)) return;
 
         getFiles(directory).forEach(file => {
             if (!isJsFile(file)) return;
 
-            versions[toPosix(path.relative(dist, file))] = fileHash(file);
+            versions[toPosix(path.relative(webAssets, file))] = fileHash(file);
         });
     });
 
     return versions;
+}
+
+function assetVersionMap() {
+    const versions = {};
+
+    if (!fs.existsSync(webAssets)) return versions;
+
+    getFiles(webAssets).forEach(file => {
+        const relative = toPosix(path.relative(webAssets, file));
+
+        if (!versionedAssetExtensions.has(path.extname(file).toLowerCase())) return;
+
+        versions[relative] = fileHash(file);
+    });
+
+    return versions;
+}
+
+function writeBuildManifest() {
+    fs.ensureDirSync(webAssets);
+    fs.writeJsonSync(path.join(webAssets, buildManifestFile), {
+        production: isProd,
+        versions: isProd ? assetVersionMap() : {},
+    }, { spaces: 2 });
 }
 
 function copyStatic(file) {
@@ -752,7 +789,7 @@ function syncCopiedDirs() {
             continue;
         }
 
-        const to = path.join(dist, entry);
+        const to = path.join(webAssets, entry);
         fs.removeSync(to);
         fs.copySync(from, to, { filter: source => !isIgnored(source) });
         display(entry, 'update');
@@ -837,9 +874,9 @@ async function build({ clean = true } = {}) {
 
     try {
         if (clean) {
-            cleanDistAssets();
+            cleanWebAssets();
         } else {
-            fs.ensureDirSync(dist);
+            fs.ensureDirSync(webAssets);
         }
 
         syncCopiedDirs();
@@ -858,15 +895,16 @@ async function build({ clean = true } = {}) {
         await compileAppJs();
         await compileAppCss();
         await compileCssBundles();
+        writeBuildManifest();
     } finally {
         currentSourceFiles = null;
     }
 }
 
-function cleanDistAssets() {
-    fs.removeSync(dist);
-    fs.ensureDirSync(dist);
-    display('dist/assets', 'remove');
+function cleanWebAssets() {
+    fs.removeSync(webAssets);
+    fs.ensureDirSync(webAssets);
+    display('web/assets', 'remove');
 }
 
 async function rebuild(file, evt = 'update') {
@@ -991,6 +1029,7 @@ function scheduleRebuild(evt, file) {
     rebuildTimers.set(key, setTimeout(() => {
         rebuildTimers.delete(key);
         rebuild(absoluteFile, evt)
+            .then(() => writeBuildManifest())
             .catch(error => {
                 display(path.basename(absoluteFile), 'error');
                 console.error(error.message);
@@ -1066,7 +1105,7 @@ build()
                 ignored: [
                     '**/.DS_Store',
                     '**/node_modules/**',
-                    path.join(dist, '**'),
+                    path.join(webAssets, '**'),
                 ],
             })
             .on('add', file => scheduleRebuild('add', file))

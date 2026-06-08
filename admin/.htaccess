@@ -1,0 +1,14 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteRule ^$ index.php [L]
+    RewriteRule ^iperformance/?$ performance [R=301,L]
+    RewriteRule ^performance/?$ index.php?page=performance [QSA,L]
+    RewriteRule ^ux/?$ index.php?page=ux [QSA,L]
+    RewriteRule ^wordpress/?$ index.php?page=wordpress [QSA,L]
+    RewriteRule ^accessibilite/?$ index.php?page=accessibilite [QSA,L]
+    RewriteRule ^seo/?$ index.php?page=seo [QSA,L]
+    RewriteRule ^images/?$ index.php?page=images [QSA,L]
+    RewriteRule ^specification$ specification/ [R=301,L]
+    RewriteRule ^specification/?(.*)$ index.php?page=specifications&route=$1 [QSA,L]
+</IfModule>

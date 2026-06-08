@@ -1,7 +1,7 @@
 #footer {
     padding: 4rem var(--ctr-offset);
     background-color: var(--color-2);
-    color: #fff;
+    color: var(--color-inverse);
     display:flex;
     justify-content: space-between;
 
