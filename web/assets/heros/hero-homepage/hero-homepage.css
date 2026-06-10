@@ -1,0 +1,40 @@
+.hero-homepage {
+    background: var(--color-3);
+    color: #fff;
+
+    .hero-content {
+        align-self: center;
+        grid-row: 1;
+        grid-column: ctr;
+        z-index: 1;
+    }
+
+    .title {
+       
+    }
+
+    .text {
+     
+    }
+
+    picture {
+        grid-column: full;
+        grid-row: 1;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    img {
+        width: 100%;
+        height: 100%;
+        -o-object-fit: cover;
+           object-fit: cover;
+    }
+
+
+    @media (min-width: 841px) {
+        height: 100vh;
+    }
+}
+/*# sourceMappingURL=hero-homepage.css.map */

@@ -1,0 +1,22 @@
+.shares .list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap, .75rem);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.shares button {
+    cursor: pointer;
+}
+
+.shares .tip {
+    pointer-events: none;
+}
+
+.shares button:not(.is-copied) .tip {
+    display: none;
+}
+
+/*# sourceMappingURL=shares.css.map */

@@ -1,0 +1,63 @@
+.tooltip {
+    display: inline-block;
+    position: relative;
+    width: -moz-max-content;
+    width: max-content;
+
+    .trigger-button {
+        -webkit-appearance: none;
+           -moz-appearance: none;
+                appearance: none;
+        background: transparent;
+        border: 0;
+        border-bottom: 1px dotted currentColor;
+        color: var(--color-2);
+        cursor: help;
+        display: inline-flex;
+        font-weight: 700;
+        line-height: 1.2;
+        padding: 0;
+    }
+
+    .trigger-button:focus-visible {
+        outline-offset: .3rem;
+    }
+
+    .tooltip-content {
+        position: absolute;
+        bottom: calc(100% + .8rem);
+        left: 50%;
+        z-index: 10;
+        width: -moz-max-content;
+        width: max-content;
+        max-width: min(28rem, calc(100vw - 3.2rem));
+        color: var(--tooltip-color, var(--color-text));
+        background-color: var(--tooltip-background, var(--color-surface));
+        border: 1px solid var(--tooltip-border, var(--color-border));
+        box-shadow: 0 .8rem 2.4rem color-mix(in srgb, var(--color-shadow) 88%, transparent);
+        padding: 1rem;
+        border-radius: .4rem;
+        font-size: 1.2rem;
+        line-height: 1.4;
+        opacity: 0;
+        pointer-events: none;
+        visibility: hidden;
+        transform: translateX(-50%) translateY(.4rem);
+        transition: opacity .2s ease, visibility .2s ease, transform .2s ease;
+    }
+
+    &:hover .tooltip-content,
+    &:focus-within .tooltip-content {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tooltip .tooltip-content {
+        transition: none;
+    }
+}
+
+/*# sourceMappingURL=tooltip.css.map */

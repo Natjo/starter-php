@@ -13,22 +13,17 @@ Les CSS page-aware restent hors d'app.css et sont chargés selon les templates u
 @import "styles/fonts.css" critical;
 @import "styles/classes.css" critical;
 @import "styles/print.css" common;
-@import "styles/starter.css" common;
+
 
 // vendors
 @import "vendors/lenis/lenis.css" common;
 
-// form
-@import "form/form.css" common;
-
 // common
 @import "common/header-nav/header-nav.css" common;
-@import "common/lightdark/lightdark.css" common;
-@import "common/prefooter/prefooter.css" common;
 @import "common/footer/footer.css" common;
 
 // cards
-@import "cards/card-news/card-news.css" common;
+@import "cards/card-foundation/card-foundation.css" common;
 
 // components fréquents
 @import "components/badge/badge.css" common;
@@ -40,8 +35,8 @@ Les CSS page-aware restent hors d'app.css et sont chargés selon les templates u
 @import "components/btn/btn.css" critical;
 @import "components/link/link.css" critical;
 @import "components/list/list.css" common;
-@import "components/marquee/marquee.css" common;
-@import "components/newsletter/newsletter.css" common;
-@import "components/notification/notification.css" common;
-@import "components/pagination/pagination.css" common;
+
+
+
+
 @import "components/select-lang/select-lang.css" common;

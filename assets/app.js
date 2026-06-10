@@ -1,6 +1,5 @@
 import Lenis from "@vendors/lenis/lenis";
 import HeaderNav from "@common/header-nav";
-import LightDark from "@common/lightdark/lightdark";
 import ModulesHydration from "@modules/hydration";
 
 const supportsSmoothScroll = () => {
@@ -14,6 +13,5 @@ const initLenis = () => {
 };
 
 initLenis();
-LightDark();
 ModulesHydration();
 HeaderNav();
