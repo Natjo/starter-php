@@ -6,8 +6,6 @@ export default function HeaderNav(root = document) {
         return;
     }
 
-
-
     const navs = root instanceof Element && root.matches('.header-nav')
         ? [root]
         : root.querySelectorAll('.header-nav');

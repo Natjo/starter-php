@@ -14,29 +14,22 @@ Les CSS page-aware restent hors d'app.css et sont chargés selon les templates u
 @import "styles/classes.css" critical;
 @import "styles/print.css" common;
 
-
 // vendors
 @import "vendors/lenis/lenis.css" common;
 
 // common
-@import "common/header-nav/header-nav.css" common;
+@import "common/header-nav/header-nav.css" critical;
 @import "common/footer/footer.css" common;
 
 // cards
 @import "cards/card-foundation/card-foundation.css" common;
 
 // components fréquents
-@import "components/badge/badge.css" common;
 @import "components/slider/slider.css" common;
-@import "components/tag/tag.css" common;
 @import "components/eyebrow/eyebrow.css" common;
 @import "components/title/title.css" critical;
 @import "components/text/text.css" critical;
 @import "components/btn/btn.css" critical;
 @import "components/link/link.css" critical;
 @import "components/list/list.css" common;
-
-
-
-
 @import "components/select-lang/select-lang.css" common;

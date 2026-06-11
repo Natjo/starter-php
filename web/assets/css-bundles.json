@@ -5,26 +5,20 @@
   "bundledFiles": [
     "cards/card-foundation/card-foundation.css",
     "common/footer/footer.css",
-    "common/header-nav/header-nav.css",
-    "components/badge/badge.css",
     "components/eyebrow/eyebrow.css",
     "components/list/list.css",
     "components/select-lang/select-lang.css",
     "components/slider/slider.css",
-    "components/tag/tag.css",
     "styles/print.css",
     "vendors/lenis/lenis.css"
   ],
   "fileBundles": {
     "cards/card-foundation/card-foundation.css": "common",
     "common/footer/footer.css": "common",
-    "common/header-nav/header-nav.css": "common",
-    "components/badge/badge.css": "common",
     "components/eyebrow/eyebrow.css": "common",
     "components/list/list.css": "common",
     "components/select-lang/select-lang.css": "common",
     "components/slider/slider.css": "common",
-    "components/tag/tag.css": "common",
     "styles/print.css": "common",
     "vendors/lenis/lenis.css": "common"
   }

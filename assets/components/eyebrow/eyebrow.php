@@ -19,4 +19,4 @@ $attributes = component::attributes($args["attributes"] ?? []);
 if ($text === "") return;
 ?>
 
-<<?= $element ?> class="<?= $classes ?>"<?= $attributes ?>><?= esc_html($text) ?></<?= $element ?>>
+<<?= $element ?> class="<?= $classes ?>"<?= $attributes ?>><?= wp_kses_post($text) ?></<?= $element ?>>

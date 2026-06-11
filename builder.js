@@ -918,7 +918,11 @@ async function rebuild(file, evt = 'update') {
         if (isCssFile(absoluteFile) && bundledCssSourceDirs.has(topLevelDir(absoluteFile))) {
             await compileCssBundleForFile(absoluteFile);
         }
-        if (isAppCss(absoluteFile) || isStylesSourceFile(absoluteFile)) {
+        if (
+            isAppCss(absoluteFile)
+            || isStylesSourceFile(absoluteFile)
+            || (isCssFile(absoluteFile) && criticalCssImports.has(toPosix(path.relative(src, absoluteFile))))
+        ) {
             await compileAppCss();
         }
         if (isJsFile(absoluteFile) && !isAppJs(absoluteFile)) {
@@ -962,6 +966,11 @@ async function rebuild(file, evt = 'update') {
 
     if (bundledCssImports.has(toPosix(path.relative(src, absoluteFile)))) {
         await compileCssBundleForFile(absoluteFile);
+        return;
+    }
+
+    if (isCssFile(absoluteFile) && criticalCssImports.has(toPosix(path.relative(src, absoluteFile)))) {
+        await compileAppCss();
         return;
     }
 
@@ -1124,6 +1133,7 @@ build()
                 console.error(error.message);
             });
 
+        startPollingRescan();
     })
     .catch(error => {
         display('build', 'error');

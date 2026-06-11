@@ -14,10 +14,10 @@ if (empty($items)) {
 }
 ?>
 
-<div class="<?= $classes ?>">
-    <ul class="list__items" role="list">
+<div>
+    <ul class="list <?= $classes ?>" role="list">
         <?php foreach ($items as $item) : ?>
-            <li class="list__item">
+            <li class="item">
                 <?php card($card, is_array($item) ? $item : []); ?>
             </li>
         <?php endforeach; ?>

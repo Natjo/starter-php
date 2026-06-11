@@ -32,7 +32,9 @@ $admin_base = preg_replace('#/web/assets/?$#', '', rtrim((string) THEME_ASSETS, 
     <link rel="icon" href="<?= esc_url(THEME_ASSETS . 'favicon/favicon-32x32.png') ?>" type="image/png" sizes="32x32">
     <link rel="icon" href="<?= esc_url(THEME_ASSETS . 'favicon/favicon-16x16.png') ?>" type="image/png" sizes="16x16">
     <link rel="apple-touch-icon" href="<?= esc_url(THEME_ASSETS . 'favicon/apple-touch-icon.png') ?>">
-    <link rel="preload" href="<?= esc_url(THEME_ASSETS . 'font/roboto.woff2') ?>" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="<?= esc_url(THEME_ASSETS . 'fonts/SequelSansLight.woff2') ?>" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="<?= esc_url(THEME_ASSETS . 'fonts/SequelSansBook.woff2') ?>" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="<?= esc_url(THEME_ASSETS . 'fonts/SequelSansHeavy.woff2') ?>" as="font" type="font/woff2" crossorigin>
     <script>
         (() => {
             try {

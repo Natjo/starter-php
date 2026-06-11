@@ -4,18 +4,14 @@
     background-color: var(--color-2);
     color: #fff;
     box-sizing: border-box;
-    padding: 1.2em 1.6em;
-    transition: opacity .3s ease;
+    height: 4.4rem;
+    padding: 1.6rem 2.4rem;
     display: inline-flex;
     align-items: center;
     gap: .8rem;
-    border-radius: .4rem;
-    text-align: center;
-    justify-content: center;
-    line-height: 2rem;
+    border-radius: 999px;
     text-align: center;
     white-space: nowrap;
-    transition: background .3s ease;
 
     &[aria-disabled=true] {
         opacity: .5;
@@ -25,36 +21,17 @@
         background: #0090AA;
     }
 
-    .icon{
-        height:auto;
+    .icon {
+        height: auto;
     }
 
-    &:disabled{
+    &:disabled {
         opacity: .5;
         pointer-events: none;
     }
 
-    &.sm{
-        font-size: 80%;
-    }
-
-    &.lg{
-        font-size: 120%;
-    }
-
-}
-
-.btn-1{
-
-}
-
-.btn-2{
-    background: none;
-    color: var(--color-text);
-    border:2px solid var(--color-text);
-    color: var(--color-text);
-    &:hover{
-        background: var(--color-text);
-        color: #fff;
+    &.btn-1 {
+        background: var(--color-1);
+        color: var(--color-text-invert);
     }
 }

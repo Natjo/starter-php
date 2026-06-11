@@ -4,8 +4,14 @@ $args = normalize_args($args ?? null);
 
 <section <?= options("strate strate-hybrid_ai", $args) ?>>
     <div class="strate-content">
-        <?php component::title($args); ?>
+        <?php component::icon("hybrid_ai", 240, 75); ?>
 
         <?php component::text($args); ?>
+        
+        <?php if (!empty($args["subtitle"])) : ?>
+            <div class="subtitle">
+                <?= $args["subtitle"] ?>
+            </div>
+        <?php endif; ?>
     </div>
 </section>

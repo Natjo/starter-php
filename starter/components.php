@@ -377,7 +377,7 @@ class component
         if ($attributes !== null) {
             $args["attributes"] = $attributes;
         }
-
+    
         get_template_part('components/accordion/accordion', null, $args);
     }
 

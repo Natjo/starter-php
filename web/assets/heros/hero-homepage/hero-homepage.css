@@ -5,8 +5,9 @@
     .hero-content {
         align-self: center;
         grid-row: 1;
-        grid-column: ctr;
+        grid-column: fluid;
         z-index: 1;
+        align-self: end;
     }
 
     .title {
@@ -15,6 +16,14 @@
 
     .text {
      
+    }
+    .hybrid_ai{
+        grid-column: fluid;
+        grid-row: 1; 
+        justify-self: end;
+        align-self: end; 
+         z-index: 1;
+
     }
 
     picture {

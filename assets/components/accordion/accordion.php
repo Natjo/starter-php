@@ -1,4 +1,5 @@
 <?php
+
 $args = normalize_args($args ?? null);
 $items = !empty($args["items"]) && is_array($args["items"]) ? $args["items"] : [];
 $items = array_values(array_filter(array_map(static function ($item) {
@@ -9,12 +10,14 @@ $items = array_values(array_filter(array_map(static function ($item) {
 
     return $title !== "" && $text !== "" ? ["title" => $title, "text" => $text] : null;
 }, $items)));
+
 $classes = component::classes("accordion", $args["classes"] ?? "");
 $attributes = component::attributes($args["attributes"] ?? []);
 $multiple = !empty($args["multiple"]);
 $uid = uniqid("accordion-");
 
 if (empty($items)) return;
+
 ?>
 
 <div class="<?= $classes ?>"<?= $attributes ?> data-module="components/accordion" data-context="@visible true" data-multiple="<?= $multiple ? "true" : "false" ?>">

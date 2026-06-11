@@ -1,1 +1,1 @@
-{"version":3,"sources":["../../../../assets/strates/strate-ai_news/strate-ai_news.css"],"names":[],"mappings":"AAAA;;AAEA","file":"strate-ai_news.css","sourcesContent":[".strate-ai_news {\n  \n}\n"]}
+{"version":3,"sources":["../../../../assets/strates/strate-ai_news/strate-ai_news.css"],"names":[],"mappings":"AAAA;IACI,eAAe;;AAEnB","file":"strate-ai_news.css","sourcesContent":[".strate-ai_news {\n    --nb-columns: 1;\n  \n}\n"]}
