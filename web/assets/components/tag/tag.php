@@ -1,5 +1,22 @@
 <?php
-$args = normalize_args($args ?? null);
+$args = $params[0] ?? null;
+if (is_string($args)) $args = ["name" => $args];
+if (!is_array($args)) return;
+$tag_type = $params[1] ?? "info";
+$tag_classes = $params[2] ?? null;
+$tag_attributes = $params[3] ?? null;
+$tag_allowed = ["info", "btn", "link"];
+if (!is_string($tag_type) || !in_array($tag_type, $tag_allowed, true)) {
+    if (is_string($tag_type) && trim($tag_type) !== "") {
+        $tag_attributes = $tag_classes;
+        $tag_classes = $tag_type;
+    }
+    $tag_type = "info";
+}
+if (!isset($args["type"]) || $tag_type !== "info") $args["type"] = $tag_type;
+if ($tag_classes !== null) $args["classes"] = $tag_classes;
+if ($tag_attributes !== null) $args["attributes"] = $tag_attributes;
+$args = normalize_args($args);
 
 $payload = $args["args"] ?? $args;
 $allowed_types = ["info", "btn", "link"];

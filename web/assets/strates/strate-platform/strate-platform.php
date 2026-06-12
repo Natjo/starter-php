@@ -6,22 +6,21 @@ $args = normalize_args($args ?? null);
 <section <?= options("strate strate-platform", $args) ?> data-module="strates/strate-platform" data-context="@visible true">
     <div class="sticky">
         <div class="strate-content">
-            <?php component::eyebrow($args); ?>
-
-            <?php component::title($args, 2, "title-2"); ?>
-
+            <div class="strate-header">
+                <?php component::eyebrow($args); ?>
+                <?php component::title($args, 2, "title-2"); ?>
+            </div>
             <?php component::text($args); ?>
 
-            <?php component::btn($args, "btn-1"); ?>
-
-            <ul>
-
+            <ul class="list-platforms">
                 <?php foreach ($args["items"] ?? [] as $item) : ?>
                     <li class="item">
-                        <?php component::icon($item["icon"], 20, 20); ?> <span><?= $item["title"]; ?></span>
+                        <?php component::icon($item["icon"], 12, 12); ?> <span><?= $item["title"]; ?></span>
                     </li>
                 <?php endforeach; ?>
             </ul>
+
+            <?php component::btn($args, "btn-1 cta"); ?>
         </div>
 
         <div class="platforms">
@@ -31,7 +30,11 @@ $args = normalize_args($args ?? null);
                         <?= $index + 1; ?>
                     </div>
 
-                    <?php component::image($platform["image"]); ?>
+                    <div class="platform-content">
+                        <div class="platform-content-inner">
+                            <?php component::image($platform["image"]); ?>
+                        </div>
+                    </div>
 
                     <div class="label">
                         <?= $platform["title"]; ?>

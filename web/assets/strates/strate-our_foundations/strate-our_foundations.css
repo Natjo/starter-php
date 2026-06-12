@@ -1,43 +1,17 @@
 .strate-our_foundations {
+    padding-block: 12rem 6rem;
     --nb-columns: 3;
-    --softness: 10;
     contain: paint;
-
     will-change: auto;
+
     &.viewed{
         will-change: transform, opacity, color;
     }
-    .char {
-        /* Per-char progress computed from root vars set by JS:
-           --p, --denom, --softness, and per-char --i */
-        --t: calc(var(--p) * (var(--denom) + var(--softness)));
-        --progress: clamp(0, calc((var(--t) - var(--i)) / var(--softness)), 1);
 
-        opacity: calc(0.1 + 0.9 * var(--progress));
-        /*transition: opacity 0.18s ease; */
-    }
-    .char {
-        scale: calc(.9 + var(--progress) * 0.1);
-    }
-
-    .char {
-        translate: calc(-4px + var(--progress) * 4px);
-    }
-
-    /* .char{ filter: blur(calc(6px - var(--progress) * 6px)); }*/
-    .char {
-        color: color-mix(in srgb,
-                var(--color-4) calc((1 - var(--progress)) * 100%),
-                var(--color-3) calc(var(--progress) * 100%));
-    }
     .strate-content {
         grid-area: 1 / 1;
         grid-column: ctr;
         z-index: 2;
-    }
-
-    .title-animate{
-        opacity: .5;
     }
 
     .images {

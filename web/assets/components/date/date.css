@@ -1,0 +1,10 @@
+.date {
+    display: inline-block;
+    font-size: 1.2rem;
+    line-height: 1.2rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    opacity: .5;
+}
+
+/*# sourceMappingURL=date.css.map */

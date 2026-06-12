@@ -3,43 +3,26 @@
     color: #fff;
 
     .hero-content {
-        align-self: center;
+        align-self: end;
         grid-row: 1;
         grid-column: fluid;
         z-index: 1;
-        align-self: end;
     }
 
-    .title {
-       
-    }
-
-    .text {
-     
-    }
-    .hybrid_ai{
+    .hybrid_ai {
         grid-column: fluid;
-        grid-row: 1; 
+        grid-row: 1;
         justify-self: end;
-        align-self: end; 
-         z-index: 1;
-
+        align-self: end;
+        z-index: 1;
     }
 
-    picture {
+    .slideshow {
         grid-column: full;
         grid-row: 1;
-        width: 100%;
         height: 100%;
-        overflow: hidden;
+        z-index: 0;
     }
-
-    img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
 
     @media (--breakpoint-md-up) {
         height: 100vh;

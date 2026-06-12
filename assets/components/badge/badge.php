@@ -1,5 +1,10 @@
 <?php
-$args = normalize_args($args ?? null);
+$args = $params[0] ?? null;
+if (is_string($args)) $args = ["name" => $args];
+if (!is_array($args)) return;
+if (($params[1] ?? null) !== null) $args["classes"] = $params[1];
+if (($params[2] ?? null) !== null) $args["attributes"] = $params[2];
+$args = normalize_args($args);
 $name = $args["name"] ?? $args["label"] ?? $args["title"] ?? $args["text"] ?? "";
 $name = is_scalar($name) ? trim((string) $name) : "";
 

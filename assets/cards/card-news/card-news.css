@@ -1,17 +1,40 @@
 .card-news {
-    .card-content {
+    border-top: 1px solid var(--Filets-secondaire, rgba(190, 190, 190, 0.25));
+    border-top: 1px solid var(--Filets-secondaire, color(display-p3 0.7451 0.7451 0.7451 / 0.25));
+
+ 
+padding: 32px 24px 32px 0;
+    .card-content {   position: relative;
         display: flex;
         flex-direction: column;
         width: 1320px;
-        padding: 32px 24px 32px 0;
+        
         justify-content: space-between;
         align-items: flex-start;
-    }
-    .card-header{
-        display: flex;
-        gap: 1rem;       align-items: center;
+        gap: 1.2rem;
     }
 
-    border-top: 1px solid var(--Filets-secondaire, rgba(190, 190, 190, 0.25));
-    border-top: 1px solid var(--Filets-secondaire, color(display-p3 0.7451 0.7451 0.7451 / 0.25));
+    .card-header {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .source {
+        display: inline-block;
+        font-size: 1.2rem;
+        line-height: 1.2rem;
+        font-weight: 400;
+        text-transform: uppercase;
+    }
+
+    .text{
+        line-height: 2.4rem;
+    }
+
+    .icon{
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
 }

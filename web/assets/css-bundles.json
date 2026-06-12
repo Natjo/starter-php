@@ -9,6 +9,7 @@
     "components/list/list.css",
     "components/select-lang/select-lang.css",
     "components/slider/slider.css",
+    "modules/textAnimated/textAnimated.css",
     "styles/print.css",
     "vendors/lenis/lenis.css"
   ],
@@ -19,6 +20,7 @@
     "components/list/list.css": "common",
     "components/select-lang/select-lang.css": "common",
     "components/slider/slider.css": "common",
+    "modules/textAnimated/textAnimated.css": "common",
     "styles/print.css": "common",
     "vendors/lenis/lenis.css": "common"
   }

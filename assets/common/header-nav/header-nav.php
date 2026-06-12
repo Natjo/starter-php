@@ -4,24 +4,32 @@ $args = [
     "pages" => [
 
         [
-            "title" => "Golden rules ",
-            "url" => "#golden_rules",
+            "title" => "Golden rules",
+            "url" => "#our_foundations",
         ],
         [
             "title" => "Solutions",
-            "url" => "#solutions",
+            "url" => "#toolkit",
         ],
         [
             "title" => "Dust",
-            "url" => "#dust",
+            "url" => "#platform",
         ],
         [
             "title" => "Training",
-            "url" => "#training",
+            "url" => "#learn",
         ],
         [
             "title" => "News",
-            "url" => "#news",
+            "url" => "#ai_news",
+        ],
+        [
+            "title" => "People",
+            "url" => "#key_people",
+        ],
+        [
+            "title" => "Hybrid AI",
+            "url" => "#hybrid_ai",
         ]
     ],
 ];

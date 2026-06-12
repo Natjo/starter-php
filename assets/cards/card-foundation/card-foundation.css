@@ -37,13 +37,15 @@
 
 .card-foundation {
     display: flex;
-    padding: 4.8rem;
+    padding: 4rem;
     flex-direction: column;
     justify-content: space-between;
     align-items: flex-start;
     align-self: stretch;
     --color: var(--theme, var(--color-1));
     justify-self: stretch;
+    height: 28.2rem;
+    box-sizing: border-box;
 
     border: 1px solid rgba(190, 190, 190, 0.25);
     border: 1px solid color(display-p3 0.7451 0.7451 0.7451 / 0.25);
@@ -57,6 +59,11 @@
 
     .title {
         transition: color .3s ease;
+    }
+
+    .text{
+        line-height: 2.2rem;
+        opacity: 0.8;
     }
 
     &:hover {

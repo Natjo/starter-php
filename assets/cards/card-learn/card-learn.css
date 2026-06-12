@@ -1,3 +1,40 @@
 .card-learn {
-    
+   
+        padding: 2.4rem;
+        box-sizing: border-box;
+    border-radius: 4.7px;
+    border: 1px solid rgba(190, 190, 190, 0.25);
+    border: 1px solid color(display-p3 0.7451 0.7451 0.7451 / 0.25);
+    background: linear-gradient(302deg, rgba(255, 255, 255, 0.20) 72.88%, rgba(255, 255, 255, 0.10) 100%);
+    background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color(display-p3 1 1 1 / 0.10) 100%);
+
+    .card-content {
+        position: relative;
+        display: flex;
+
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 33rem;align-self: stretch;
+    }
+    .title {
+        margin-top: 2.4rem;
+    }
+
+    .text {
+        margin-top: auto;
+        line-height: 2.2rem;
+        opacity: .8;
+    }
+
+    .icon{
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
+    &:hover{
+
+background: linear-gradient(302deg, rgba(255, 255, 255, 0.20) 72.88%, rgba(255, 255, 255, 0.10) 100%), rgba(255, 255, 255, 0.07);
+background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color(display-p3 1 1 1 / 0.10) 100%), color(display-p3 1 1 1 / 0.07);
+    }
 }

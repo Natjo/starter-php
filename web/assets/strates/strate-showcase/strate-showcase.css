@@ -1,5 +1,103 @@
 .strate-showcase {
-  
+    /* Occupe toute la largeur de la grille .strate (au lieu de la colonne centrale) */
+    --ctr: full;
+    --showcase-gap: 2rem;
+
+    /* Le wrapper empile le contenu (titre/texte) et la grille d'images
+       dans la même cellule -> le titre se superpose au centre des images. */
+    .strate-showcase__sticky {
+        display: grid;
+        grid-template-columns: 1fr;
+        padding-inline: clamp(1rem, 4vw, 4rem);
+    }
+
+    .strate-content {
+        grid-area: 1 / 1;
+        z-index: 2;
+
+        position: sticky;
+        top: 50vh;
+        transform: translateY(-50%);
+        align-self: start;
+        justify-self: center;
+
+        width: min(34ch, 40%);
+        text-align: center;
+    }
+
+    .strate-showcase__grid {
+        grid-area: 1 / 1;
+
+        display: flex;
+        justify-content: space-between;
+        gap: var(--showcase-gap);
+    }
+
+    .strate-showcase__side {
+        flex: 0 1 30%;
+
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--showcase-gap);
+        align-items: start;
+    }
+
+    .strate-showcase__col {
+        display: flex;
+        flex-direction: column;
+        gap: var(--showcase-gap);
+        will-change: transform;
+    }
+
+    /* Décalage initial des colonnes pour un rythme plus organique */
+    .strate-showcase__side--left .strate-showcase__col:nth-child(2) {
+        margin-top: 6rem;
+    }
+
+    .strate-showcase__side--right .strate-showcase__col:nth-child(1) {
+        margin-top: 9rem;
+    }
+
+    .strate-showcase__img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 4px;
+    }
+}
+
+@media (max-width: 768px) {
+    .strate-showcase {
+        .strate-showcase__sticky {
+            display: block;
+        }
+
+        .strate-content {
+            position: static;
+            transform: none;
+            width: 100%;
+            margin-bottom: 3rem;
+        }
+
+        .strate-showcase__grid {
+            flex-wrap: wrap;
+        }
+
+        .strate-showcase__side {
+            flex: 1 1 100%;
+        }
+
+        .strate-showcase__side--left .strate-showcase__col:nth-child(2),
+        .strate-showcase__side--right .strate-showcase__col:nth-child(1) {
+            margin-top: 0;
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .strate-showcase .strate-showcase__col {
+        transform: none !important;
+    }
 }
 
 /*# sourceMappingURL=strate-showcase.css.map */

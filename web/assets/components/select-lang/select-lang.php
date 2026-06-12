@@ -1,5 +1,13 @@
 <?php
-$args = normalize_args($args ?? null);
+$select_lang_input = $params[0] ?? null;
+if (!is_array($select_lang_input) || empty($select_lang_input)) return;
+$args = isset($select_lang_input["languages"]) || isset($select_lang_input["args"])
+    ? $select_lang_input
+    : ["languages" => $select_lang_input];
+if (($params[1] ?? null) !== null) $args["label"] = $params[1];
+if (($params[2] ?? null) !== null) $args["classes"] = $params[2];
+if (($params[3] ?? null) !== null) $args["attributes"] = $params[3];
+$args = normalize_args($args);
 
 $languages = isset($args["languages"]) && is_array($args["languages"])
     ? $args["languages"]

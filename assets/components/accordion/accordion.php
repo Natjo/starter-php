@@ -1,6 +1,23 @@
 <?php
 
-$args = normalize_args($args ?? null);
+$accordion_input = $params[0] ?? null;
+if (empty($accordion_input) || !is_array($accordion_input)) return;
+$accordion_multiple = $params[1] ?? false;
+$accordion_classes = $params[2] ?? null;
+$accordion_attributes = $params[3] ?? null;
+if (!is_bool($accordion_multiple)) {
+    $accordion_attributes = $accordion_classes;
+    $accordion_classes = $accordion_multiple;
+    $accordion_multiple = false;
+}
+$args = isset($accordion_input["items"]) && is_array($accordion_input["items"]) ? $accordion_input : ["items" => $accordion_input];
+$accordion_list = $args["items"];
+$accordion_is_list = array_keys($accordion_list) === range(0, count($accordion_list) - 1);
+if (!$accordion_is_list) $args["items"] = [$accordion_list];
+$args["multiple"] = (bool) $accordion_multiple;
+if ($accordion_classes !== null) $args["classes"] = $accordion_classes;
+if ($accordion_attributes !== null) $args["attributes"] = $accordion_attributes;
+$args = normalize_args($args);
 $items = !empty($args["items"]) && is_array($args["items"]) ? $args["items"] : [];
 $items = array_values(array_filter(array_map(static function ($item) {
     if (!is_array($item)) return null;

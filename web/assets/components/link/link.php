@@ -1,5 +1,17 @@
 <?php
-$args = normalize_args($args ?? null);
+$link_input = $params[0] ?? null;
+if (empty($link_input)) return;
+if (is_string($link_input)) $link_input = ["link" => ["url" => $link_input, "title" => $link_input]];
+if (!is_array($link_input)) return;
+if (!empty($link_input["button"]) && is_array($link_input["button"])) $link_input = $link_input["button"];
+$link_data = !empty($link_input["link"]) && is_array($link_input["link"]) ? $link_input["link"] : $link_input;
+if (empty($link_data["title"])) return;
+$args = normalize_args([
+    "link" => $link_data,
+    "classes" => ($params[1] ?? null) ?? ($link_input["classes"] ?? ""),
+    "icon" => ($params[2] ?? null) ?? ($link_input["icon"] ?? null),
+    "attributes" => ($params[3] ?? null) ?? ($link_input["attributes"] ?? ""),
+]);
 $link = !empty($args["link"]) && is_array($args["link"]) ? $args["link"] : $args;
 $url = isset($link["url"]) && is_scalar($link["url"]) ? trim((string) $link["url"]) : "";
 $title = isset($link["title"]) && is_scalar($link["title"]) ? trim((string) $link["title"]) : "";

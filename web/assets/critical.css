@@ -226,6 +226,7 @@ body {
 
 /* strates */
 .strate {
+    scroll-margin-top: var(--header-height);
     display: grid;
     grid-template-columns: var(--layout);
     align-content: start;
@@ -246,6 +247,13 @@ body {
         padding-top: var(--pt);
         padding-bottom: var(--pb);
     }
+}
+.strate-header{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4rem;
+    margin-bottom: 6rem;
 }
 
 /* grid */
@@ -409,6 +417,7 @@ body {
 
 
 
+
 /* vendors */
 
 
@@ -423,7 +432,7 @@ body {
     gap: 2rem;
     min-height: var(--header-height);
     padding-inline: var(--ctr-offset);
-    backdrop-filter: blur(2px);
+    backdrop-filter: blur(1px);
     color: #fff;
     z-index: 100;
 
@@ -448,6 +457,10 @@ body {
 
 
 .title {
+
+    strong{
+        color: var(--color-1);
+    }
    
 }
 
@@ -469,6 +482,16 @@ body {
 
     @media (min-width: 1141px) {
         font-size: 6rem;
+    }
+}
+
+.title-2-bis {
+    font-weight: 700;
+    font-size: 2.2rem;
+    line-height: 2.8rem;
+
+    @media (min-width: 1141px) {
+        font-size: 2.8rem;
     }
 }
 

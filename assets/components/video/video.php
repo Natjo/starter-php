@@ -1,7 +1,18 @@
 <?php
 
 /** @var array $args */
-$args = normalize_args($args ?? null);
+$video_url = $params[0] ?? null;
+if (empty($video_url)) return;
+$args = normalize_args([
+    "url" => $video_url,
+    "title" => $params[1] ?? "Lecteur vidéo",
+    "poster" => $params[2] ?? null,
+    "play_label" => $params[7] ?? "Lire la vidéo",
+    "autoplay" => $params[3] ?? false,
+    "loop" => $params[4] ?? false,
+    "classes" => $params[5] ?? null,
+    "attributes" => $params[6] ?? null,
+]);
 $text = static fn(mixed $value): string => is_scalar($value) ? trim((string) $value) : "";
 
 // $args["url"] accepte :

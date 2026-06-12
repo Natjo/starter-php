@@ -1,5 +1,12 @@
 <?php
-$args = normalize_args($args ?? null);
+$args = $params[0] ?? null;
+if (is_string($args)) $args = ["title" => $args];
+if (!is_array($args)) return;
+$hx = $params[1] ?? 2;
+if ($hx !== null) $args["hx"] = $hx;
+if (($params[2] ?? null) !== null) $args["classes"] = $params[2];
+if (($params[3] ?? null) !== null) $args["attributes"] = $params[3];
+$args = normalize_args($args);
 $title = $args["title"] ?? $args["titre"] ?? $args["heading"] ?? $args["headline"] ?? "";
 $title = is_scalar($title) ? (string) $title : "";
 

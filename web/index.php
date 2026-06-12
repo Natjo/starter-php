@@ -7,12 +7,26 @@
         "suptitle" => "Internal <strong>Ai hub</strong>",
         "title" => "Ai at<br>the service<br>of creativity",
         "text" => "<p>Richard is  your internal hub for AI-powered creative excellence.<br>Discover tolls, best practices, and resources to elevate eve@ry project.@</p>",
-        "images" => THEME_UPLOADS . "hero-1.jpg"
+        "items" => [
+            [
+                "images" => THEME_UPLOADS . "hero-1.jpg"
+            ],
+            [
+                "images" => THEME_UPLOADS . "hero-2.jpg"
+            ],
+            [
+                "images" => THEME_UPLOADS . "hero-3.jpg"
+            ],
+        ]
+
     ]);
     ?>
 
     <?php
     strate("our_foundations",  [
+        "options" => [
+            "id" => "our_foundations",
+        ],
         "suptitle" => "✦ Our foundation : the hybrid AI <sup>TM</sup> charter",
         "title" => "Creative value with AI safely, creatively, competively.<br>Six principles that guide how Lonsdale uses AI to outpace creativity, bot replace it.",
         "items" => [
@@ -52,6 +66,9 @@
 
     <?php
     strate("platform",  [
+        "options" => [
+            "id" => "platform",
+        ],
         "suptitle" => "+ Platform",
         "title" => "Dust",
         "text" => "<p>Dust is our central AI platform for building and deploying intelligent assistants. Access custom agents, connect your data sources, and supercharge your creative process.</p>",
@@ -86,6 +103,14 @@
             [
                 "title" => "Browse available assistants or create your own",
                 "image" => THEME_UPLOADS . "platform.jpg"
+            ],
+            [
+                "title" => "Connect relevant data sources (Drive, Notion, Slack)",
+                "image" => THEME_UPLOADS . "platform.jpg"
+            ],
+            [
+                "title" => "Start conversing and building workflows",
+                "image" => THEME_UPLOADS . "platform.jpg"
             ]
         ]
     ]);
@@ -93,24 +118,34 @@
 
     <?php
     strate("toolkit",  [
+        "options" => [
+            "id" => "toolkit",
+        ],
         "suptitle" => "<strong>Toolkit</strong> : creative solutions",
         "title" => "Our curated catalog of AI tools approved for agency use. Each solution has been vetted for quality, security, and creative value.",
-        "text" => "<p>Dust is our central AI platform for building and deploying intelligent assistants. Access custom agents, connect your data sources, and supercharge your creative process.</p>",
         "items" => [
             [
                 "suptitle" => "Image generation",
                 "icon" => "midjourney",
                 "title" => "Midjourney",
+                "text" => "<p>Create high-fidelity visuals, mood boards, and concept art. Use detailed prompts with style references for brand-consistent results.</p>",
+                "usage" => "<p>Access via Discord. Start prompts with /imagine. Use --ar for aspect ratios, --style for aesthetics.</p>"
             ],
             [
                 "suptitle" => "Text & strategy",
                 "icon" => "chatgpt",
                 "title" => "ChatGPT",
+                "text" => "<p>Create high-fidelity visuals, mood boards, and concept art. Use detailed prompts with style references for brand-consistent results.</p>",
+                "usage" => "<p>Access via Discord. Start prompts with /imagine. Use --ar for aspect ratios, --style for aesthetics.</p>"
+
             ],
             [
                 "suptitle" => "Image generation",
-                "icon" => "dall",
+                "icon" => "chatgpt",
                 "title" => "DALL·E 3",
+                "text" => "<p>Create high-fidelity visuals, mood boards, and concept art. Use detailed prompts with style references for brand-consistent results.</p>",
+                "usage" => "<p>Access via Discord. Start prompts with /imagine. Use --ar for aspect ratios, --style for aesthetics.</p>"
+
             ]
         ]
     ]);
@@ -118,9 +153,11 @@
 
     <?php
     strate("showcase",  [
+        "options" => [
+            "id" => "showcase",
+        ],
         "suptitle" => "Showcase",
         "title" => "Made by human powered <strong>by AI</strong>.",
-        "text" => "<p>Dust is our central AI platform for building and deploying intelligent assistants. Access custom agents, connect your data sources, and supercharge your creative process.</p>",
         "items" => [
             [
                 "images" => "",
@@ -154,6 +191,9 @@
 
     <?php
     strate("learn",  [
+        "options" => [
+            "id" => "learn",
+        ],
         "suptitle" => "Learn",
         "title" => "Best practices & training",
         "items" => [
@@ -223,6 +263,9 @@
 
     <?php
     strate("ai_news",  [
+        "options" => [
+            "id" => "ai_news",
+        ],
         "suptitle" => "AI news",
         "title" => "Stay informed",
         "items" => [
@@ -230,7 +273,7 @@
                 "source" => "New Verge",
                 "date" => "Mars 2026",
                 "title" => "GPT-5 brings multimodal reasoning to creative workflows",
-                "text" => "<p>OpenAI's latest model can now reason across text, images, and audio simultaneously <small>—opening new possibilities for integrated creative briefs.</small></p>",
+                "text" => "<p>OpenAI's latest model can now reason across text, images, and audio simultaneously<br>—opening new possibilities for integrated creative briefs.</p>",
                 "link" => [
                     "title" => "",
                     "url" => "/",
@@ -242,7 +285,7 @@
                 "source" => "New Verge",
                 "date" => "Mars 2026",
                 "title" => "GPT-5 brings multimodal reasoning to creative workflows",
-                "text" => "<p>OpenAI's latest model can now reason across text, images, and audio simultaneously <small>—opening new possibilities for integrated creative briefs.</small></p>",
+                "text" => "<p>OpenAI's latest model can now reason across text, images, and audio simultaneously<br>—opening new possibilities for integrated creative briefs.</p>",
                 "link" => [
                     "title" => "",
                     "url" => "",
@@ -253,7 +296,7 @@
                 "source" => "New Verge",
                 "date" => "Mars 2026",
                 "title" => "GPT-5 brings multimodal reasoning to creative workflows",
-                "text" => "<p>OpenAI's latest model can now reason across text, images, and audio simultaneously <small>—opening new possibilities for integrated creative briefs.</small></p>",
+                "text" => "<p>OpenAI's latest model can now reason across text, images, and audio simultaneously<br>—opening new possibilities for integrated creative briefs.</p>",
                 "link" => [
                     "title" => "",
                     "url" => "",
@@ -266,6 +309,9 @@
 
     <?php
     strate("key_people",  [
+        "options" => [
+            "id" => "key_people",
+        ],
         "suptitle" => "Key people",
         "title" => "Your go-to experts for <strong>AI questions</strong>, guidance, and collaboration across the agency.",
         "items" => [
@@ -348,6 +394,9 @@
 
     <?php
     strate("hybrid_ai",  [
+        "options" => [
+            "id" => "hybrid_ai",
+        ],
         "text" => "Where<br>human<br>intelligence<br>meets ai power.",
         "subtitle" => "By lonsdale.",
         "images" => [

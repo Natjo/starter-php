@@ -1,5 +1,5 @@
 import { ScrollDriver, style, stagger } from "@modules/scrollDriver/scrollDriver";
-import { splitText } from "@modules/splitText/splitText.js";
+import textAnimated from "@modules/textAnimated/textAniimated.js";
 
 export default el => {
     const items = [...el.querySelectorAll(".item")];
@@ -29,18 +29,11 @@ export default el => {
             });
         });
     });
-
-
-    // text animated
-    const title = el?.querySelector?.(".title-animate");
-    const { chars, restore } = splitText(title);
-    const characters = el?.querySelectorAll?.(".char");
-
-    driver.add(title, [85, 60], e => {
-        e.timeline(0, 100, (val) => stagger(characters, val));
-    });
-
     driver.enable();
+
+
+    textAnimated(el);
+
 
     const lenis = window.lenis;
     const onLenisScroll = instance => driver.onScroll(instance.animatedScroll);

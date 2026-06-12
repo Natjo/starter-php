@@ -1,1 +1,1 @@
-{"version":3,"sources":["../../../../assets/strates/strate-learn/strate-learn.css"],"names":[],"mappings":"AAAA;;AAEA","file":"strate-learn.css","sourcesContent":[".strate-learn {\n   \n}"]}
+{"version":3,"sources":["../../../../assets/strates/strate-learn/strate-learn.css"],"names":[],"mappings":"AAAA;IACI,yBAAyB;;;AAG7B","file":"strate-learn.css","sourcesContent":[".strate-learn {\n    padding-block: 13rem 6rem;\n\n\n}"]}

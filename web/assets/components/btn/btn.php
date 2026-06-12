@@ -1,5 +1,11 @@
 <?php
-$args = normalize_args($args ?? null);
+$args = $params[0] ?? null;
+if (is_string($args)) $args = ["name" => $args];
+if (!is_array($args)) return;
+if (($params[1] ?? null) !== null) $args["classes"] = $params[1];
+if (!empty($params[2] ?? null)) $args["icon"] = $params[2];
+if (($params[3] ?? null) !== null) $args["attributes"] = $params[3];
+$args = normalize_args($args);
 
 $payload = null;
 if (!empty($args["button"]) && is_array($args["button"])) {

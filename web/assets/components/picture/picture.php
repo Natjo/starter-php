@@ -1,6 +1,48 @@
 <?php
 /** @var array $args */
-$args = normalize_args($args ?? null);
+$picture_first = $params[0] ?? null;
+$picture_sizes = $params[1] ?? "full";
+$picture_classes = $params[2] ?? "";
+$picture_lazy = $params[3] ?? true;
+$picture_placeholder = $params[4] ?? false;
+$picture_breakpoint = $params[5] ?? 768;
+$picture_preload = $params[6] ?? false;
+
+if (is_array($picture_sizes)) {
+    $picture_desktop_size = isset($picture_sizes[0]) && $picture_sizes[0] !== "" ? (string) $picture_sizes[0] : "full";
+    $picture_mobile_size = isset($picture_sizes[1]) && $picture_sizes[1] !== "" ? (string) $picture_sizes[1] : "full";
+} else {
+    $picture_desktop_size = is_string($picture_sizes) && $picture_sizes !== "" ? $picture_sizes : "full";
+    $picture_mobile_size = "full";
+}
+
+$picture_images = $picture_first;
+if (is_array($picture_first)) {
+    $picture_lazy = array_key_exists("lazy", $picture_first) ? (bool) $picture_first["lazy"] : $picture_lazy;
+    $picture_preload = !empty($picture_first["preload"]) || $picture_preload;
+    $picture_placeholder = array_key_exists("placeholder", $picture_first) ? (bool) $picture_first["placeholder"] : $picture_placeholder;
+    $picture_breakpoint = isset($picture_first["breakpoint"]) ? (int) $picture_first["breakpoint"] : $picture_breakpoint;
+    $picture_classes = $picture_classes !== "" ? $picture_classes : (string) ($picture_first["classes"] ?? "");
+
+    if (array_key_exists("images", $picture_first)) {
+        $picture_images = $picture_first["images"];
+    } elseif (array_key_exists("desktop", $picture_first) || array_key_exists("mobile", $picture_first) || array_keys($picture_first) === range(0, count($picture_first) - 1)) {
+        $picture_images = $picture_first;
+    } else {
+        $picture_images = null;
+    }
+}
+
+$args = normalize_args([
+    "images" => $picture_images,
+    "classes" => $picture_classes,
+    "lazy" => $picture_lazy,
+    "preload" => $picture_preload,
+    "breakpoint" => $picture_breakpoint,
+    "placeholder" => $picture_placeholder,
+    "desktop_size" => $picture_desktop_size,
+    "mobile_size" => $picture_mobile_size,
+]);
 // Accepts:
 // - $args["images"] as ["desktop" => id|path, "mobile" => id|path], scalar, or indexed array
 // - Or directly an id|path as $args itself (backward-friendly)

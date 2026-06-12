@@ -14,17 +14,13 @@ $tag = $url !== "" ? "a" : "div";
                 </div>
             <?php endif; ?>
 
-            <?php if (!empty($args["date"])) : ?>
-                <div class="date">
-                    <?= $args["date"] ?>
-                </div>
-            <?php endif; ?>
+            <?php component::date($args); ?>
         </div>
 
         <?php component::title($args, 3, ".title-3"); ?>
 
         <?php component::text($args); ?>
         
-        <?php component::icon("blank", 16, 16); ?>
+        <?php component::icon("blank", 24, 24); ?>
     </<?= $tag ?>>
 </article>

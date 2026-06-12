@@ -1,5 +1,19 @@
 <?php
-$args = normalize_args($args ?? null);
+$dialog_content = $params[0] ?? null;
+$dialog_trigger = array_key_exists(1, $params) ? $params[1] : ["btn", null, null];
+$dialog_trigger_label = $params[2] ?? "Open dialog";
+$dialog_close_label = $params[3] ?? "Close";
+$dialog_aria_label = $params[4] ?? "Dialog";
+$dialog_classes = $params[5] ?? null;
+$dialog_attributes = $params[6] ?? null;
+$args = is_array($dialog_content) ? $dialog_content : ["content" => $dialog_content];
+if (!is_array($dialog_content)) $args["trigger"] = $dialog_trigger;
+$args["trigger_label"] = $args["trigger_label"] ?? $dialog_trigger_label;
+$args["close_label"] = $args["close_label"] ?? $dialog_close_label;
+$args["aria_label"] = $args["aria_label"] ?? $dialog_aria_label;
+if ($dialog_classes !== null) $args["classes"] = $dialog_classes;
+if ($dialog_attributes !== null) $args["attributes"] = $dialog_attributes;
+$args = normalize_args($args);
 $uniqueId = function ($prefix = "") {
     if (function_exists("wp_unique_id")) {
         return wp_unique_id($prefix);

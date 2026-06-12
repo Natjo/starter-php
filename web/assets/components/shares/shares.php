@@ -1,5 +1,10 @@
 <?php
-$args = normalize_args($args ?? null);
+$shares_list = $params[0] ?? null;
+if (empty($shares_list)) return;
+$args = is_array($shares_list) && array_key_exists("list", $shares_list) ? $shares_list : ["list" => $shares_list];
+if (($params[1] ?? null) !== null) $args["classes"] = $params[1];
+if (($params[2] ?? null) !== null) $args["attributes"] = $params[2];
+$args = normalize_args($args);
 $list = isset($args["list"]) ? $args["list"] : [];
 $classes = component::classes("shares", $args["classes"] ?? "");
 $attributes = component::attributes($args["attributes"] ?? []);

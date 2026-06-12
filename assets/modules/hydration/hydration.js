@@ -31,6 +31,7 @@ const importModule = async (moduleName) => {
             if (dir === 'form') modulePath = `./form/${file}.js`;
             if (dir === 'modules') modulePath = `./modules/${file}.js`;
             if (dir === 'strates') modulePath = `./strates/${file}.js`;
+            if (dir === 'heros') modulePath = `./heros/${file}.js`;
 
             if (modulePath) {
                 modulePath = versionedModulePath(modulePath);
