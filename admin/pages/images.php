@@ -112,7 +112,7 @@ if (!function_exists('generate')) {
                 $target = image_webp_path($source);
                 $relativeTarget = relative_path($uploadsDir, $target);
 
-                if (!$force && is_file($target)) {
+                if (!$force && generated_image_is_fresh($source, $target)) {
                     $generatedBySource[$relativeSource]['full'] = $relativeTarget;
                     $result['skipped']++;
                 } elseif (crop_image($source, $target, $defaults)) {
@@ -128,7 +128,7 @@ if (!function_exists('generate')) {
                 $relativeTarget = relative_path($uploadsDir, $target);
                 delete_legacy_variant($source, $name, $result);
 
-                if (!$force && is_file($target)) {
+                if (!$force && generated_image_is_fresh($source, $target)) {
                     $generatedBySource[$relativeSource][$name] = $relativeTarget;
                     $result['skipped']++;
                     continue;
@@ -349,6 +349,20 @@ if (!function_exists('save_image_manifest')) {
     function save_image_manifest(string $file, array $manifest): void
     {
         file_put_contents($file, json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    }
+}
+
+if (!function_exists('generated_image_is_fresh')) {
+    function generated_image_is_fresh(string $source, string $target): bool
+    {
+        if (!is_file($target)) {
+            return false;
+        }
+
+        $sourceTime = filemtime($source);
+        $targetTime = filemtime($target);
+
+        return $sourceTime !== false && $targetTime !== false && $targetTime >= $sourceTime;
     }
 }
 

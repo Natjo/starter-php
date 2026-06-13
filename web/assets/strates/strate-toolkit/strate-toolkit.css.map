@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../../assets/strates/strate-toolkit/strate-toolkit.css"],"names":[],"mappings":"AAAA;IACI,yBAAyB;;IAEzB,eAAe;;;AAGnB","file":"strate-toolkit.css","sourcesContent":[".strate-toolkit {\n    padding-block: 10rem 6rem;\n\n    --nb-columns: 3;\n  \n\n}\n"]}

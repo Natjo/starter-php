@@ -1,20 +1,6 @@
 .strate-hybrid_ai {
     position: relative;
 
-    &:before {
-        content: "";
-        display: block;
-        width: 100%;
-        height: 100%;
-        grid-column: fluid;
-        grid-row: 1/2;
-        background: linear-gradient(180deg, #000018 4.3%, #000018 22.57%, #000018 77.37%, #000018 95.64%), url(<path-to-image>) lightgray -491.682px -77.06px / 134.154% 109.629% no-repeat, #000018;
-        background: linear-gradient(180deg, color(display-p3 0 0 0.0902) 4.3%, color(display-p3 0 0 0.0902 / 0.00) 22.57%, color(display-p3 0 0 0.0902 / 0.00) 77.37%, color(display-p3 0 0 0.0902) 95.64%), url(<path-to-image>) lightgray -491.682px -77.06px / 134.154% 109.629% no-repeat, color(display-p3 0 0 0.0902);
-        background-blend-mode: normal, lighten, normal;
-        z-index: 2;
-        pointer-events: none;
-    }
-
     .strate-content {
         grid-column: fluid;
         grid-row: 1/2;
@@ -62,4 +48,16 @@
         text-transform: uppercase;
 
     }
+
+    background: linear-gradient(180deg,
+        color(display-p3 0 0 0.0902) 4.3%,
+        color(display-p3 0 0 0.0902 / 0) 22.57%,
+        color(display-p3 0 0 0.0902 / 0) 77.37%,
+        color(display-p3 0 0 0.0902) 95.64%),
+    url("/assets/img/backgrounds/bg-2.jpg") center / cover no-repeat,
+    var(--color-bg);
+
+    background-blend-mode: normal,
+    lighten,
+    normal;
 }

@@ -75,14 +75,15 @@ button{
 
 :root {
     color-scheme: light;
-    
+
     --font-1: 'SequelSans', Arial, sans-serif;
 
 
     --ctr-width: 135rem;
 
     --radius: .45rem;
-    --shadows: 0 0 0 10px rgba(0,0,0,0.2);
+    --shadows: 0 0 0 10px rgba(0, 0, 0, 0.2);
+    --border: 1px solid rgba(190, 190, 190, 0.25);
 
     /* surfaces */
     --color-bg: #000017;
@@ -102,11 +103,6 @@ button{
 
     /* brand */
     --color-1: #EBDB0C;
-    --color-2: #00A0BD;
-    --color-3: #EFF2F8;
-    --color-4: #EB5B00;
-    --color-5: #0055A4;
-    --color-6: #009DCC;
 
     --layout:
         [full] var(--ctr-offset) [fluid ctr ctr-sm center] auto [center-end ctr-sm-end ctr-end fluid-end] var(--ctr-offset) [full-end];
@@ -147,7 +143,6 @@ button{
             [full] var(--ctr-offset) [fluid] 1fr [ctr-start] var(--ctr-col) [ctr-sm-start] minmax(1vw, calc((var(--ctr-width) - (2 * var(--ctr-col)))/2)) [center] minmax(1vw, calc((var(--ctr-width) - (2 * var(--ctr-col)))/2)) [ctr-sm-end] var(--ctr-col) [ctr-end] 1fr [fluid-end] var(--ctr-offset) [full-end];
     }
 }
-
 
 html {
     font-size: 62.5%;
@@ -194,6 +189,7 @@ html {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
     ::view-transition-old(root),
     ::view-transition-new(root) {
         animation-duration: 1ms;
@@ -248,13 +244,15 @@ body {
         padding-bottom: var(--pb);
     }
 }
-.strate-header{
+
+.strate-header {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 4rem;
     margin-bottom: 6rem;
 }
+
 
 /* grid */
 .grid {
@@ -280,7 +278,6 @@ body {
     white-space: nowrap;
     border: 0;
 }
-
 
 /* SequelSans */
 @font-face {
@@ -415,53 +412,21 @@ body {
     }
 }
 
+/*@import "styles/print.css" common; */
 
+/* modules */
 
 
 /* vendors */
-
-
-/* common */
-.header-nav {
-    position: fixed;
-    left: 0;
-    right: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 2rem;
-    min-height: var(--header-height);
-    padding-inline: var(--ctr-offset);
-    backdrop-filter: blur(1px);
-    color: #fff;
-    z-index: 100;
-
-
-    .btn-nav {
-        display: none
-    }
-
-    #nav {
-        display: flex;
-        gap: 4rem;
-    }
-
-}
-
-
-
-/* cards */
 
 
 /* components fréquents */
 
 
 .title {
-
     strong{
         color: var(--color-1);
     }
-   
 }
 
 .title-1 {
@@ -716,6 +681,54 @@ body {
         font-weight: 600;
     }
 }
+
+
+
+
+
+
+/*@import "components/select-lang/select-lang.css" common; */
+
+/* common */
+.header-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    min-height: var(--header-height);
+    padding-inline: var(--ctr-offset);
+    backdrop-filter: blur(1px);
+    color: #fff;
+    z-index: 100;
+
+    .btn-nav {
+        display: none
+    }
+
+    #nav {
+        display: flex;
+        gap: 4rem;
+    }
+}
+
+
+
+/* cards */
+
+
+
+
+
+
+/* strates  */
+
+
+
+
+
 
 
 

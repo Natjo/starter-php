@@ -39,7 +39,7 @@
     }
 
     .platforms {
-        display:flex;
+        display: flex;
         flex-direction: column;
         gap: .8rem;
 
@@ -66,14 +66,15 @@
             overflow: hidden;
             height: var(--height);
         }
-        .platform-content-inner{
+
+        .platform-content-inner {
             padding-top: 5rem;
         }
 
         .label {
             display: flex;
             align-items: center;
-       
+
             height: 3.3rem;
             translate: 4rem;
         }
@@ -95,4 +96,10 @@
 
         }
     }
+
+    background: url("/assets/img/backgrounds/bg-2.jpg") center / cover no-repeat,
+    var(--color-bg);
+
+    background-blend-mode: lighten,
+    normal;
 }

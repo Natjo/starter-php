@@ -1,13 +1,14 @@
 :root {
     color-scheme: light;
-    
+
     --font-1: 'SequelSans', Arial, sans-serif;
 
 
     --ctr-width: 135rem;
 
     --radius: .45rem;
-    --shadows: 0 0 0 10px rgba(0,0,0,0.2);
+    --shadows: 0 0 0 10px rgba(0, 0, 0, 0.2);
+    --border: 1px solid rgba(190, 190, 190, 0.25);
 
     // surfaces
     --color-bg: #000017;
@@ -27,11 +28,6 @@
 
     // brand
     --color-1: #EBDB0C;
-    --color-2: #00A0BD;
-    --color-3: #EFF2F8;
-    --color-4: #EB5B00;
-    --color-5: #0055A4;
-    --color-6: #009DCC;
 
     --layout:
         [full] var(--ctr-offset) [fluid ctr ctr-sm center] auto [center-end ctr-sm-end ctr-end fluid-end] var(--ctr-offset) [full-end];

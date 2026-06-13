@@ -314,80 +314,52 @@
         ],
         "suptitle" => "Key people",
         "title" => "Your go-to experts for <strong>AI questions</strong>, guidance, and collaboration across the agency.",
+        "placeholder" => THEME_UPLOADS . "people-0.jpg",
         "items" => [
             [
-                "name" => "SOPHIE MARCHAND",
+                "name" => "Sophie Marchand",
                 "function" => "Senior Prompt Engineer",
                 "from" => "AI Strategy & Governance",
-                "shares" => [
-                    "linkedin" => [
-                        "title" => "",
-                        "url" => "",
-                        "target" => "_blank",
-                    ],
-                ],
+                "shares" => ["linkedin", "email"],
+                "image" => THEME_UPLOADS . "people-1.jpg"
             ],
             [
                 "name" => "Thomas Durand",
                 "function" => "Senior Prompt Engineer",
                 "from" => "AI Strategy & Governance",
-                "shares" => [
-                    "linkedin" => [
-                        "title" => "",
-                        "url" => "",
-                        "target" => "_blank",
-                    ],
-                ],
+                "shares" => ["linkedin", "email"],
+                "image" => THEME_UPLOADS . "people-2.jpg"
             ],
             [
                 "name" => "Léa fontaine",
                 "function" => "Senior Prompt Engineer",
                 "from" => "AI Strategy & Governance",
-                "shares" => [
-                    "linkedin" => [
-                        "title" => "",
-                        "url" => "",
-                        "target" => "_blank",
-                    ],
-                ],
+                "shares" => ["linkedin", "email"],
+                "image" => THEME_UPLOADS . "people-3.png"
+            ],
+            [
+                "name" => "Marc Lefèvre",
+                "function" => "Senior Prompt Engineer",
+                "from" => "AI Strategy & Governance",
+                "shares" => ["linkedin", "email"],
+                "image" => THEME_UPLOADS . "people-4.png"
+            ],
+            [
+                "name" => "Camille Bernard",
+                "function" => "Senior Prompt Engineer",
+                "from" => "AI Strategy & Governance",
+                "shares" => ["linkedin", "email"],
+                "image" => THEME_UPLOADS . "people-5.png"
+            ],
+            [
+                "name" => "Antoine Morel",
+                "function" => "Senior Prompt Engineer",
+                "from" => "AI Strategy & Governance",
+                "shares" => ["linkedin", "email"],
+                "image" => THEME_UPLOADS . "people-6.jpg"
             ]
         ],
-        [
-            "name" => "Marc Lefèvre",
-            "function" => "Senior Prompt Engineer",
-            "from" => "AI Strategy & Governance",
-            "shares" => [
-                "linkedin" => [
-                    "title" => "",
-                    "url" => "",
-                    "target" => "_blank",
-                ],
-            ],
-        ],
-        [
-            "name" => "Camille Bernard",
-            "function" => "Senior Prompt Engineer",
-            "from" => "AI Strategy & Governance",
-            "shares" => [
-                "linkedin" => [
-                    "title" => "",
-                    "url" => "",
-                    "target" => "_blank",
-                ],
-            ],
-        ],
-        [
-            "name" => "Antoine Morel",
-            "function" => "Senior Prompt Engineer",
-            "from" => "AI Strategy & Governance",
-            "shares" => [
-                "linkedin" => [
-                    "title" => "",
-                    "url" => "",
-                    "target" => "_blank",
-                ],
-            ],
-        ]
+
 
     ]);
     ?>

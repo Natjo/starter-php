@@ -1,3 +1,30 @@
+import { ScrollDriver, style, stagger } from "@modules/scrollDriver";
+import textAnimated from "@modules/textAnimated/textAniimated.js";
+
 export default el => {
- 
+
+    textAnimated(el);
+
+    const list = el.querySelector('.list');
+    if (!list) return;
+    const images = el.querySelector('.images');
+    const driver = new ScrollDriver();
+    driver.add(el, [0, 50], e => {
+        e.timeline(0, 100, val => {
+            stagger(list, val, { softness: 0.2 });
+            if (images) stagger(images, val, { selector: "img" });
+        });
+    });
+
+    driver.enable();
+
+    const lenis = window.lenis;
+    const onLenisScroll = instance => driver.onScroll(instance.animatedScroll);
+    lenis?.on("scroll", onLenisScroll);
+    driver.onScroll(lenis?.animatedScroll ?? window.scrollY ?? 0);
+
+    return () => {
+        lenis?.off("scroll", onLenisScroll);
+        driver.disable();
+    };
 }

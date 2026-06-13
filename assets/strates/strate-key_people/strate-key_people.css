@@ -1,3 +1,58 @@
 .strate-key_people {
-   
+    --layout: [full-start] var(--ctr-offset) [fluid col-1] 1fr [col-1-end col-2] 1fr [col-2-end col-3] 2fr [col-3-end fluid-end] var(--ctr-offset) [full-end];
+
+    .strate-header {
+        grid-column: fluid;
+        display: grid;
+        grid-template-columns: subgrid;
+        align-items: center;
+        gap: 0;
+        grid-row: 1;
+
+        .eyebrow {
+            grid-column: col-1;
+        }
+
+        .title {
+            grid-column: col-3;
+        }
+
+
+        .title {
+            font-size: 3.6rem;
+            line-height: 4rem;
+            letter-spacing: -.15rem;
+        }
+    }
+
+    .images {
+        grid-column: col-2;
+        display: grid;
+        justify-content: end;
+        margin-right: 5rem;
+        position:sticky;
+        top: 15rem;
+        grid-row: 1;
+
+        img{
+            grid-area: 1 / 1;
+            width: 30.6rem;
+            height: 34.3rem;
+            object-fit: cover;
+
+            --pos: calc(var(--p, 0) * var(--denom, 0));
+            --dist: calc(var(--pos) - var(--i, 0));
+            --rise: clamp(0, calc(var(--dist) + 1), 1);
+            --fall: clamp(0, calc(1 - var(--dist)), 1);
+            --intensity: min(var(--rise), var(--fall));
+            opacity: var(--intensity, 0);
+        }
+    }
+
+    .list {
+        grid-column: full;
+        gap: 0;
+        margin-top: 6.6rem;
+        margin-bottom: 12rem;
+    }
 }

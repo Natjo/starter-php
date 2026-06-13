@@ -12,19 +12,13 @@ Les CSS page-aware restent hors d'app.css et sont chargés selon les templates u
 @import "styles/layout.css" critical;
 @import "styles/fonts.css" critical;
 @import "styles/classes.css" critical;
-@import "styles/print.css" common;
+//@import "styles/print.css" common;
 
+// modules
 @import "modules/textAnimated/textAnimated.css" common;
 
 // vendors
 @import "vendors/lenis/lenis.css" common;
-
-// common
-@import "common/header-nav/header-nav.css" critical;
-@import "common/footer/footer.css" common;
-
-// cards
-@import "cards/card-foundation/card-foundation.css" common;
 
 // components fréquents
 @import "components/slider/slider.css" common;
@@ -34,4 +28,29 @@ Les CSS page-aware restent hors d'app.css et sont chargés selon les templates u
 @import "components/btn/btn.css" critical;
 @import "components/link/link.css" critical;
 @import "components/list/list.css" common;
-@import "components/select-lang/select-lang.css" common;
+@import "components/date/date.css" common;
+@import "components/shares/shares.css" common;
+@import "components/slideshow/slideshow.css" common;
+@import "components/video/video.css" common;
+//@import "components/select-lang/select-lang.css" common;
+
+// common
+@import "common/header-nav/header-nav.css" critical;
+@import "common/footer/footer.css" common;
+
+// cards
+@import "cards/card-foundation/card-foundation.css" common;
+@import "cards/card-solution/card-solution.css" common;
+@import "cards/card-people/card-people.css" common;
+@import "cards/card-news/card-news.css" common;
+@import "cards/card-learn/card-learn.css" common;
+
+// strates 
+@import "strates/strate-ai_news/strate-ai_news.css" common;
+@import "strates/strate-hybrid_ai/strate-hybrid_ai.css" common;
+@import "strates/strate-key_people/strate-key_people.css" common;
+@import "strates/strate-learn/strate-learn.css" common;
+@import "strates/strate-our_foundations/strate-our_foundations.css" common;
+@import "strates/strate-platform/strate-platform.css" common;
+@import "strates/strate-showcase/strate-showcase.css" common;
+@import "strates/strate-toolkit/strate-toolkit.css" common;

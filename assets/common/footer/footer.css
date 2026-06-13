@@ -19,7 +19,9 @@
         z-index: 1;
         opacity: 0.6;
         background: linear-gradient(180deg, #010118 7.33%, #010118 31.95%), #000018;
-        background: linear-gradient(180deg, color(display-p3 0.0039 0.0039 0.0902) 7.33%, color(display-p3 0.0039 0.0039 0.0902 / 0.00) 31.95%), color(display-p3 0 0 0.0902);
+        background: linear-gradient(180deg, color(display-p3 0.0039 0.0039 0.0902) 7.33%, color(display-p3 0.0039 0.0039 0.0902 / 0.00) 31.95%), 
+        var(--color-bg);
+
     }
 
     canvas {

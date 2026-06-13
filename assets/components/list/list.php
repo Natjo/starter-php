@@ -1,5 +1,8 @@
 <?php
 $list_items = $params[0] ?? null;
+if (is_array($list_items) && isset($list_items["items"]) && is_array($list_items["items"])) {
+    $list_items = $list_items["items"];
+}
 if (empty($list_items)) return;
 $list_card = $params[1] ?? "news";
 if ($list_card === "news") $list_card = "card-news";
@@ -22,12 +25,11 @@ if (empty($items)) {
 }
 ?>
 
-<div>
-    <ul class="list <?= $classes ?>" role="list">
-        <?php foreach ($items as $item) : ?>
-            <li class="item">
-                <?php card($card, is_array($item) ? $item : []); ?>
-            </li>
-        <?php endforeach; ?>
-    </ul>
-</div>
+
+<ul class="<?= $classes ?>" role="list">
+    <?php foreach ($items as $item) : ?>
+        <li class="item">
+            <?php card($card, is_array($item) ? $item : []); ?>
+        </li>
+    <?php endforeach; ?>
+</ul>

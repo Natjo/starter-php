@@ -2,4 +2,16 @@
     --nb-columns: 1;
     padding-block: 10rem 6rem;
 
+
+    background: linear-gradient(180deg,
+            color(display-p3 0 0 0.0902) 4.3%,
+            color(display-p3 0 0 0.0902 / 0) 22.57%,
+            color(display-p3 0 0 0.0902 / 0) 77.37%,
+            color(display-p3 0 0 0.0902) 95.64%),
+        url("/assets/img/backgrounds/bg-1.jpg") center / cover no-repeat,
+        var(--color-bg);
+
+    background-blend-mode: normal,
+        lighten,
+        normal;
 }

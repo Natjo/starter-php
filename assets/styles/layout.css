@@ -43,6 +43,7 @@ html {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
     ::view-transition-old(root),
     ::view-transition-new(root) {
         animation-duration: 1ms;
@@ -97,13 +98,15 @@ body {
         padding-bottom: var(--pb);
     }
 }
-.strate-header{
+
+.strate-header {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 4rem;
     margin-bottom: 6rem;
 }
+
 
 /* grid */
 .grid {

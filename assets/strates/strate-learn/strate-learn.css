@@ -2,4 +2,16 @@
     padding-block: 13rem 6rem;
 
 
+    .list {
+        --nb-columns: 3;
+    }
+
+    //background: transparent url("/assets/img/backgrounds/bg-1.jpg") center center / cover no-repeat;
+
+
+
+
+
+    background:url("/assets/img/backgrounds/bg-2.jpg") center / cover no-repeat,
+    var(--color-bg);
 }

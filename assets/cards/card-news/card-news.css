@@ -1,16 +1,11 @@
 .card-news {
-    border-top: 1px solid var(--Filets-secondaire, rgba(190, 190, 190, 0.25));
-    border-top: 1px solid var(--Filets-secondaire, color(display-p3 0.7451 0.7451 0.7451 / 0.25));
+    border-top: var(--border);
+    padding: 3.2rem 2.4rem 3.2rem 0;
 
- 
-padding: 32px 24px 32px 0;
-    .card-content {   position: relative;
+    .card-content {
+        position: relative;
         display: flex;
         flex-direction: column;
-        width: 1320px;
-        
-        justify-content: space-between;
-        align-items: flex-start;
         gap: 1.2rem;
     }
 
@@ -28,11 +23,11 @@ padding: 32px 24px 32px 0;
         text-transform: uppercase;
     }
 
-    .text{
+    .text {
         line-height: 2.4rem;
     }
 
-    .icon{
+    .icon {
         position: absolute;
         top: 0;
         right: 0;

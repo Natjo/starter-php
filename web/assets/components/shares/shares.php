@@ -1,14 +1,31 @@
 <?php
-$shares_list = $params[0] ?? null;
+$first = $params[0] ?? null;
+
+// Deux formes d'appel :
+// - component::shares($title, $list, $classes, $attributes)
+// - component::shares($list, $classes, $attributes)
+if (is_string($first)) {
+    $shares_title = $first;
+    $shares_list = $params[1] ?? null;
+    $shares_classes = $params[2] ?? null;
+    $shares_attributes = $params[3] ?? null;
+} else {
+    $shares_title = null;
+    $shares_list = $first;
+    $shares_classes = $params[1] ?? null;
+    $shares_attributes = $params[2] ?? null;
+}
+
 if (empty($shares_list)) return;
 $args = is_array($shares_list) && array_key_exists("list", $shares_list) ? $shares_list : ["list" => $shares_list];
-if (($params[1] ?? null) !== null) $args["classes"] = $params[1];
-if (($params[2] ?? null) !== null) $args["attributes"] = $params[2];
+if ($shares_title !== null) $args["title"] = $shares_title;
+if ($shares_classes !== null) $args["classes"] = $shares_classes;
+if ($shares_attributes !== null) $args["attributes"] = $shares_attributes;
 $args = normalize_args($args);
 $list = isset($args["list"]) ? $args["list"] : [];
 $classes = component::classes("shares", $args["classes"] ?? "");
 $attributes = component::attributes($args["attributes"] ?? []);
-$title = !empty($args["title"]) ? (string) $args["title"] : "Partager l’article";
+$title = !empty($args["title"]) ? trim((string) $args["title"]) : "";
 
 static $sharesInstance = 0;
 $sharesInstance++;
@@ -60,7 +77,7 @@ $encodedMailBody = rawurlencode($url);
 $catalog = [
     "email" => [
         "name" => "email",
-        "icon" => "mail",
+        "icon" => "email",
         "url" => "mailto:?body=" . $encodedMailBody,
         "label" => "Partager l’article par E-mail",
     ],
@@ -75,6 +92,12 @@ $catalog = [
         "icon" => "facebook",
         "url" => "https://www.facebook.com/sharer/sharer.php?u=" . $encodedUrl,
         "label" => "Partager l’article sur Facebook",
+    ],
+    "linkedin" => [
+        "name" => "linkedin",
+        "icon" => "linkedin",
+        "url" => "https://www.linkedin.com/sharing/share-offsite/?url=" . $encodedUrl,
+        "label" => "Partager l’article sur LinkedIn",
     ],
     "x" => [
         "name" => "x",
@@ -101,16 +124,18 @@ if (is_array($list)) {
     }
 }
 if (empty($keys)) {
-    $keys = array_keys($catalog);
+    return;
 }
 ?>
 
 
 
-<nav class="<?= $classes ?>" aria-labelledby="<?= esc_attr($titleId) ?>" data-context="@visible true" data-module="components/shares"<?= $attributes ?>>
-    <div class="title" id="<?= esc_attr($titleId) ?>"><?= esc_html($title) ?></div>
+<nav class="<?= $classes ?>" <?= $title !== "" ? 'aria-labelledby="' . esc_attr($titleId) . '"' : 'aria-label="Partager"' ?> data-context="@visible true" data-module="components/shares"<?= $attributes ?>>
+    <?php if ($title !== "") : ?>
+        <div class="title" id="<?= esc_attr($titleId) ?>"><?= esc_html($title) ?></div>
+    <?php endif; ?>
 
-    <ul class="list">
+    <ul>
         <?php foreach ($keys as $key) :
             $item = $catalog[$key] ?? null;
             if (!is_array($item)) continue;

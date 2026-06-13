@@ -11,6 +11,7 @@ const cssnano = require('cssnano');
 const babel = require('@babel/core');
 const esbuild = require('esbuild');
 const chokidar = require('chokidar');
+const { optimize } = require('svgo');
 
 const root = __dirname;
 const src = path.join(root, 'assets');
@@ -111,6 +112,8 @@ const isStylesSourceFile = file => topLevelDir(file) === 'styles';
 const isTemplateFile = file => templateSourceDirs.has(topLevelDir(file)) && path.extname(file) === '.php';
 const isJsFile = file => path.extname(file) === '.js';
 const isCssFile = file => path.extname(file) === '.css';
+const isSvgFile = file => path.extname(file).toLowerCase() === '.svg';
+const isImgAssetFile = file => topLevelDir(file) === 'img';
 
 const outputPath = file => path.join(webAssets, path.relative(src, file));
 
@@ -774,10 +777,65 @@ function writeBuildManifest() {
     }, { spaces: 2 });
 }
 
+function writeOptimizedSvg(from, to) {
+    const source = fs.readFileSync(from, 'utf8');
+    const isSprite = isSvgSpriteFile(from);
+    const result = optimize(source, {
+        path: from,
+        plugins: isSprite ? [
+            'cleanupAttrs',
+            'removeDoctype',
+            'removeXMLProcInst',
+            'removeComments',
+            'removeMetadata',
+            'removeEditorsNSData',
+            'cleanupNumericValues',
+            'convertColors',
+            'sortAttrs',
+            {
+                name: 'removeAttrs',
+                params: {
+                    attrs: '(data-name)',
+                },
+            },
+        ] : undefined,
+    });
+
+    fs.ensureDirSync(path.dirname(to));
+    fs.writeFileSync(to, result.data);
+}
+
+function isSvgSpriteFile(file) {
+    if (!isSvgFile(file) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) return false;
+    return fs.readFileSync(file, 'utf8').includes('<symbol');
+}
+
+function optimizeSvgCopyTargets(from) {
+    if (!isProd) return false;
+    if (!isSvgFile(from)) return false;
+    return isImgAssetFile(from);
+}
+
 function copyStatic(file) {
     const out = outputPath(file);
     fs.ensureDirSync(path.dirname(out));
-    fs.copySync(file, out, { filter: source => !isIgnored(source) });
+
+    if (fs.statSync(file).isDirectory()) {
+        fs.copySync(file, out, { filter: source => !isIgnored(source) });
+
+        if (isProd && isImgAssetFile(file)) {
+            getFiles(file)
+                .filter(optimizeSvgCopyTargets)
+                .forEach(sourceFile => {
+                    writeOptimizedSvg(sourceFile, outputPath(sourceFile));
+                });
+        }
+    } else if (optimizeSvgCopyTargets(file)) {
+        writeOptimizedSvg(file, out);
+    } else {
+        fs.copySync(file, out, { filter: source => !isIgnored(source) });
+    }
+
     display(toPosix(path.relative(src, file)), 'update');
 }
 
@@ -792,6 +850,15 @@ function syncCopiedDirs() {
         const to = path.join(webAssets, entry);
         fs.removeSync(to);
         fs.copySync(from, to, { filter: source => !isIgnored(source) });
+
+        if (isProd && entry === 'img') {
+            getFiles(from)
+                .filter(optimizeSvgCopyTargets)
+                .forEach(sourceFile => {
+                    writeOptimizedSvg(sourceFile, outputPath(sourceFile));
+                });
+        }
+
         display(entry, 'update');
     }
 }

@@ -1,0 +1,48 @@
+.card-people {
+    display: grid;
+    grid-template-columns: var(--layout);
+    height: calc(7.6rem + 2.4rem * var(--intensity, 0));
+    padding: 1.6rem 0;
+    align-items: center;
+    line-height: 2.4rem;
+    font-size: 1.4rem;
+    border-bottom: var(--border);
+
+    --w: 1;
+    --travel: calc(var(--denom, 0) + var(--w));
+    --pos: calc(var(--p, 0) * var(--travel) - var(--w));
+    --dist: calc(var(--pos) - var(--i, 0));
+    --rise: clamp(0, calc((var(--dist) + var(--w)) / var(--w)), 1);
+    --fall: clamp(0, calc((var(--w) - var(--dist)) / var(--w)), 1);
+    --intensity: min(var(--rise), var(--fall));
+
+    background: linear-gradient(302deg, rgba(255, 255, 255, calc(0.20 * var(--intensity))) 72.88%, rgba(255, 255, 255, calc(0.10 * var(--intensity))) 100%), rgba(255, 255, 255, calc(0.10 * var(--intensity)));
+    background: linear-gradient(302deg, color(display-p3 1 1 1 / calc(0.00 * var(--intensity))) 72.88%, color(display-p3 1 1 1 / calc(0.10 * var(--intensity))) 100%), color(display-p3 1 1 1 / calc(0.10 * var(--intensity)));
+
+
+    .item:first-of-type & {
+        border-top: var(--border);
+    }
+
+    .name {
+        font-size: 2.4rem;
+        font-weight: 600;
+        letter-spacing: -.0236rem;
+        grid-column: col-1;
+        color: color-mix(in srgb, currentColor, var(--color-1) calc(var(--intensity, 0) * 100%));
+    }
+
+    .content {
+        grid-column: col-3;
+        display: flex;
+        align-items: center;
+    }
+
+    .from {
+        margin-left: 5rem;
+    }
+
+    .shares {
+        margin-left: auto;
+    }
+}

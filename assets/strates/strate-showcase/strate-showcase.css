@@ -10,7 +10,19 @@
         grid-template-columns: 1fr;
         padding-inline: clamp(1rem, 4vw, 4rem);
     }
+    .bg {
 
+
+        width: 562px;
+        height: 562px;
+        transform: rotate(-90deg);
+
+        fill: rgba(255, 255, 255, 0.26);
+
+        fill: color(display-p3 1 1 1 / 0.26);
+
+        filter: blur(186px);
+    }
     .strate-content {
         grid-area: 1 / 1;
         z-index: 2;
@@ -92,6 +104,8 @@
             margin-top: 0;
         }
     }
+
+
 }
 
 @media (prefers-reduced-motion: reduce) {

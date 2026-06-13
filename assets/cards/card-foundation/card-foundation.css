@@ -47,8 +47,7 @@
     height: 28.2rem;
     box-sizing: border-box;
 
-    border: 1px solid rgba(190, 190, 190, 0.25);
-    border: 1px solid color(display-p3 0.7451 0.7451 0.7451 / 0.25);
+    border: var(--border);
 
     --grad-angle: 295deg;
     --grad-stop: 26.92%;
