@@ -1015,88 +1015,100 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
     normal;
 }
 .strate-showcase {
-    /* Occupe toute la largeur de la grille .strate (au lieu de la colonne centrale) */
-    --ctr: full;
-    --showcase-gap: 2rem;
+    --ctr: fluid;
 
-    /* Le wrapper empile le contenu (titre/texte) et la grille d'images
-       dans la même cellule -> le titre se superpose au centre des images. */
-    .strate-showcase__sticky {
+
+    .sticky {
+        position: sticky;
+        top: 0;
+        height: 100vh;
         display: grid;
-        grid-template-columns: 1fr;
-        padding-inline: clamp(1rem, 4vw, 4rem);
+        align-items: center;
+        grid-template-columns: repeat(6, 1fr);
+
+        .strate-header {
+            grid-column: 3/5;
+            justify-self: center;
+            text-align: center;
+            align-items: center;
+            background: red;
+            align-self:stretch;
+        }
     }
+
     .bg {
-
-
         width: 562px;
         height: 562px;
         transform: rotate(-90deg);
-
         fill: rgba(255, 255, 255, 0.26);
-
         fill: color(display-p3 1 1 1 / 0.26);
-
         filter: blur(186px);
     }
-    .strate-content {
-        grid-area: 1 / 1;
-        z-index: 2;
 
-        position: sticky;
-        top: 50vh;
-        transform: translateY(-50%);
-        align-self: start;
-        justify-self: center;
-
-        width: min(34ch, 40%);
-        text-align: center;
-    }
-
-    .strate-showcase__grid {
-        grid-area: 1 / 1;
-
-        display: flex;
-        justify-content: space-between;
-        gap: var(--showcase-gap);
-    }
-
-    .strate-showcase__side {
-        flex: 0 1 30%;
-
+    .medias {
+        margin-top: -100vh;
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--showcase-gap);
-        align-items: start;
+        grid-template-columns: repeat(6, 1fr);
+
+        /* */
+        .col {
+            display: grid;
+            gap: 20rem;
+            &:before{
+                content:"";
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 100%;
+                width: 2px;
+                height: 100vh;
+background: linear-gradient(270deg, color(display-p3 1 1 1 / 0.00) 0%, color(display-p3 1 1 1 / 0.25) 31.73%, color(display-p3 1 1 1 / 0.25) 65.87%, color(display-p3 1 1 1 / 0.00) 100%);
+
+            }
+            &:nth-child(3) {
+                grid-column: 5;
+            }
+
+            &:nth-child(4) {
+                grid-column: 6;
+
+            }
+
+            /* img{
+                &:nth-child(1){
+                    margin-bottom: 8rem;
+
+                }
+                &:nth-child(2){
+                    margin-bottom: 8rem;
+                }
+                &:nth-child(3){
+                    margin-bottom: 8rem;
+                }
+                                &:nth-child(4){
+                    margin-bottom: 8rem;
+                }
+            }*/
+        }
     }
 
-    .strate-showcase__col {
-        display: flex;
-        flex-direction: column;
-        gap: var(--showcase-gap);
-        will-change: transform;
+    video {
+        width: 100%;
+        aspect-ratio: 16/9;
     }
 
-    /* Décalage initial des colonnes pour un rythme plus organique */
-    .strate-showcase__side--left .strate-showcase__col:nth-child(2) {
-        margin-top: 6rem;
-    }
-
-    .strate-showcase__side--right .strate-showcase__col:nth-child(1) {
-        margin-top: 9rem;
-    }
-
-    .strate-showcase__img {
-        display: block;
+    img {
         width: 100%;
         height: auto;
-        border-radius: 4px;
     }
+
+
+
 }
 
 @media (max-width: 768px) {
     .strate-showcase {
-        .strate-showcase__sticky {
+        .sticky {
             display: block;
         }
 
@@ -1122,12 +1134,6 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
     }
 
 
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .strate-showcase .strate-showcase__col {
-        transform: none !important;
-    }
 }
 .strate-toolkit {
     padding-block: 10rem 6rem;

@@ -12,25 +12,50 @@ export function splitText(targetEl, {
   const originalText = (_el$textContent = el.textContent) !== null && _el$textContent !== void 0 ? _el$textContent : "";
   const originalHtml = el.innerHTML;
   el.setAttribute("aria-label", originalText);
-  el.textContent = "";
-  const frag = document.createDocumentFragment();
-  const words = originalText.split(/\s+/).filter(Boolean);
   const chars = [];
-  for (let w = 0; w < words.length; w++) {
-    const word = words[w];
-    const wordSpan = document.createElement("span");
-    wordSpan.className = wordClass;
-    for (let i = 0; i < word.length; i++) {
-      const chSpan = document.createElement("span");
-      chSpan.className = charClass;
-      chSpan.textContent = word[i];
-      wordSpan.appendChild(chSpan);
-      chars.push(chSpan);
-    }
-    frag.appendChild(wordSpan);
-    if (w !== words.length - 1) frag.appendChild(document.createTextNode(" "));
+  const words = [];
+  function splitTextNode(text) {
+    const frag = document.createDocumentFragment();
+    const parts = text.split(/(\s+)/);
+    parts.forEach(part => {
+      if (!part) return;
+      if (/^\s+$/.test(part)) {
+        frag.appendChild(document.createTextNode(part));
+        return;
+      }
+      const wordSpan = document.createElement("span");
+      wordSpan.className = wordClass;
+      for (let i = 0; i < part.length; i++) {
+        const chSpan = document.createElement("span");
+        chSpan.className = charClass;
+        chSpan.textContent = part[i];
+        wordSpan.appendChild(chSpan);
+        chars.push(chSpan);
+      }
+      words.push(wordSpan);
+      frag.appendChild(wordSpan);
+    });
+    return frag;
   }
-  el.appendChild(frag);
+  function transformNode(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      var _node$textContent;
+      return splitTextNode((_node$textContent = node.textContent) !== null && _node$textContent !== void 0 ? _node$textContent : "");
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      return node.cloneNode(true);
+    }
+    const clone = node.cloneNode(false);
+    node.childNodes.forEach(child => {
+      clone.appendChild(transformNode(child));
+    });
+    return clone;
+  }
+  const frag = document.createDocumentFragment();
+  Array.from(el.childNodes).forEach(node => {
+    frag.appendChild(transformNode(node));
+  });
+  el.replaceChildren(frag);
   function restore() {
     el.removeAttribute("aria-label");
     el.innerHTML = originalHtml;
