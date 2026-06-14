@@ -12,6 +12,7 @@ $pages = [
     'accessibilite' => __DIR__ . '/pages/accessibilite.php',
     'seo' => __DIR__ . '/pages/seo.php',
     'images' => __DIR__ . '/pages/images.php',
+    'webp' => __DIR__ . '/pages/webp.php',
 ];
 
 $requestedPage = isset($_GET['page']) && is_string($_GET['page']) && $_GET['page'] !== ''

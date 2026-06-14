@@ -47,6 +47,7 @@ function admin_pretty_page_routes(): array
         'accessibilite' => 'accessibilite',
         'seo' => 'seo',
         'images' => 'images',
+        'webp' => 'webp',
     ];
 }
 

@@ -484,6 +484,144 @@ textarea {
     color: var(--admin-text);
 }
 
+.admin-range {
+    min-height: auto;
+    padding: 0;
+    border: 0;
+    accent-color: var(--admin-accent);
+}
+
+.admin-range-value {
+    color: var(--admin-accent-strong);
+    font-weight: 700;
+}
+
+.admin-field-help {
+    display: grid;
+    gap: 0.25rem;
+    color: var(--admin-muted);
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+
+.admin-field-help strong {
+    color: var(--admin-text);
+}
+
+.admin-file-input-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.admin-webp-layout {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.75fr);
+    align-items: start;
+}
+
+.admin-webp-media {
+    display: grid;
+    gap: 1rem;
+}
+
+.admin-webp-preview {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 26rem;
+    overflow: hidden;
+    border: 1px dashed var(--admin-border);
+    border-radius: var(--admin-radius);
+    background:
+        linear-gradient(45deg, rgba(18, 91, 80, 0.035) 25%, transparent 25% 75%, rgba(18, 91, 80, 0.035) 75%),
+        linear-gradient(45deg, rgba(18, 91, 80, 0.035) 25%, transparent 25% 75%, rgba(18, 91, 80, 0.035) 75%),
+        #fff;
+    background-position: 0 0, 12px 12px;
+    background-size: 24px 24px;
+    cursor: pointer;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.admin-webp-preview:hover,
+.admin-webp-preview:focus-visible,
+.admin-webp-preview.is-dragging {
+    border-color: var(--admin-accent);
+    box-shadow: 0 0 0 4px rgba(18, 91, 80, 0.1);
+    outline: 0;
+}
+
+.admin-webp-preview.is-dragging {
+    background-color: rgba(18, 91, 80, 0.08);
+}
+
+.admin-webp-preview img {
+    display: block;
+    width: 100%;
+    max-height: 36rem;
+    object-fit: contain;
+}
+
+.admin-webp-preview-status {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(18, 91, 80, 0.92);
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.admin-webp-preview.is-processing img {
+    opacity: 0.65;
+}
+
+.admin-webp-controls {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.admin-webp-settings {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.admin-webp-file-meta {
+    display: grid;
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--admin-muted);
+    font-size: 0.9rem;
+}
+
+.admin-webp-file-meta[hidden] {
+    display: none;
+}
+
+.admin-webp-file-meta li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.45rem;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-webp-file-meta strong {
+    color: var(--admin-text);
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
 .admin-table-wrap {
     overflow-x: auto;
 }
@@ -918,5 +1056,13 @@ textarea {
 
     .admin-spec-row {
         flex-direction: column;
+    }
+
+    .admin-webp-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-webp-preview {
+        min-height: 18rem;
     }
 }

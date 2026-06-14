@@ -24,6 +24,9 @@ function admin_render_layout(array $view): void
         'Reglage' => [
             'images' => 'Images',
         ],
+        'Outils' => [
+            'webp' => 'WebP',
+        ],
         'Projet' => [
             'specifications' => 'Specifications',
             'wordpress' => 'WordPress',
@@ -82,6 +85,8 @@ function admin_render_layout(array $view): void
             $activePage = 'seo';
         } elseif ($adminRoute === 'images') {
             $activePage = 'images';
+        } elseif ($adminRoute === 'webp') {
+            $activePage = 'webp';
         } elseif ($adminRoute === 'specification' || str_starts_with($adminRoute, 'specification/')) {
             $activePage = 'specifications';
         }

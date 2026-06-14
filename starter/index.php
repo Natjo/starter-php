@@ -89,39 +89,18 @@ function admin_page_file($uri): string
         return safe_page_file($adminRoot . '/index.php', $adminRoot);
     }
 
-    if ($route === 'performance') {
-        $_GET['page'] = 'performance';
+    $simpleRoutes = [
+        'performance',
+        'ux',
+        'wordpress',
+        'accessibilite',
+        'seo',
+        'images',
+        'webp',
+    ];
 
-        return safe_page_file($adminRoot . '/index.php', $adminRoot);
-    }
-
-    if ($route === 'ux') {
-        $_GET['page'] = 'ux';
-
-        return safe_page_file($adminRoot . '/index.php', $adminRoot);
-    }
-
-    if ($route === 'wordpress') {
-        $_GET['page'] = 'wordpress';
-
-        return safe_page_file($adminRoot . '/index.php', $adminRoot);
-    }
-
-    if ($route === 'accessibilite') {
-        $_GET['page'] = 'accessibilite';
-
-        return safe_page_file($adminRoot . '/index.php', $adminRoot);
-    }
-
-    if ($route === 'seo') {
-        $_GET['page'] = 'seo';
-
-        return safe_page_file($adminRoot . '/index.php', $adminRoot);
-    }
-
-    if ($route === 'images') {
-        $_GET['page'] = 'images';
-
+    if (in_array($route, $simpleRoutes, true)) {
+        $_GET['page'] = $route;
         return safe_page_file($adminRoot . '/index.php', $adminRoot);
     }
 

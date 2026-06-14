@@ -736,15 +736,70 @@ if (!function_exists('relative_path')) {
     }
 }
 
+if (!function_exists('admin_webp_status')) {
+    function admin_webp_status(string $uploadsDir, string $manifestFile, array $allowedExtensions): array
+    {
+        $manifest = image_manifest($manifestFile);
+        $generatedBySource = is_array($manifest['generated'] ?? null) ? $manifest['generated'] : [];
+        $generatedLookup = generated_files($generatedBySource);
+        $knownSizes = array_keys(is_array($manifest['sizes'] ?? null) ? $manifest['sizes'] : []);
+        $sources = upload_images($uploadsDir, $allowedExtensions, $generatedLookup, $knownSizes);
+        $generated = 0;
+        $missing = 0;
+        $stale = 0;
+        $bytes = 0;
+
+        foreach ($generatedBySource as $relativeSource => $variants) {
+            if (!is_array($variants)) {
+                continue;
+            }
+
+            $source = rtrim($uploadsDir, '/') . '/' . ltrim((string) $relativeSource, '/');
+
+            foreach ($variants as $relativeVariant) {
+                if (!is_string($relativeVariant) || $relativeVariant === '') {
+                    continue;
+                }
+
+                $target = rtrim($uploadsDir, '/') . '/' . ltrim($relativeVariant, '/');
+                if (!is_file($target)) {
+                    $missing++;
+                    continue;
+                }
+
+                $generated++;
+                $size = filesize($target);
+                if ($size !== false) {
+                    $bytes += $size;
+                }
+
+                if (is_file($source) && !generated_image_is_fresh($source, $target)) {
+                    $stale++;
+                }
+            }
+        }
+
+        return [
+            'imagick' => class_exists('Imagick'),
+            'sources' => count($sources),
+            'generated' => $generated,
+            'missing' => $missing,
+            'stale' => $stale,
+            'bytes' => $bytes,
+            'updated_at' => is_string($manifest['updatedAt'] ?? null) ? $manifest['updatedAt'] : '',
+        ];
+    }
+}
+
 $result = null;
 $message = '';
 $action = $_POST['action'] ?? '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     if ($action === 'save_settings') {
         save_image_settings($sizesFile, $_POST);
         $message = 'Reglages enregistres.';
-    } else {
+    } elseif (in_array($action, ['generate', 'regenerate', 'clean'], true)) {
         $result = match ($action) {
             'regenerate' => generate(true),
             'clean' => clean(),
@@ -757,6 +812,7 @@ $config = image_config($sizesFile);
 $defaults = $config['defaults'];
 $sizes = $config['sizes'];
 $sizes[''] = array_replace($defaults, ['width' => '', 'height' => '']);
+$webpStatus = admin_webp_status($uploadsDir, $manifestFile, $allowedExtensions);
 $cssBundleManifest = admin_css_bundle_manifest($assetsDir);
 $cssBundles = is_array($cssBundleManifest['bundles'] ?? null) ? $cssBundleManifest['bundles'] : [];
 $assetGauges = [
@@ -773,11 +829,45 @@ ob_start();
     </div>
 <?php endif; ?>
 
+<section class="admin-card-grid" aria-label="Etat des images WebP">
+    <article class="admin-stat-card">
+        <p class="admin-stat-label">Imagick</p>
+        <p class="admin-stat-value"><?= $webpStatus['imagick'] ? 'Actif' : 'Indisponible' ?></p>
+        <p class="admin-stat-description">Moteur PHP utilise pour les conversions.</p>
+    </article>
+    <article class="admin-stat-card">
+        <p class="admin-stat-label">Sources</p>
+        <p class="admin-stat-value"><?= (int) $webpStatus['sources'] ?></p>
+        <p class="admin-stat-description">Images originales detectees dans les uploads.</p>
+    </article>
+    <article class="admin-stat-card">
+        <p class="admin-stat-label">WebP generes</p>
+        <p class="admin-stat-value"><?= (int) $webpStatus['generated'] ?></p>
+        <p class="admin-stat-description"><?= admin_escape(admin_format_bytes((int) $webpStatus['bytes'])) ?> sur le disque.</p>
+    </article>
+    <article class="admin-stat-card">
+        <p class="admin-stat-label">A traiter</p>
+        <p class="admin-stat-value"><?= (int) $webpStatus['missing'] + (int) $webpStatus['stale'] ?></p>
+        <p class="admin-stat-description"><?= (int) $webpStatus['missing'] ?> manquants, <?= (int) $webpStatus['stale'] ?> obsoletes.</p>
+    </article>
+</section>
+
 <section class="admin-panel">
-    <h2>Generation des images</h2>
+    <div class="admin-panel-heading">
+        <div>
+            <h2>Generation WebP</h2>
+            <p class="admin-panel-meta">
+                <?php if ($webpStatus['updated_at'] !== '') : ?>
+                    Derniere operation : <?= admin_escape(date('d/m/Y H:i', strtotime($webpStatus['updated_at']))) ?>
+                <?php else : ?>
+                    Aucune generation enregistree.
+                <?php endif; ?>
+            </p>
+        </div>
+    </div>
 
     <?php if ($result !== null) : ?>
-        <div class="admin-notice">
+        <div class="admin-notice<?= !empty($result['errors']) ? ' is-error' : '' ?>">
             <p>
                 Creees: <?= (int) $result['created'] ?>,
                 ignorees: <?= (int) $result['skipped'] ?>,
@@ -801,6 +891,24 @@ ob_start();
             <button class="admin-button is-secondary" type="submit" name="action" value="clean">Clean</button>
         </div>
     </form>
+</section>
+
+<section class="admin-panel">
+    <h2>Fonctionnement</h2>
+    <div class="admin-card-grid">
+        <article class="admin-card">
+            <h3>Generate</h3>
+            <p>Genere uniquement les fichiers absents ou plus anciens que leur source.</p>
+        </article>
+        <article class="admin-card">
+            <h3>Regenerate</h3>
+            <p>Recree toutes les variantes avec les reglages actuels.</p>
+        </article>
+        <article class="admin-card">
+            <h3>Clean</h3>
+            <p>Supprime les variantes dont la source ou le format configure n existe plus.</p>
+        </article>
+    </div>
 </section>
 
 <section class="admin-panel">
@@ -873,6 +981,6 @@ ob_start();
 return [
     'title' => 'Admin - Images',
     'heading' => 'Images',
-    'intro' => 'Gestion des generations WebP et des variantes depuis l interface admin.',
+    'intro' => 'Configuration, generation et nettoyage des variantes d images du projet.',
     'content' => (string) ob_get_clean(),
 ];
