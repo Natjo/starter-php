@@ -1,5 +1,9 @@
 .strate-showcase {
     --ctr: fluid;
+    --showcase-line: linear-gradient(180deg,
+            color(display-p3 1 1 1 / 0) 0%,
+            color(display-p3 1 1 1 / 0.45) 50%,
+            color(display-p3 1 1 1 / 0) 100%);
 
 
     .sticky {
@@ -9,70 +13,105 @@
         display: grid;
         align-items: center;
         grid-template-columns: repeat(6, 1fr);
+        height: 100vh;
+        background:
+            var(--showcase-line) 0 0 / 1px 100vh no-repeat,
+            var(--showcase-line) 16.666% 0 / 1px 100vh no-repeat,
+            var(--showcase-line) 33.333% 0 / 1px 100vh no-repeat,
+            var(--showcase-line) 50% 0 / 1px 100vh no-repeat,
+            var(--showcase-line) 66.666% 0 / 1px 100vh no-repeat,
+            var(--showcase-line) 83.333% 0 / 1px 100vh no-repeat,
+            var(--showcase-line) 100% 0 / 1px 100vh no-repeat;
 
         .strate-header {
+            position: relative;
             grid-column: 3/5;
+            grid-row: 1;
             justify-self: center;
             text-align: center;
             align-items: center;
-            background: red;
-            align-self:stretch;
+            justify-content: center;
+            align-self: stretch;
+        }
+
+        .bg {
+            grid-column: 1/-1;
+            grid-row: 1;
+            justify-self: center;
+            width: 562px;
+            height: 562px;
+            transform: rotate(-90deg);
+            fill: rgba(255, 255, 255, 0.26);
+            fill: color(display-p3 1 1 1 / 0.26);
+            filter: blur(186px);
         }
     }
 
-    .bg {
-        width: 562px;
-        height: 562px;
-        transform: rotate(-90deg);
-        fill: rgba(255, 255, 255, 0.26);
-        fill: color(display-p3 1 1 1 / 0.26);
-        filter: blur(186px);
-    }
 
     .medias {
         margin-top: -100vh;
+     
         display: grid;
         grid-template-columns: repeat(6, 1fr);
 
-        //
         .col {
             display: grid;
-            gap: 20rem;
-            &:before{
-                content:"";
-                display: block;
-                position: absolute;
-                top: 0;
-                left: 100%;
-                width: 2px;
-                height: 100vh;
-background: linear-gradient(270deg, color(display-p3 1 1 1 / 0.00) 0%, color(display-p3 1 1 1 / 0.25) 31.73%, color(display-p3 1 1 1 / 0.25) 65.87%, color(display-p3 1 1 1 / 0.00) 100%);
+        }
 
+        .col-0 {
+            .item {
+                &:nth-child(1) {
+                    margin-top: 0;
+                }
+
+                &:nth-child(2) {
+                    margin-top: 17rem;
+                }
+
+                &:nth-child(3) {
+                    margin-top: 35rem;
+                }
             }
-            &:nth-child(3) {
-                grid-column: 5;
+        }
+
+        .col-1 {
+            .item {
+                &:nth-child(1) {
+                    margin-top: 82rem;
+                }
+
+                &:nth-child(2) {
+                    margin-top: 38rem;
+                }
             }
+        }
 
-            &:nth-child(4) {
-                grid-column: 6;
+        .col-2 {
+            grid-column: 5;
 
+            .item {
+                &:nth-child(1) {
+                    margin-top: 25rem;
+                }
+
+                &:nth-child(2) {
+                    margin-top: 40rem;
+                }
             }
+        }
 
-            /* img{
-                &:nth-child(1){
-                    margin-bottom: 8rem;
+        .col-4 {
+            grid-column: 6;
 
+            .item {
+                &:nth-child(1) {
+                    margin-top: 66rem;
                 }
-                &:nth-child(2){
-                    margin-bottom: 8rem;
+
+                &:nth-child(2) {
+                    margin-top: 57rem;
                 }
-                &:nth-child(3){
-                    margin-bottom: 8rem;
-                }
-                                &:nth-child(4){
-                    margin-bottom: 8rem;
-                }
-            }*/
+            }
         }
     }
 
@@ -85,8 +124,6 @@ background: linear-gradient(270deg, color(display-p3 1 1 1 / 0.00) 0%, color(dis
         width: 100%;
         height: auto;
     }
-
-
 
 }
 

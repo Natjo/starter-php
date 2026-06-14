@@ -4,4 +4,17 @@
     letter-spacing: .14em;
     line-height: 1.2;
     text-transform: uppercase;
+
+    .icon {
+        display: none;
+    }
+
+    &.hasicon {
+        display: flex;
+        gap: 1rem;
+
+        .icon {
+            display: inline-block;
+        }
+    }
 }

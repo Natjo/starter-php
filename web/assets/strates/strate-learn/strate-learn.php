@@ -4,7 +4,7 @@ $args = normalize_args($args ?? null);
 
 <section style="--bg:'bg-1.jpg'" <?= options("strate strate-learn", $args) ?> data-module="strates/strate-learn" data-context="@visible true">
     <div class='strate-header'>
-        <?php component::eyebrow($args); ?>
+        <?php component::eyebrow($args,"hasicon"); ?>
         <?php component::title($args, 2, "title-2"); ?>
     </div>
 

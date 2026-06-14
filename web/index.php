@@ -160,44 +160,45 @@
         "title" => "Made by human powered <strong>by AI</strong>.",
         "items" => [
             [
-                "isVideo" => true,   
-                "image" => THEME_UPLOADS . "showcase-1.jpg",
-                "video" => THEME_UPLOADS . "showcase-1.mp4"
+                [
+                    "image" => THEME_UPLOADS . "showcase-2.jpg",
+                ],
+                [
+                    "image" => THEME_UPLOADS . "showcase-5.jpg",
+                ],
+                [
+                    "image" => THEME_UPLOADS . "showcase-3.jpg",
+                ],
+
             ],
             [
-                "image" => THEME_UPLOADS . "showcase-2.jpg",
+                [
+                    "image" => THEME_UPLOADS . "showcase-1.jpg",
+                ],
+                [
+                    "image" => THEME_UPLOADS . "showcase-4.jpg",
+                ],
             ],
             [
-                "image" => THEME_UPLOADS . "showcase-3.jpg",
+                [
+                    "image" => THEME_UPLOADS . "showcase-4.jpg",
+                ],
+                [
+                    "image" => THEME_UPLOADS . "showcase-6.jpg",
+                ],
             ],
+
             [
-                "image" => THEME_UPLOADS . "showcase-4.jpg",
-            ],
-            [
-                "image" => THEME_UPLOADS . "showcase-5.jpg",
-            ],
-            [
-                "image" => THEME_UPLOADS . "showcase-6.jpg",
-            ],
-                  [
-                
-                "image" => THEME_UPLOADS . "showcase-1.jpg",
-                "video" => THEME_UPLOADS . "showcase-1.mp4"
-            ],
-            [
-                "image" => THEME_UPLOADS . "showcase-2.jpg",
-            ],
-            [
-                "image" => THEME_UPLOADS . "showcase-3.jpg",
-            ],
-            [
-                "image" => THEME_UPLOADS . "showcase-4.jpg",
-            ],
-            [
-                "image" => THEME_UPLOADS . "showcase-5.jpg",
-            ],
-            [
-                "image" => THEME_UPLOADS . "showcase-6.jpg",
+                [
+                    "isVideo" => true,
+                    "video" => THEME_UPLOADS . "showcase-1.mp4"
+                ],
+                [
+                    "image" => THEME_UPLOADS . "showcase-2.jpg",
+                ],
+                [
+                    "image" => THEME_UPLOADS . "showcase-5.jpg",
+                ],
             ]
 
         ]
