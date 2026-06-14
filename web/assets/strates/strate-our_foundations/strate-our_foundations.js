@@ -1,5 +1,5 @@
 import { ScrollDriver, style, stagger } from "../../modules/scrollDriver/scrollDriver.js";
-import textAnimated from "../../modules/textAnimated/textAniimated.js";
+import textAnimated from "../../modules/textAnimated/textAnimated.js";
 export default el => {
   const items = [...el.querySelectorAll(".item")];
   if (!items.length) return;

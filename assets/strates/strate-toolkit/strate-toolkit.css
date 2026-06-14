@@ -1,7 +1,10 @@
 .strate-toolkit {
     padding-block: 10rem 6rem;
+    --list-columns: 3;
 
-    --nb-columns: 3;
-  
-
+    .slider {
+        grid-column: ctr;
+        --nb: 2;
+        --offset: 10rem;
+    }
 }

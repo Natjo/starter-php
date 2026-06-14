@@ -1,8 +1,6 @@
 .list {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(var(--nb-columns, 1), 1fr);  
-    gap: var(--gap);
+    grid-template-columns: repeat(var(--list-columns, 1), 1fr);
+    gap: var(--list-gap, var(--gap));
 }
-
-

@@ -1,12 +1,59 @@
+@property --news-grad-angle {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 302deg;
+}
+
+@property --news-grad-stop {
+    syntax: "<percentage>";
+    inherits: false;
+    initial-value: 72.88%;
+}
+
+@property --news-grad-top-alpha {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 0;
+}
+
+@property --news-grad-bottom-alpha {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 0;
+}
+
+@property --news-surface-alpha {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 0;
+}
+
 .card-news {
+    --news-grad-angle: 302deg;
+    --news-grad-stop: 72.88%;
+    --news-grad-top-alpha: 0;
+    --news-grad-bottom-alpha: 0;
+    --news-surface-alpha: 0;
+
     border-top: var(--border);
-    padding: 3.2rem 2.4rem 3.2rem 0;
+    background: linear-gradient(var(--news-grad-angle),
+            rgba(255, 255, 255, var(--news-grad-top-alpha)) var(--news-grad-stop),
+            rgba(255, 255, 255, var(--news-grad-bottom-alpha)) 100%),
+        rgba(255, 255, 255, var(--news-surface-alpha));
+    transition:
+        --news-grad-angle 0.3s ease,
+        --news-grad-stop 0.3s ease,
+        --news-grad-top-alpha 0.3s ease,
+        --news-grad-bottom-alpha 0.3s ease,
+        --news-surface-alpha 0.3s ease;
 
     .card-content {
         position: relative;
         display: flex;
         flex-direction: column;
         gap: 1.2rem;
+        padding: 3.2rem 2.4rem 3.2rem 3.2rem;
+        box-sizing: border-box;
     }
 
     .card-header {
@@ -21,6 +68,7 @@
         line-height: 1.2rem;
         font-weight: 400;
         text-transform: uppercase;
+        transition: color .3s ease;
     }
 
     .text {
@@ -29,7 +77,20 @@
 
     .icon {
         position: absolute;
-        top: 0;
-        right: 0;
+        top: 3.2rem;
+        right: 2.4rem;
+         transition: stroke .3s ease;
+    }
+
+    &:hover {
+        --news-grad-bottom-alpha: 0.1;
+        --news-surface-alpha: 0.07;
+
+        .icon{
+            stroke: var(--color-1)
+        }
+        .source{
+             color: var(--color-1)
+        }
     }
 }

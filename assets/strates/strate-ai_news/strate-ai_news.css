@@ -1,5 +1,5 @@
 .strate-ai_news {
-    --nb-columns: 1;
+    --list-columns: 1;
     padding-block: 10rem 6rem;
 
 
@@ -14,4 +14,8 @@
     background-blend-mode: normal,
         lighten,
         normal;
+
+        .list{
+            --list-gap: 0;
+        }
 }

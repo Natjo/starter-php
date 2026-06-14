@@ -15,6 +15,7 @@ function Slider(slider) {
     const btnPrev = slider.querySelector(".prev");
     const statusEl = slider.querySelector("[data-slider-status]");
     const paginationEl = slider.querySelector("[data-slider-pagination]");
+    const timelineEl = slider.querySelector("[data-slider-timeline]");
     const measureEl = slider.querySelector(".slider-wrapper") || slider;
     if (!content || !items.length) return;
 
@@ -45,6 +46,15 @@ function Slider(slider) {
 
     const api = this;
     const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
+
+    const updateTimeline = () => {
+        if (!timelineEl) return;
+        const scrollableWidth = s.contentWidth - s.viewportWidth;
+        const progress = s.disabled || scrollableWidth <= 0
+            ? 1
+            : clamp(content.scrollLeft / scrollableWidth, 0, 1);
+        timelineEl.style.setProperty("--slider-progress", progress);
+    };
 
     const updateControls = () => {
         btnPrev?.setAttribute("aria-disabled", s.index <= 0);
@@ -122,6 +132,7 @@ function Slider(slider) {
                 : clamp(nextIndex, 0, s.maxIndex);
 
         const p = scrollLeft * 100 / (s.contentWidth - s.viewportWidth || 1);
+        updateTimeline();
         const now = performance.now();
 
         if (clampedIndex !== s.index) {
@@ -214,9 +225,10 @@ function Slider(slider) {
         // Use the same coordinate space for both left/right: viewport rect from getBoundingClientRect().
         // This avoids Firefox inconsistencies when side panels/scrollbars affect clientWidth/innerWidth.
         const viewportRect = slider.ownerDocument.documentElement.getBoundingClientRect();
-        s.left = Math.round(bound.left - viewportRect.left);
+        s.left = Math.max(0, Math.floor(bound.left - viewportRect.left));
+        const right = Math.max(0, Math.floor(viewportRect.right - bound.right));
         slider.style.setProperty("--left", `${s.left}px`);
-        slider.style.setProperty("--right", `${Math.round(viewportRect.right - bound.right)}px`);
+        slider.style.setProperty("--right", `${right}px`);
         s.contentWidth = content.scrollWidth;
         s.viewportWidth = content.offsetWidth;
 
@@ -225,6 +237,7 @@ function Slider(slider) {
         slider.classList[s.disabled ? "add" : "remove"]("disable");
         updateControls();
         buildPagination();
+        updateTimeline();
     };
 
     const onResize = () => {

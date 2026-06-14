@@ -3,16 +3,18 @@ $slider_items = $params[0] ?? null;
 if (empty($slider_items) || !is_array($slider_items)) return;
 $slider_is_list = array_keys($slider_items) === range(0, count($slider_items) - 1);
 if (!$slider_is_list) $slider_items = [$slider_items];
-$args = normalize_args([
+$slider_options = is_array($params[2] ?? null) ? $params[2] : [];
+$args = normalize_args($slider_options, [
     "items" => $slider_items,
     "card" => array_key_exists(1, $params) ? $params[1] : "card-news",
-    "classes" => $params[2] ?? "",
+    "classes" => is_array($params[2] ?? null) ? "" : ($params[2] ?? ""),
     "navigation" => $params[3] ?? true,
     "pagination" => $params[4] ?? true,
     "aria_label" => $params[5] ?? "Carrousel",
     "prev_label" => $params[6] ?? "Diapositive précédente",
     "next_label" => $params[7] ?? "Diapositive suivante",
     "pagination_label" => $params[8] ?? "Navigation du carrousel",
+    "timeline" => $params[9] ?? false,
 ]);
 $text = static fn(mixed $value): string => is_scalar($value) ? trim((string) $value) : "";
 $items = !empty($args["items"]) && is_array($args["items"]) ? $args["items"] : [];
@@ -25,6 +27,7 @@ $card = array_key_exists("card", $args) && $args["card"] === null
     : (!empty($args["card"]) ? (string) $args["card"] : "card-news");
 $navigation  = !empty($args["navigation"]) ? true : false;
 $pagination  = !empty($args["pagination"]) ? true : false;
+$timeline    = !empty($args["timeline"]) ? true : false;
 $classes     = component::classes("slider", $args["classes"] ?? "");
 $aria_label  = $text($args["aria_label"] ?? "");
 $prev_label  = $text($args["prev_label"] ?? "");
@@ -74,6 +77,12 @@ if (empty($items)) return;
 
     <?php if ($pagination) : ?>
         <nav class="slider-pagination" aria-label="<?= esc_attr($pagination_label) ?>" data-slider-pagination></nav>
+    <?php endif ?>
+
+    <?php if ($timeline) : ?>
+        <div class="slider-timeline" aria-hidden="true" data-slider-timeline>
+            <span class="slider-timeline-progress"></span>
+        </div>
     <?php endif ?>
 
     <div id="<?= esc_attr($status_id) ?>" class="sr-only" aria-live="polite" aria-atomic="true" data-slider-status></div>

@@ -254,26 +254,8 @@
                     "target" => "_blank",
                 ]
             ],
-            [
-                "suptitle" => "Training",
-                "title" => "AI FUNDAMENTALS WORKSHOP",
-                "text" => "<p>A 2-hour interactive session covering prompt engineering, tool selection, and ethical AI use for creative teams.</p>",
-                "link" => [
-                    "title" => "",
-                    "url" => "",
-                    "target" => "_blank",
-                ]
-            ],
-            [
-                "suptitle" => "Training",
-                "title" => "AI FUNDAMENTALS WORKSHOP",
-                "text" => "<p>A 2-hour interactive session covering prompt engineering, tool selection, and ethical AI use for creative teams.</p>",
-                "link" => [
-                    "title" => "",
-                    "url" => "",
-                    "target" => "_blank",
-                ]
-            ],
+           
+           
         ]
     ]);
     ?>

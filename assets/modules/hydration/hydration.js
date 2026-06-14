@@ -11,10 +11,11 @@ const moduleCandidates = (moduleName) => {
     const parts = moduleName.split('/').filter(Boolean);
     const last = parts[parts.length - 1];
 
-    return [
-        last ? `${moduleName}/${last}` : null,
-        moduleName,
-    ].filter(Boolean);
+    if (parts.length >= 2 && last) {
+        return [`${moduleName}/${last}`];
+    }
+
+    return [moduleName].filter(Boolean);
 };
 
 const importModule = async (moduleName) => {

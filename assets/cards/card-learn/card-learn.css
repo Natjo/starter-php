@@ -1,20 +1,69 @@
+@property --learn-grad-angle {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 302deg;
+}
+
+@property --learn-grad-stop {
+    syntax: "<percentage>";
+    inherits: false;
+    initial-value: 72.88%;
+}
+
+@property --learn-grad-top-alpha {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 0;
+}
+
+@property --learn-grad-bottom-alpha {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 0.1;
+}
+
+@property --learn-surface-alpha {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 0;
+}
+
 .card-learn {
-        padding: 2.4rem;
-        box-sizing: border-box;
+    --learn-grad-angle: 302deg;
+    --learn-grad-stop: 72.88%;
+    --learn-grad-top-alpha: 0;
+    --learn-grad-bottom-alpha: 0.1;
+    --learn-surface-alpha: 0;
+
+    padding: 2.4rem;
+    box-sizing: border-box;
     border-radius: 4.7px;
     border: 1px solid rgba(190, 190, 190, 0.25);
     border: 1px solid color(display-p3 0.7451 0.7451 0.7451 / 0.25);
-    background: linear-gradient(302deg, rgba(255, 255, 255, 0.20) 72.88%, rgba(255, 255, 255, 0.10) 100%);
-    background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color(display-p3 1 1 1 / 0.10) 100%);
-∑
+
+    background: linear-gradient(
+            var(--learn-grad-angle),
+            rgba(255, 255, 255, var(--learn-grad-top-alpha)) var(--learn-grad-stop),
+            rgba(255, 255, 255, var(--learn-grad-bottom-alpha)) 100%
+        ),
+        rgba(255, 255, 255, var(--learn-surface-alpha));
+    transition:
+        --learn-grad-angle 0.3s ease,
+        --learn-grad-stop 0.3s ease,
+        --learn-grad-top-alpha 0.3s ease,
+        --learn-grad-bottom-alpha 0.3s ease,
+        --learn-surface-alpha 0.3s ease;
+
     .card-content {
         position: relative;
         display: flex;
 
         flex-direction: column;
         justify-content: space-between;
-        min-height: 33rem;align-self: stretch;
+        min-height: 33rem;
+        align-self: stretch;
     }
+
     .title {
         margin-top: 2.4rem;
     }
@@ -25,15 +74,13 @@
         opacity: .8;
     }
 
-    .icon{
+    .icon {
         position: absolute;
         top: 0;
         right: 0;
     }
 
-    &:hover{
-
-background: linear-gradient(302deg, rgba(255, 255, 255, 0.20) 72.88%, rgba(255, 255, 255, 0.10) 100%), rgba(255, 255, 255, 0.07);
-background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color(display-p3 1 1 1 / 0.10) 100%), color(display-p3 1 1 1 / 0.07);
+    &:hover {
+        --learn-surface-alpha: 0.07;
     }
 }

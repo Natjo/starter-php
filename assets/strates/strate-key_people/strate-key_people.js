@@ -1,5 +1,5 @@
 import { ScrollDriver, style, stagger } from "@modules/scrollDriver";
-import textAnimated from "@modules/textAnimated/textAniimated.js";
+import textAnimated from "@modules/textAnimated";
 
 export default el => {
 

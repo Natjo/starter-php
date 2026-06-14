@@ -8,7 +8,6 @@
     gap: 2rem;
     min-height: var(--header-height);
     padding-inline: var(--ctr-offset);
-    backdrop-filter: blur(1px);
     color: #fff;
     z-index: 100;
 

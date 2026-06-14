@@ -1,15 +1,14 @@
-import { ScrollDriver, style, stagger } from "@modules/scrollDriver/scrollDriver";
-import textAnimated from "@modules/textAnimated/textAniimated.js";
+import textAnimated from "@modules/textAnimated";
+import Slider from "@components/slider";
 
 export default el => {
-
     textAnimated(el);
 
+    const sliderEl = el.querySelector(".slider"); 
+    const slider = new Slider(sliderEl);
+    slider?.add?.();
 
-     
-     // restore
-     return () => {
-    
-        
+    return () => {
+        slider?.remove?.();
     };
-}
+};

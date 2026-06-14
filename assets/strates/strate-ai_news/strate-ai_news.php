@@ -4,9 +4,9 @@ $args = normalize_args($args ?? null);
 
 <section <?= options("strate strate-ai_news", $args) ?>>
     <div class="strate-content">
-       
-        <div class='strate-header'> 
-            <?php component::eyebrow($args); ?>
+
+        <div class='strate-header'>
+            <?php component::eyebrow($args, "hasicon"); ?>
             <?php component::title($args, 2, "title-2"); ?>
         </div>
 

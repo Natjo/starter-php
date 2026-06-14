@@ -45,7 +45,9 @@ const excludedCopyDirs = new Set([...templateSourceDirs, 'modules', 'pages', 'st
 const importAliases = {
     'common': path.join(src, 'common'),
     '@common': path.join(src, 'common'),
+    '@components/slider': path.join(src, 'components', 'slider', 'slider.js'),
     '@components': path.join(src, 'components'),
+    '@modules/textAnimated': path.join(src, 'modules', 'textAnimated', 'textAnimated.js'),
     '@modules': path.join(src, 'modules'),
     '@vendors': path.join(src, 'vendors'),
 };
@@ -131,7 +133,9 @@ const bundleGroupForRelativeCss = file => {
 };
 
 const resolveAliasImport = specifier => {
-    const alias = Object.keys(importAliases).find(name => specifier === name || specifier.startsWith(`${name}/`));
+    const aliasKeys = Object.keys(importAliases);
+    const exactAlias = aliasKeys.find(name => specifier === name);
+    const alias = exactAlias || aliasKeys.find(name => specifier.startsWith(`${name}/`));
 
     if (!alias) return null;
 
@@ -148,7 +152,7 @@ const resolveAliasImport = specifier => {
         path.join(target, `${path.basename(target)}.js`),
     ];
 
-    return candidates.find(candidate => fs.existsSync(candidate) && fs.statSync(candidate).isFile()) || null;
+    return candidates.find(candidate => fs.existsSync(candidate) && fs.statSync(candidate).isFile()) || resolveDirectoryJsEntry(target);
 };
 
 const relativeImport = (from, to) => {
@@ -163,6 +167,18 @@ const fileHash = file => crypto
     .slice(0, 10);
 
 const stripQuery = specifier => specifier.split('?')[0].split('#')[0];
+
+const resolveDirectoryJsEntry = target => {
+    if (!fs.existsSync(target) || !fs.statSync(target).isDirectory()) return null;
+
+    const files = fs.readdirSync(target)
+        .filter(entry => ['.js', '.mjs'].includes(path.extname(entry)))
+        .map(entry => path.join(target, entry))
+        .filter(file => fs.statSync(file).isFile())
+        .sort();
+
+    return files.length === 1 ? files[0] : null;
+};
 
 const resolveJsImport = (from, specifier) => resolveAliasImport(specifier) || resolveRelativeJsImport(from, specifier);
 
@@ -181,7 +197,7 @@ const resolveRelativeJsImport = (from, specifier) => {
         path.join(target, `${path.basename(target)}.js`),
     ];
 
-    return candidates.find(candidate => fs.existsSync(candidate) && fs.statSync(candidate).isFile()) || null;
+    return candidates.find(candidate => fs.existsSync(candidate) && fs.statSync(candidate).isFile()) || resolveDirectoryJsEntry(target);
 };
 
 const jsVersionHash = file => {

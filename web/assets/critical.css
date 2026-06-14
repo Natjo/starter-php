@@ -266,7 +266,8 @@ body {
     }
 }
 */
-/*
+
+/**/
 .sr-only {
     position: absolute;
     width: 1px;
@@ -277,7 +278,7 @@ body {
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
-}*/
+}
 
 /* SequelSans */
 @font-face {
@@ -700,7 +701,6 @@ body {
     gap: 2rem;
     min-height: var(--header-height);
     padding-inline: var(--ctr-offset);
-    backdrop-filter: blur(1px);
     color: #fff;
     z-index: 100;
 
