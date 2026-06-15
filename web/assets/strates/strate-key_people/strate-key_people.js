@@ -4,7 +4,6 @@ export default el => {
   var _ref, _lenis$animatedScroll;
   textAnimated(el);
   const list = el.querySelector('.list');
-  if (!list) return;
   const images = el.querySelector('.images');
   const driver = new ScrollDriver();
   driver.add(el, [0, 50], e => {
@@ -12,7 +11,7 @@ export default el => {
       stagger(list, val, {
         softness: 0.2
       });
-      if (images) stagger(images, val, {
+      stagger(images, val, {
         selector: "img"
       });
     });

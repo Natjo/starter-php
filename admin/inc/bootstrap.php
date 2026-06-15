@@ -48,6 +48,7 @@ function admin_pretty_page_routes(): array
         'seo' => 'seo',
         'images' => 'images',
         'webp' => 'webp',
+        'icons' => 'icons',
     ];
 }
 

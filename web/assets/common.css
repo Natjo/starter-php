@@ -860,7 +860,7 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
             color(display-p3 0 0 0.0902 / 0) 22.57%,
             color(display-p3 0 0 0.0902 / 0) 77.37%,
             color(display-p3 0 0 0.0902) 95.64%),
-        url("../../../../../assets/img/backgrounds/bg-1.jpg") center / cover no-repeat,
+        url("../../../../../../../../assets/img/backgrounds/bg-1.jpg") center / cover no-repeat,
         var(--color-bg);
 
     background-blend-mode: normal,
@@ -927,7 +927,7 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
         color(display-p3 0 0 0.0902 / 0) 22.57%,
         color(display-p3 0 0 0.0902 / 0) 77.37%,
         color(display-p3 0 0 0.0902) 95.64%),
-    url("../../../../../assets/img/backgrounds/bg-2.jpg") center / cover no-repeat,
+    url("../../../../../../../../assets/img/backgrounds/bg-2.jpg") center / cover no-repeat,
     var(--color-bg);
 
     background-blend-mode: normal,
@@ -1001,13 +1001,13 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
         --list-columns: 4;
     }
 
-    /*background: transparent url("../../../../../assets/img/backgrounds/bg-1.jpg") center center / cover no-repeat; */
+    /*background: transparent url("../../../../../../../../assets/img/backgrounds/bg-1.jpg") center center / cover no-repeat; */
 
 
 
 
 
-    background:url("../../../../../assets/img/backgrounds/bg-2.jpg") center / cover no-repeat,
+    background:url("../../../../../../../../assets/img/backgrounds/bg-2.jpg") center / cover no-repeat,
     var(--color-bg);
 }
 .strate-our_foundations {
@@ -1153,7 +1153,7 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
         }
     }
 
-    background: url("../../../../../assets/img/backgrounds/bg-2.jpg") center / cover no-repeat,
+    background: url("../../../../../../../../assets/img/backgrounds/bg-2.jpg") center / cover no-repeat,
     var(--color-bg);
 
     background-blend-mode: lighten,

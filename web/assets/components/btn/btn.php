@@ -1,4 +1,5 @@
 <?php
+$params = isset($params) && is_array($params) ? $params : [];
 $args = $params[0] ?? null;
 if (is_string($args)) $args = ["name" => $args];
 if (!is_array($args)) return;
@@ -50,7 +51,7 @@ if ($link) {
     $rel = $target_value === "_blank" && !$has_rel ? ' rel="noopener noreferrer"' : "";
 ?>
 
-    <a href="<?= esc_url($url) ?>" class="<?= $classes ?>"<?= $attributes . $target . $rel ?>><?php if ($icon) component::icon(...$icon); ?><span><?= esc_html($title) ?></span></a>
+    <a href="<?= esc_url($url) ?>" class="<?= $classes ?>"<?= $attributes . $target . $rel ?>><span><?= esc_html($title) ?></span><?php if ($icon) component::icon(...$icon); ?></a>
 <?php
     return;
 }
@@ -62,4 +63,4 @@ $has_type = is_array($raw_attributes)
     : (is_string($raw_attributes) && preg_match('/\btype\s*=/i', $raw_attributes));
 ?>
 
-<button<?= $has_type ? "" : ' type="button"' ?> class="<?= $classes ?>"<?= $attributes ?>><?php if ($icon) component::icon(...$icon); ?><span><?= esc_html($name) ?></span></button>
+<button<?= $has_type ? "" : ' type="button"' ?> class="<?= $classes ?>"<?= $attributes ?>><span><?= esc_html($name) ?></span><?php if ($icon) component::icon(...$icon); ?></button>

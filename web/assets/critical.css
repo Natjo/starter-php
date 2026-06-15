@@ -665,6 +665,10 @@ body {
         background: var(--color-1);
         color: var(--color-text-invert);
     }
+
+    &:has(.icon){
+        
+    }
 }
 
 .link {

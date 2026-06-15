@@ -1,6 +1,6 @@
 # Select lang
 
-Affiche un sélecteur compact qui redirige vers la version choisie de la page.
+Affiche un bouton compact qui ouvre une liste de liens vers les langues disponibles.
 
 ```php
 component::select_lang([
@@ -13,7 +13,8 @@ component::select_lang([
 
 - `languages` ou `args` : liste des langues.
 - `label` : libellé accessible du sélecteur.
-- `name` : nom du champ.
 - `classes` et `attributes` : classes et attributs HTML supplémentaires.
 
 Chaque langue accepte `code`, `label`, `url`, `current` ou `selected`, et `disabled`.
+
+Le composant n'utilise pas de `<select>`. La langue courante est affichée dans le bouton et marquée avec `aria-current="page"` dans la liste.

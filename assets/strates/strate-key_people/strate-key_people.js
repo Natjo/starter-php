@@ -6,13 +6,13 @@ export default el => {
     textAnimated(el);
 
     const list = el.querySelector('.list');
-    if (!list) return;
     const images = el.querySelector('.images');
+    
     const driver = new ScrollDriver();
     driver.add(el, [0, 50], e => {
         e.timeline(0, 100, val => {
             stagger(list, val, { softness: 0.2 });
-            if (images) stagger(images, val, { selector: "img" });
+            stagger(images, val, { selector: "img" });
         });
     });
 

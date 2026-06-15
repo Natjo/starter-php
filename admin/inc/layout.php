@@ -26,6 +26,7 @@ function admin_render_layout(array $view): void
         ],
         'Outils' => [
             'webp' => 'WebP',
+            'icons' => 'Icons',
         ],
         'Projet' => [
             'specifications' => 'Specifications',
@@ -87,6 +88,8 @@ function admin_render_layout(array $view): void
             $activePage = 'images';
         } elseif ($adminRoute === 'webp') {
             $activePage = 'webp';
+        } elseif ($adminRoute === 'icons') {
+            $activePage = 'icons';
         } elseif ($adminRoute === 'specification' || str_starts_with($adminRoute, 'specification/')) {
             $activePage = 'specifications';
         }

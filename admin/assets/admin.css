@@ -562,10 +562,15 @@ textarea {
 }
 
 .admin-webp-preview img {
+    --zoom-x: 50%;
+    --zoom-y: 50%;
     display: block;
     width: 100%;
     max-height: 36rem;
     object-fit: contain;
+    transform: scale(1);
+    transform-origin: var(--zoom-x) var(--zoom-y);
+    transition: transform 180ms ease, opacity 160ms ease;
 }
 
 .admin-webp-preview-status {
@@ -582,6 +587,17 @@ textarea {
 
 .admin-webp-preview.is-processing img {
     opacity: 0.65;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .admin-webp-preview.has-image {
+        cursor: zoom-in;
+    }
+
+    .admin-webp-preview.has-image.is-zoomed:not(.is-dragging):not(.is-processing) img {
+        transform: scale(2);
+        cursor: zoom-out;
+    }
 }
 
 .admin-webp-controls {
@@ -1064,5 +1080,223 @@ textarea {
 
     .admin-webp-preview {
         min-height: 18rem;
+    }
+}
+
+.admin-icons {
+    --icons-line: color-mix(in srgb, var(--admin-border) 78%, transparent);
+}
+
+.admin-icons-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.admin-icons-header h1,
+.admin-icons-add h2 {
+    margin: 0;
+}
+
+.admin-icons-header p:not(.admin-eyebrow) {
+    margin-bottom: 0;
+}
+
+.admin-icons-count {
+    flex: 0 0 auto;
+    padding: 0.55rem 0.8rem;
+    border: 1px solid var(--icons-line);
+    border-radius: 999px;
+    background: var(--admin-panel);
+    font-weight: 700;
+}
+
+.admin-icons-definitions {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+.admin-icons-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(17rem, 22rem);
+    align-items: start;
+    gap: 1.5rem;
+}
+
+.admin-icons-library,
+.admin-icons-add {
+    border: 1px solid var(--icons-line);
+    border-radius: 1rem;
+    background: var(--admin-panel);
+}
+
+.admin-icons-library {
+    padding: 1rem;
+}
+
+.admin-icons-toolbar {
+    margin-bottom: 1rem;
+}
+
+.admin-icons-search,
+.admin-icons-add label {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.admin-icons-search span,
+.admin-icons-add label span {
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.admin-icons-search input {
+    width: min(100%, 34rem);
+}
+
+.admin-icons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    gap: 0.8rem;
+}
+
+.admin-icon-card {
+    display: grid;
+    grid-template-rows: 9rem auto auto;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--icons-line);
+    border-radius: 0.8rem;
+}
+
+.admin-icon-card[hidden] {
+    display: none;
+}
+
+.admin-icon-preview {
+    display: grid;
+    place-items: center;
+    padding: 1.25rem;
+    color: #13151b;
+    background-color: #f2f3f5;
+    background-image:
+        linear-gradient(45deg, #e4e6ea 25%, transparent 25%),
+        linear-gradient(-45deg, #e4e6ea 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #e4e6ea 75%),
+        linear-gradient(-45deg, transparent 75%, #e4e6ea 75%);
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+    background-size: 16px 16px;
+}
+
+.admin-icon-preview svg {
+    width: 100%;
+    height: 100%;
+    max-width: 7rem;
+    max-height: 6rem;
+    overflow: visible;
+}
+
+.admin-icon-meta {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.8rem;
+}
+
+.admin-icon-meta code {
+    overflow: hidden;
+    font-weight: 800;
+    text-overflow: ellipsis;
+}
+
+.admin-icon-meta small {
+    color: var(--admin-muted);
+}
+
+.admin-icon-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0 0.8rem 0.8rem;
+}
+
+.admin-icon-actions form {
+    margin: 0;
+}
+
+.admin-icon-actions .admin-button.is-danger {
+    border-color: rgba(141, 42, 42, 0.4);
+    background: transparent;
+    color: #8d2a2a;
+}
+
+.admin-icons-add {
+    position: sticky;
+    top: 1.5rem;
+    padding: 1.25rem;
+}
+
+.admin-icons-add > p {
+    line-height: 1.55;
+}
+
+.admin-icons-add form {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.25rem;
+}
+
+.admin-icons-backup {
+    margin: 1.25rem 0 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--icons-line);
+    color: var(--admin-muted);
+    font-size: 0.85rem;
+}
+
+.admin-icons-empty {
+    margin: 0;
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+@media (max-width: 980px) {
+    .admin-icons-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-icons-add {
+        position: static;
+        grid-row: 1;
+    }
+}
+
+@media (max-width: 600px) {
+    .admin-icons-header {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .admin-icons-count {
+        justify-self: start;
+    }
+
+    .admin-icons-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-icon-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .admin-icon-actions form,
+    .admin-icon-actions button {
+        width: 100%;
     }
 }

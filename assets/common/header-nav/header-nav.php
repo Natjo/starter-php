@@ -57,9 +57,14 @@ $current = trim(parse_url($_SERVER["REQUEST_URI"] ?? "/", PHP_URL_PATH), "/");
         <?php endforeach; ?>
     </nav>
 
-    <?php component::btn(["name" => "Access Dust", "classes" => "btn-1"]); ?>
+    <?php component::btn("Access Dust", "btn-1", ["blank", 16, 16]); ?>
 
     <button class="btn-nav" type="button" aria-expanded="false" aria-controls="nav">
         Menu
     </button>
+
+    <?php component::select_lang([
+        ["code" => "fr", "label" => "FR", "url" => "/fr/", "current" => true],
+        ["code" => "en", "label" => "EN", "url" => "/en/"],
+    ]); ?>
 </header>

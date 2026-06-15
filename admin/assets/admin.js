@@ -347,6 +347,7 @@ const initWebpTool = () => {
         previewUrl = URL.createObjectURL(file);
         image.src = previewUrl;
         image.hidden = false;
+        dropzone.classList.add("has-image");
 
         if (meta instanceof HTMLElement) {
             if (metaName instanceof HTMLElement) metaName.textContent = file.name;
@@ -475,6 +476,27 @@ const initWebpTool = () => {
         if (file) loadFile(file);
     });
 
+    dropzone.addEventListener("pointermove", (event) => {
+        if (event.pointerType !== "mouse" || image.hidden || dropzone.classList.contains("is-dragging")) {
+            return;
+        }
+
+        const rect = image.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) return;
+
+        const x = Math.max(0, Math.min(100, ((event.clientX - rect.left) / rect.width) * 100));
+        const y = Math.max(0, Math.min(100, ((event.clientY - rect.top) / rect.height) * 100));
+        image.style.setProperty("--zoom-x", `${x}%`);
+        image.style.setProperty("--zoom-y", `${y}%`);
+        dropzone.classList.add("is-zoomed");
+    });
+
+    dropzone.addEventListener("pointerleave", () => {
+        dropzone.classList.remove("is-zoomed");
+        image.style.removeProperty("--zoom-x");
+        image.style.removeProperty("--zoom-y");
+    });
+
     if (quality instanceof HTMLInputElement && qualityOutput instanceof HTMLOutputElement) {
         quality.addEventListener("input", () => {
             qualityOutput.value = quality.value;
@@ -510,3 +532,57 @@ const initWebpTool = () => {
 };
 
 initWebpTool();
+
+const initIconsTool = () => {
+    const search = document.querySelector("[data-icons-search]");
+    const cards = [...document.querySelectorAll("[data-icon-card]")];
+    const empty = document.querySelector("[data-icons-empty]");
+
+    if (search instanceof HTMLInputElement && cards.length) {
+        search.addEventListener("input", () => {
+            const query = search.value.trim().toLowerCase();
+            let visibleCount = 0;
+
+            cards.forEach((card) => {
+                if (!(card instanceof HTMLElement)) return;
+                const visible = (card.dataset.iconId || "").includes(query);
+                card.hidden = !visible;
+                visibleCount += visible ? 1 : 0;
+            });
+
+            if (empty instanceof HTMLElement) {
+                empty.hidden = visibleCount !== 0;
+            }
+        });
+    }
+
+    document.querySelectorAll("[data-copy-icon]").forEach((button) => {
+        button.addEventListener("click", async () => {
+            if (!(button instanceof HTMLButtonElement)) return;
+            const iconId = button.dataset.copyIcon || "";
+
+            try {
+                await navigator.clipboard.writeText(iconId);
+                const initialLabel = button.textContent;
+                button.textContent = "ID copie";
+                window.setTimeout(() => {
+                    button.textContent = initialLabel;
+                }, 1400);
+            } catch (error) {
+                window.prompt("Copiez l identifiant :", iconId);
+            }
+        });
+    });
+
+    document.querySelectorAll("[data-icon-delete-form]").forEach((form) => {
+        form.addEventListener("submit", (event) => {
+            if (!(form instanceof HTMLFormElement)) return;
+            const iconName = form.dataset.iconName || "";
+            if (!window.confirm(`Supprimer definitivement l icone "${iconName}" ?`)) {
+                event.preventDefault();
+            }
+        });
+    });
+};
+
+initIconsTool();

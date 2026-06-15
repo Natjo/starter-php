@@ -97,6 +97,7 @@ function admin_page_file($uri): string
         'seo',
         'images',
         'webp',
+        'icons',
     ];
 
     if (in_array($route, $simpleRoutes, true)) {
