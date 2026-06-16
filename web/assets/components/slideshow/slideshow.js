@@ -5,11 +5,12 @@ export default el => {
   const INTERVAL = parseInt(el.dataset.interval, 10) || 3000;
   const DURATION = parseInt(el.dataset.duration, 10) || 700;
   const OFFSET = 20;
+  const easeOut = t => 1 - Math.pow(1 - t, 4);
   el.style.setProperty("--slideshow-duration", `${DURATION}ms`);
   let current = 0;
   let stopped = false;
   let timerId = null;
-  let finalizeId = null;
+  let rafId = null;
   const loadSlide = index => new Promise(resolve => {
     const slide = slides[index];
     slide.querySelectorAll("[data-srcset]").forEach(node => {
@@ -33,27 +34,47 @@ export default el => {
     img.addEventListener("load", done);
     img.addEventListener("error", done);
   });
-  const wipeTo = upcoming => new Promise(resolve => {
+  const animateWidth = (slide, from, to) => new Promise(resolve => {
+    const start = performance.now();
+    const tick = now => {
+      if (stopped) {
+        resolve();
+        return;
+      }
+      const t = Math.min(1, (now - start) / DURATION);
+      const value = from + (to - from) * easeOut(t);
+      slide.style.setProperty("--width", `${value}%`);
+      if (t < 1) {
+        rafId = requestAnimationFrame(tick);
+        return;
+      }
+      rafId = null;
+      resolve();
+    };
+    rafId = requestAnimationFrame(tick);
+  });
+  const wipeTo = async upcoming => {
     slides.forEach(slide => slide.style.zIndex = "0");
     slides[upcoming].style.zIndex = "1";
     slides[current].style.zIndex = "2";
+    const outgoing = slides[current];
     const incoming = slides[upcoming];
+    outgoing.style.transition = "none";
+    outgoing.style.setProperty("--width", "100%");
     incoming.style.setProperty("--width", "100%");
-    incoming.style.transition = "none";
+    incoming.style.transition = `transform ${DURATION}ms ease-out`;
     incoming.style.transform = `translateX(${OFFSET}px)`;
     void incoming.offsetWidth;
-    incoming.style.transition = "";
-    slides[current].style.setProperty("--width", "0%");
     incoming.style.transform = "translateX(0px)";
-    finalizeId = window.setTimeout(() => {
-      slides[current].style.zIndex = "0";
-      slides[current].style.setProperty("--width", "100%");
-      slides[current].style.transform = "";
-      current = upcoming;
-      slides[current].style.zIndex = "2";
-      resolve();
-    }, DURATION);
-  });
+    await animateWidth(outgoing, 100, 0);
+    if (stopped) return;
+    outgoing.style.zIndex = "0";
+    outgoing.style.setProperty("--width", "100%");
+    outgoing.style.transform = "";
+    outgoing.style.transition = "";
+    current = upcoming;
+    slides[current].style.zIndex = "2";
+  };
   const tick = async () => {
     if (stopped) return;
     const upcoming = (current + 1) % N;
@@ -71,7 +92,7 @@ export default el => {
   return () => {
     stopped = true;
     window.clearTimeout(timerId);
-    window.clearTimeout(finalizeId);
+    if (rafId != null) cancelAnimationFrame(rafId);
     slides.forEach(slide => {
       slide.style.removeProperty("z-index");
       slide.style.removeProperty("--width");

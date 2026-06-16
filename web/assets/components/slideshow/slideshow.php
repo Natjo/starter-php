@@ -3,8 +3,8 @@ $slides = $params[0] ?? null;
 if (!is_array($slides) || count($slides) < 1) return;
 
 $options = is_array($params[1] ?? null) ? $params[1] : [];
-$interval = isset($options["interval"]) ? (int) $options["interval"] : 3000;
-$duration = isset($options["duration"]) ? (int) $options["duration"] : 700;
+$interval = isset($options["interval"]) ? (int) $options["interval"] : 4000;
+$duration = isset($options["duration"]) ? (int) $options["duration"] : 1600;
 $classes = component::classes("slideshow", $options["classes"] ?? "");
 $attributes = component::attributes($options["attributes"] ?? []);
 ?>

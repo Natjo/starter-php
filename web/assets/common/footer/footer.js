@@ -1,5 +1,6 @@
 import { ScrollDriver } from "../../modules/scrollDriver/scrollDriver.js";
 export default el => {
+  var _ref, _lenis$animatedScroll;
   const canvas = el.querySelector("canvas");
   if (!canvas) return;
   const base = canvas.dataset.framesBase;
@@ -99,18 +100,23 @@ export default el => {
   };
   driver.add(el, "bottom-bottom", e => {
     e.timeline(80, 100, val => {
-      target = clamp(val / 100);
+      target = clamp(val);
       requestTick();
     });
   });
   driver.enable();
   resize();
   requestTick();
+  const lenis = window.lenis;
+  const onLenisScroll = instance => driver.onScroll(instance.animatedScroll);
+  lenis === null || lenis === void 0 || lenis.on("scroll", onLenisScroll);
+  driver.onScroll((_ref = (_lenis$animatedScroll = lenis === null || lenis === void 0 ? void 0 : lenis.animatedScroll) !== null && _lenis$animatedScroll !== void 0 ? _lenis$animatedScroll : window.scrollY) !== null && _ref !== void 0 ? _ref : 0);
   window.addEventListener("resize", resize);
   return () => {
     disposed = true;
     window.removeEventListener("resize", resize);
-    driver.destroy();
+    lenis === null || lenis === void 0 || lenis.off("scroll", onLenisScroll);
+    driver.disable();
     if (raf != null) cancelAnimationFrame(raf);
     images.forEach(img => {
       var _img$close;

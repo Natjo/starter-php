@@ -136,7 +136,7 @@ export default el => {
 
     driver.add(el, "bottom-bottom", e => {
         e.timeline(80, 100, val => {
-            target = clamp(val / 100);
+            target = clamp(val);
             requestTick();
         });
     });
@@ -145,12 +145,18 @@ export default el => {
     resize();
     requestTick();
 
+    const lenis = window.lenis;
+    const onLenisScroll = instance => driver.onScroll(instance.animatedScroll);
+    lenis?.on("scroll", onLenisScroll);
+    driver.onScroll(lenis?.animatedScroll ?? window.scrollY ?? 0);
+
     window.addEventListener("resize", resize);
 
     return () => {
         disposed = true;
         window.removeEventListener("resize", resize);
-        driver.destroy();
+        lenis?.off("scroll", onLenisScroll);
+        driver.disable();
 
         if (raf != null) cancelAnimationFrame(raf);
 

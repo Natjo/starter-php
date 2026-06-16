@@ -63,11 +63,10 @@
     }
 
     .title {
-        margin-top: 2.4rem;
+        margin-top: 2.4rem; margin-bottom: auto;
     }
 
     .text {
-        margin-top: auto;
         line-height: 2.2rem;
         opacity: .8;
     }
@@ -77,6 +76,11 @@
         top: 0;
         right: 0;
         transition: color .3s ease;
+    }
+
+    .icon-type{
+        margin-top: auto;
+        margin-bottom: 1.6rem;
     }
 
     &:hover {

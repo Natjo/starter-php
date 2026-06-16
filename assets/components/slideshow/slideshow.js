@@ -5,17 +5,16 @@ export default el => {
     const N = slides.length;
     const INTERVAL = parseInt(el.dataset.interval, 10) || 3000;
     const DURATION = parseInt(el.dataset.duration, 10) || 700;
-    const OFFSET = 20; // translate de la slide entrante (px)
+    const OFFSET = 20;
+    const easeOut = t => 1 - Math.pow(1 - t, 4);
 
     el.style.setProperty("--slideshow-duration", `${DURATION}ms`);
 
     let current = 0;
     let stopped = false;
     let timerId = null;
-    let finalizeId = null;
+    let rafId = null;
 
-    // Promeut les data-src / data-srcset en attributs réels et résout une fois
-    // l'image chargée (ne charge qu'une seule fois, puis résout immédiatement).
     const loadSlide = index => new Promise(resolve => {
         const slide = slides[index];
 
@@ -43,60 +42,80 @@ export default el => {
         img.addEventListener("error", done);
     });
 
-    const wipeTo = upcoming => new Promise(resolve => {
-        // Slide courante au-dessus (elle se balaye), suivante juste en dessous.
+    const animateWidth = (slide, from, to) => new Promise(resolve => {
+        const start = performance.now();
+
+        const tick = now => {
+            if (stopped) {
+                resolve();
+                return;
+            }
+
+            const t = Math.min(1, (now - start) / DURATION);
+            const value = from + (to - from) * easeOut(t);
+
+            slide.style.setProperty("--width", `${value}%`);
+
+            if (t < 1) {
+                rafId = requestAnimationFrame(tick);
+                return;
+            }
+
+            rafId = null;
+            resolve();
+        };
+
+        rafId = requestAnimationFrame(tick);
+    });
+
+    const wipeTo = async upcoming => {
         slides.forEach(slide => (slide.style.zIndex = "0"));
         slides[upcoming].style.zIndex = "1";
         slides[current].style.zIndex = "2";
 
-        // Prépare la slide entrante : décalée, sans transition (pas de saut animé).
+        const outgoing = slides[current];
         const incoming = slides[upcoming];
-        incoming.style.setProperty("--width", "100%");
-        incoming.style.transition = "none";
-        incoming.style.transform = `translateX(${OFFSET}px)`;
-        void incoming.offsetWidth; // force reflow
-        incoming.style.transition = "";
 
-        // Balayage : --width 100% -> 0 révèle la slide ; l'entrante glisse vers 0.
-        slides[current].style.setProperty("--width", "0%");
+        outgoing.style.transition = "none";
+        outgoing.style.setProperty("--width", "100%");
+
+        incoming.style.setProperty("--width", "100%");
+        incoming.style.transition = `transform ${DURATION}ms ease-out`;
+        incoming.style.transform = `translateX(${OFFSET}px)`;
+        void incoming.offsetWidth;
         incoming.style.transform = "translateX(0px)";
 
-        finalizeId = window.setTimeout(() => {
-            // Slide sortante masquée : on la renvoie derrière et on la réinitialise.
-            slides[current].style.zIndex = "0";
-            slides[current].style.setProperty("--width", "100%");
-            slides[current].style.transform = "";
+        await animateWidth(outgoing, 100, 0);
+        if (stopped) return;
 
-            current = upcoming;
-            slides[current].style.zIndex = "2";
-            resolve();
-        }, DURATION);
-    });
+        outgoing.style.zIndex = "0";
+        outgoing.style.setProperty("--width", "100%");
+        outgoing.style.transform = "";
+        outgoing.style.transition = "";
+
+        current = upcoming;
+        slides[current].style.zIndex = "2";
+    };
 
     const tick = async () => {
         if (stopped) return;
 
         const upcoming = (current + 1) % N;
 
-        // On attend que l'image soit prête (déjà préchargée en arrière-plan
-        // pendant l'affichage de la slide) avant de lancer le balayage.
         await loadSlide(upcoming);
         if (stopped) return;
 
         await wipeTo(upcoming);
         if (stopped) return;
 
-        // La nouvelle slide est active : on précharge déjà la suivante.
         loadSlide((current + 1) % N);
 
         timerId = window.setTimeout(tick, INTERVAL);
     };
 
-    // État initial : seule la 1ère slide est visible au-dessus.
     slides.forEach(slide => (slide.style.zIndex = "0"));
     slides[current].style.zIndex = "2";
 
-    // Précharge la 2ème slide dès maintenant (pendant l'affichage de la 1ère).
     loadSlide((current + 1) % N);
 
     timerId = window.setTimeout(tick, INTERVAL);
@@ -104,7 +123,7 @@ export default el => {
     return () => {
         stopped = true;
         window.clearTimeout(timerId);
-        window.clearTimeout(finalizeId);
+        if (rafId != null) cancelAnimationFrame(rafId);
         slides.forEach(slide => {
             slide.style.removeProperty("z-index");
             slide.style.removeProperty("--width");

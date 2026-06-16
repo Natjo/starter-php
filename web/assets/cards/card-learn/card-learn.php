@@ -5,6 +5,7 @@ $text = htmlspecialchars((string) ($args["text"] ?? ""), ENT_QUOTES, "UTF-8");
 $url = (string) ($args["link"]["url"] ?? "");
 $target = (string) ($args["link"]["target"] ?? "");
 $tag = $url !== "" ? "a" : "div";
+$icon = $args["icon"] ?? "";
 ?>
 
 <article class="card-learn">
@@ -12,7 +13,7 @@ $tag = $url !== "" ? "a" : "div";
         <?php component::eyebrow($args); ?>
     
         <?php component::title($args, 3, ".title-3"); ?>
-        
+        <?php component::icon($icon, 24, 24, "icon-type"); ?>
         <?php component::text($args); ?>
 
         <?php component::icon("blank", 16, 16); ?>

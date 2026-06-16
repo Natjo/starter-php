@@ -13,13 +13,15 @@
     height: 100%;
     overflow: hidden;
 
+   
+
     .slideshow-slide {
         grid-area: 1 / 1;
         width: 100%;
         height: 100%;
         --width: 100%;
         clip-path: polygon(0px 0px, var(--width) 0px, var(--width) 100%, 0px 100%);
-        transition: --width var(--slideshow-duration) ease, transform var(--slideshow-duration) ease;
+        transition: transform var(--slideshow-duration) ease-out;
     }
 
     picture {

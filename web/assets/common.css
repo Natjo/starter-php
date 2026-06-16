@@ -127,11 +127,10 @@
     }
 
     .title {
-        margin-top: 2.4rem;
+        margin-top: 2.4rem; margin-bottom: auto;
     }
 
     .text {
-        margin-top: auto;
         line-height: 2.2rem;
         opacity: .8;
     }
@@ -141,6 +140,11 @@
         top: 0;
         right: 0;
         transition: color .3s ease;
+    }
+
+    .icon-type{
+        margin-top: auto;
+        margin-bottom: 1.6rem;
     }
 
     &:hover {
@@ -354,9 +358,12 @@
 
 
         .usage-title {
+            display: flex;
+            gap: .7rem;
+            align-items: center;
             font-size: 1.2rem;
             line-height: 1.2rem;
-            font-weight: 400;
+            font-weight: 600;
             text-transform: uppercase;
         }
     }
@@ -398,10 +405,7 @@
         width: 100%;
         height: 100%;
         z-index: 1;
-        opacity: 0.6;
-        background: linear-gradient(180deg, #010118 7.33%, #010118 31.95%), #000018;
-        background: linear-gradient(180deg, color(display-p3 0.0039 0.0039 0.0902) 7.33%, color(display-p3 0.0039 0.0039 0.0902 / 0.00) 31.95%),
-            var(--color-bg);
+        background: linear-gradient(180deg, var(--color-bg) 7.33%, rgba(0,0,0,0) 31.95%, var(--color-bg)   100%);
     }
 
     canvas {
@@ -452,13 +456,14 @@
             flex-direction: column;
             gap: 1.4rem;
         }
-
     }
+
     small {
         font-size: 1.6rem;
         opacity: 0.7;
         font-weight: 300;
     }
+
     @supports (animation-timeline: view()) {
         .footer-content {
             animation: parallax 1s linear both;
@@ -759,13 +764,15 @@ border: 1px solid var(--Filets-secondaire, rgba(190, 190, 190, 0.25));
     height: 100%;
     overflow: hidden;
 
+   
+
     .slideshow-slide {
         grid-area: 1 / 1;
         width: 100%;
         height: 100%;
         --width: 100%;
         clip-path: polygon(0px 0px, var(--width) 0px, var(--width) 100%, 0px 100%);
-        transition: --width var(--slideshow-duration) ease, transform var(--slideshow-duration) ease;
+        transition: transform var(--slideshow-duration) ease-out;
     }
 
     picture {

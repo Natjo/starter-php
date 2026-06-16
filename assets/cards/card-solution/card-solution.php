@@ -15,7 +15,7 @@ $attributes = component::attributes($args["attributes"] ?? []);
             <?php component::eyebrow($suptitle); ?>
 
             <div class="card-title">
-                <?php component::icon($icon, 32, 32); ?>
+                <?php component::image($icon); ?>
 
                 <?php component::title($args, 3, "title-3"); ?>
             </div>
@@ -24,7 +24,7 @@ $attributes = component::attributes($args["attributes"] ?? []);
         <?php component::text($args, ""); ?>
 
         <div class="usage">
-            <div class="usage-title">✦ HOW TO USE</div>
+            <div class="usage-title"><?php component::icon("star", 10, 10); ?> HOW TO USE</div>
 
             <?php component::text($args["usage"] ?? ""); ?>
         </div>

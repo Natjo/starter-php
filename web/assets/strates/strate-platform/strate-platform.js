@@ -6,6 +6,7 @@ export default el => {
   style.var(el, platforms.length, "--nb-platforms");
   const driver = new ScrollDriver();
   const clamp = value => Math.max(0, Math.min(1, value));
+  const easeIn = t => Math.pow(t, 4);
   const count = platforms.length;
   const segments = Math.max(1, count - 1);
   const items = [...platforms].map(platform => ({
@@ -25,20 +26,30 @@ export default el => {
     lastProgress = clamp(progress);
     items.forEach((item, index) => {
       let perone = 0;
+      let heightFactor = 0;
       if (count === 1) {
         perone = 1;
+        heightFactor = 1;
       } else if (lastProgress >= 1) {
         perone = index === count - 1 ? 1 : 0;
+        heightFactor = index === count - 1 ? 1 : 0;
       } else if (lastProgress <= 0) {
         perone = index === 0 ? 1 : 0;
+        heightFactor = index === 0 ? 1 : 0;
       } else {
         const raw = lastProgress * segments;
         const current = Math.min(count - 2, Math.floor(raw));
         const t = raw - current;
-        if (index === current) perone = 1 - t;else if (index === current + 1) perone = t;
+        if (index === current) {
+          heightFactor = 1 - t;
+          perone = 1 - easeIn(t);
+        } else if (index === current + 1) {
+          heightFactor = t;
+          perone = easeIn(t);
+        }
       }
       style.var(item.el, perone, "--perone");
-      style.var(item.content, `${perone * maxHeights[index]}px`, "--height");
+      style.var(item.content, `${heightFactor * maxHeights[index]}px`, "--height");
     });
   };
   driver.add(el, "top-bottom", e => {

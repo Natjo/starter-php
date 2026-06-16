@@ -128,7 +128,7 @@
         "items" => [
             [
                 "suptitle" => "Image generation",
-                "icon" => "midjourney",
+                "icon" => THEME_UPLOADS . "midjourney.svg",
                 "title" => "Midjourney",
                 "text" => "<p>Create high-fidelity visuals, mood boards, and concept art. Use detailed prompts with style references for brand-consistent results.</p>",
                 "usage" => "<p>Access via Discord. Start prompts with /imagine. Use --ar for aspect ratios, --style for aesthetics.</p>"
@@ -219,6 +219,7 @@
             [
                 "suptitle" => "Training",
                 "title" => "AI FUNDAMENTALS WORKSHOP",
+                "icon" =>  "video",
                 "text" => "<p>A 2-hour interactive session covering prompt engineering, tool selection, and ethical AI use for creative teams.</p>",
                 "link" => [
                     "title" => "",
@@ -229,6 +230,7 @@
             [
                 "suptitle" => "Training",
                 "title" => "AI FUNDAMENTALS WORKSHOP",
+                "icon" =>  "training",
                 "text" => "<p>A 2-hour interactive session covering prompt engineering, tool selection, and ethical AI use for creative teams.</p>",
                 "link" => [
                     "title" => "",
