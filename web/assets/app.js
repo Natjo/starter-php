@@ -1302,9 +1302,19 @@ function ModulesHydration() {
 var supportsSmoothScroll = () => {
   return !window.matchMedia("(prefers-reduced-motion: reduce)").matches && window.matchMedia("(pointer: fine)").matches;
 };
+var isChrome = () => {
+  const brands = navigator.userAgentData?.brands;
+  if (Array.isArray(brands)) {
+    return brands.some(({ brand }) => brand === "Google Chrome" || brand === "Chromium") && !brands.some(({ brand }) => brand === "Microsoft Edge" || brand === "Opera");
+  }
+  return /\bChrome\//.test(navigator.userAgent) && !/\b(?:Edg|OPR)\//.test(navigator.userAgent);
+};
 var initLenis = () => {
   if (!supportsSmoothScroll()) return;
-  window.lenis = new Lenis({ autoRaf: true });
+  window.lenis = new Lenis({
+    autoRaf: true,
+    wheelMultiplier: isChrome() ? 0.7 : 1
+  });
 };
 initLenis();
 ModulesHydration();

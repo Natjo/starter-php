@@ -1,6 +1,8 @@
 .hero-homepage {
     background: var(--color-3);
     color: #fff;
+    overflow: clip;
+
 
     .hero-content {
         align-self: end;
@@ -23,7 +25,7 @@
         grid-row: 3;
         grid-column: 1;
         font-size: 1.8rem;
-        opacity:.8;
+        opacity: .8;
         line-height: 3rem;
         padding-block: 1rem;
     }
@@ -46,5 +48,19 @@
     @media (min-width: 841px) {
         height: 100vh;
     }
+
+
+
+
+    @supports (animation-timeline: view()) {
+        @media (prefers-reduced-motion: no-preference) {
+            .hero-content {
+                animation: parallax1 1s linear both;
+                animation-timeline: view();
+                animation-range: entry 0% exit 100%;
+            }
+        }
+    }
+
 }
 /*# sourceMappingURL=hero-homepage.css.map */

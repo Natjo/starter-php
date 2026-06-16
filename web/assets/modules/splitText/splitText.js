@@ -1,6 +1,7 @@
 export function splitText(targetEl, {
   wordClass = "word",
-  charClass = "char"
+  charClass = "char",
+  skipSelector = ""
 } = {}) {
   var _el$textContent;
   const el = targetEl;
@@ -38,11 +39,15 @@ export function splitText(targetEl, {
     return frag;
   }
   function transformNode(node) {
+    var _node$matches;
     if (node.nodeType === Node.TEXT_NODE) {
       var _node$textContent;
       return splitTextNode((_node$textContent = node.textContent) !== null && _node$textContent !== void 0 ? _node$textContent : "");
     }
     if (node.nodeType !== Node.ELEMENT_NODE) {
+      return node.cloneNode(true);
+    }
+    if (skipSelector && (_node$matches = node.matches) !== null && _node$matches !== void 0 && _node$matches.call(node, skipSelector)) {
       return node.cloneNode(true);
     }
     const clone = node.cloneNode(false);

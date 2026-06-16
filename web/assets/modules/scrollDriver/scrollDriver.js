@@ -228,29 +228,25 @@ class ScrollDriver {
     this._wh = window.innerHeight;
     this._sections = [];
     this._enabled = false;
-    this._latestScrollY = window.scrollY || 0;
+    this._latestScrollY = currentScrollY();
     this._rafId = null;
     this._activeSections = new Set();
     this._handleResize = () => {
       this._wh = window.innerHeight;
+      this._latestScrollY = currentScrollY();
       for (const s of this._sections) s._measure(this._wh);
       this._syncActiveSections();
       this._schedule();
     };
   }
   _handleIntersection(section, isIntersecting) {
+    this._latestScrollY = currentScrollY();
     section.el.classList.toggle("viewed", isIntersecting);
     if (isIntersecting) {
       this._activeSections.add(section);
     } else if (this._activeSections.has(section)) {
-      if (this._enabled) {
-        try {
-          section._update(this._latestScrollY);
-        } catch (_unused) {}
-      }
       this._activeSections.delete(section);
     }
-    if (this._enabled) this._schedule();
   }
   onScroll(scrollY) {
     const y = Number(scrollY);

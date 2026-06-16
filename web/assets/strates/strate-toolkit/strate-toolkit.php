@@ -2,7 +2,7 @@
 $args = normalize_args($args ?? null);
 ?>
 
-<section <?= options("strate strate-toolkit", $args) ?> data-module="strates/strate-toolkit" data-context="@visible true">
+<section <?= options("strate strate-toolkit", $args) ?> data-module="strates/strate-toolkit">
 
     <div class='strate-header'>
         <?php component::eyebrow($args); ?>

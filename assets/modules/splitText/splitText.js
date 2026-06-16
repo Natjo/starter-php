@@ -5,7 +5,7 @@
  * - input may contain inline markup; tags are preserved
  * - returns { words, chars, restore }
  */
-export function splitText(targetEl, { wordClass = "word", charClass = "char" } = {}) {
+export function splitText(targetEl, { wordClass = "word", charClass = "char", skipSelector = "" } = {}) {
   const el = targetEl;
   if (!el) return { words: [], chars: [], restore: () => {} };
 
@@ -52,6 +52,10 @@ export function splitText(targetEl, { wordClass = "word", charClass = "char" } =
     }
 
     if (node.nodeType !== Node.ELEMENT_NODE) {
+      return node.cloneNode(true);
+    }
+
+    if (skipSelector && node.matches?.(skipSelector)) {
       return node.cloneNode(true);
     }
 

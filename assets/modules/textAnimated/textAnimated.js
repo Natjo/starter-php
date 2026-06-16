@@ -6,16 +6,28 @@ function textAnimated(el) {
     if (!title) return;
 
     const driver = new ScrollDriver();
-    const { chars, restore } = splitText(title);
+    const { chars, restore } = splitText(title, { skipSelector: ".tooltip" });
+    const getViewportProgress = () => {
+        const rect = title.getBoundingClientRect();
+        const start = window.innerHeight * 0.85;
+        const end = window.innerHeight * 0.60 - rect.height;
+        const progress = ((start - rect.top) / ((start - end) || 1)) * 100;
 
-    driver.add(title, [85, 60], e => {
-        e.timeline(0, 100, (val) => stagger(chars, val));
+        return Math.max(0, Math.min(100, progress));
+    };
+
+    stagger(chars, 0, { rootEl: title });
+    title.classList.add("is-text-animated-ready");
+
+    driver.add(title, [85, 60], () => {
+        stagger(chars, getViewportProgress(), { rootEl: title });
     });
 
     driver.enable();
 
     return () => {
         driver.destroy();
+        title.classList.remove("is-text-animated-ready");
         style.clear(title);
         chars.forEach(style.clear);
         restore();

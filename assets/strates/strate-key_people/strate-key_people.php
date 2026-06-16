@@ -9,6 +9,11 @@ $placeholder = $args["placeholder"] ?? null;
         <?php component::eyebrow($args); ?>
 
         <?php component::title($args, 2, "text-animated"); ?>
+        <div class="bg">
+            <?php component::icon("pattern", 87, 87, "small"); ?>
+            <?php component::icon("pattern", 338, 338); ?>
+            <?php component::icon("star-stroke", 38, 38); ?>
+        </div>
     </div>
 
     <div class="images">

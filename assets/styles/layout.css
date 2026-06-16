@@ -133,3 +133,24 @@ body {
     white-space: nowrap;
     border: 0;
 }
+
+
+@keyframes parallax {
+ from {
+        transform: translateY(-10rem);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes parallax1 {
+ from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(10rem);
+    }
+}

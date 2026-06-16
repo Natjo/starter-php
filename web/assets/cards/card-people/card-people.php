@@ -4,9 +4,6 @@ $name = (string) ($args["name"] ?? "");
 $function = (string) ($args["function"] ?? "");
 $from = (string) ($args["from"] ?? "");
 $shares = $args["shares"] ?? [];
-if (is_array($shares) && $shares !== array_values($shares)) {
-    $shares = array_keys($shares);
-}
 $shares = is_array($shares) ? $shares : [];
 ?>
 

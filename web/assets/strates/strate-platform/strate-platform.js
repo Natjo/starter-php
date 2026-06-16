@@ -9,6 +9,7 @@ export default el => {
   const clamp = value => Math.max(0, Math.min(1, value));
   const segments = Math.max(1, platforms.length - 1);
   const items = [...platforms].map(platform => ({
+    el: platform,
     content: platform.querySelector(".platform-content"),
     inner: platform.querySelector(".platform-content-inner")
   }));
@@ -32,7 +33,7 @@ export default el => {
         style.var(item.content, `${height}px`, "--height");
         let perone = 0;
         if (index === segIndex) perone = 1 - t;else if (index === segIndex + 1) perone = t;
-        style.var(item.content, perone, "--perone");
+        style.var(item.el, perone, "--perone");
       });
     });
   });
@@ -48,6 +49,9 @@ export default el => {
     driver.destroy();
     ro.disconnect();
     style.clear(el);
-    items.forEach(item => style.clear(item.content));
+    items.forEach(item => {
+      style.clear(item.el);
+      style.clear(item.content);
+    });
   };
 };

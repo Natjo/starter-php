@@ -1,0 +1,47 @@
+.strate-separator {
+    margin-bottom: 0;
+    
+    .strate-content {
+        grid-column: full;
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        gap: 2.3rem;
+    }
+
+    .icon-pattern{
+        width: 100%;
+        height: auto;
+        grid-row: 1;
+    }
+
+    .icon-star {
+        align-self: center;
+        justify-self: center;
+        animation: separator-star-spin linear both;
+        animation-timeline: scroll();
+        animation-range: 0 100%;
+        transform-box: fill-box;
+        transform-origin: center;
+    }
+
+    .col-7 {
+        grid-column: 7;
+        grid-row: 1;
+    }
+}
+
+@keyframes separator-star-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(3600deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .strate-separator .icon-star {
+        animation: none;
+    }
+}

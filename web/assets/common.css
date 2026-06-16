@@ -105,11 +105,9 @@
     border: 1px solid rgba(190, 190, 190, 0.25);
     border: 1px solid color(display-p3 0.7451 0.7451 0.7451 / 0.25);
 
-    background: linear-gradient(
-            var(--learn-grad-angle),
+    background: linear-gradient(var(--learn-grad-angle),
             rgba(255, 255, 255, var(--learn-grad-top-alpha)) var(--learn-grad-stop),
-            rgba(255, 255, 255, var(--learn-grad-bottom-alpha)) 100%
-        ),
+            rgba(255, 255, 255, var(--learn-grad-bottom-alpha)) 100%),
         rgba(255, 255, 255, var(--learn-surface-alpha));
     transition:
         --learn-grad-angle 0.3s ease,
@@ -138,17 +136,21 @@
         opacity: .8;
     }
 
-    .icon {
+    .icon-blank {
         position: absolute;
         top: 0;
         right: 0;
+        transition: color .3s ease;
     }
 
     &:hover {
         --learn-surface-alpha: 0.07;
+
+        .icon-blank {
+            color: var(--color-1)
+        }
     }
 }
-
 @property --news-grad-angle {
     syntax: "<angle>";
     inherits: false;
@@ -203,8 +205,9 @@
         display: flex;
         flex-direction: column;
         gap: 1.2rem;
-        padding: 3.2rem 2.4rem 3.2rem 3.2rem;
+        padding: 3.2rem 2.4rem 3.2rem 0;
         box-sizing: border-box;
+        transition: padding .3s ease;
     }
 
     .card-header {
@@ -224,6 +227,7 @@
 
     .text {
         line-height: 2.4rem;
+        opacity:.8;
     }
 
     .icon {
@@ -242,6 +246,9 @@
         }
         .source{
              color: var(--color-1)
+        }
+        .card-content{
+            padding-left: 3.2rem;
         }
     }
 }
@@ -293,14 +300,21 @@
         margin-left: auto;
     }
 }
+@property --surface-alpha {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 0;
+}
+
 .card-solution {
+    --surface-alpha: 0;
     padding: 3.8rem;
     border-radius: 4.729px;
     border: var(--border);
-
-
-background: linear-gradient(302deg, rgba(255, 255, 255, 0.20) 72.88%, rgba(255, 255, 255, 0.10) 100%);
-background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color(display-p3 1 1 1 / 0.10) 100%);
+    background:
+        linear-gradient(302deg, rgba(255, 255, 255, 0) 72.88%, rgba(255, 255, 255, 0.10) 100%),
+        rgba(255, 255, 255, var(--surface-alpha));
+    transition: --surface-alpha .3s ease;
 
     .card-content {
         position: relative;
@@ -331,7 +345,7 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
         gap: 1.1rem;
         border-top: 1.182px solid rgba(255, 255, 255, 0.20);
 
-        .usage-title{
+        .usage-title {
             font-size: 1.2rem;
             line-height: 1.2rem;
             font-weight: 400;
@@ -339,19 +353,23 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
         }
     }
 
-    .icon-blank{
+    .icon-blank {
         position: absolute;
         top: 0;
         right: 0;
+        transition: color .3s ease;
     }
 
-    &:hover{
-        border-radius: 4.729px;
-background: linear-gradient(302deg, rgba(255, 255, 255, 0.20) 72.88%, rgba(255, 255, 255, 0.10) 100%), rgba(255, 255, 255, 0.07);
-background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color(display-p3 1 1 1 / 0.10) 100%), color(display-p3 1 1 1 / 0.07);
+    &:hover {
+        --surface-alpha: 0.07;
+
+        .icon-blank {
+            color: var(--color-1);
+        }
     }
 
 }
+
 #footer {
     position: relative;
     background-color: var(--color-2);
@@ -363,7 +381,7 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
     grid-template-columns: var(--layout);
     grid-template-rows: 1fr auto auto;
     align-items: end;
-
+    overflow: clip;
 
     &:before {
         content: "";
@@ -402,13 +420,9 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
     }
 
     .lonsdale_partners {
-        margin: 4rem 0 6rem 6rem;
-        grid-column: full;
-        grid-row: 2;
-        z-index: 2;
-        width: calc(100% - 12rem);
+        margin-top: 4rem;
+        width: 100%;
         height: auto;
-        box-sizing: border-box;
     }
 
     .text {
@@ -426,6 +440,13 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
             flex-direction: column;
             gap: 1.8rem;
         }
+    }
+
+
+    .footer-content {
+        animation: parallax 1s linear both;
+        animation-timeline: view();
+        animation-range: entry 0% exit 0%;
     }
 }
 .date {
@@ -482,6 +503,8 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
 
 .shares button {
     cursor: pointer;
+border: 1px solid var(--Filets-secondaire, rgba(190, 190, 190, 0.25));
+    border-radius: 50%;
 }
 
 .shares .tip {
@@ -687,7 +710,7 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
         display: block;
         width: 100%;
         height: 100%;
-        background-color: currentColor;
+        background-color: var(--color-1);
         transform: scaleX(var(--slider-progress));
         transform-origin: left center;
         will-change: transform;
@@ -813,35 +836,43 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
     }
 }
 
-.text-animated{
+.text-animated {
+    --p: 0;
+    --denom: 1;
     --softness: 10;
-    opacity: .5;
+    color: rgba(255, 255, 255, 0.4);
+    /* opacity: .5; */
+
+    &:not(.is-text-animated-ready) :not(.tooltip):not(.tooltip *) {
+        color: inherit;
+    }
 
     &.viewed .char {
         will-change: translate, scale, opacity;
     }
 
     .char {
+       /* display: inline-block; */
         /* Per-char progress computed from root vars set by JS:
            --p, --denom, --softness, and per-char --i */
         --t: calc(var(--p) * (var(--denom) + var(--softness)));
-        --progress: clamp(0, calc((var(--t) - var(--i)) / var(--softness)), 1);
+        --progress: clamp(0, calc((var(--t) - var(--i, 9999)) / var(--softness)), 1);
 
-        opacity: calc(0.1 + 0.9 * var(--progress));
+        opacity: calc(var(--progress));
     }
-    .char {
+
+    /*.char {
         scale: calc(.9 + var(--progress) * 0.1);
     }
 
     .char {
         translate: calc(-4px + var(--progress) * 4px);
-    }
+    }*/
 
-    /* .char{ filter: blur(calc(6px - var(--progress) * 6px)); }*/
     .char {
         color: color-mix(in srgb,
-                var(--color-4) calc((1 - var(--progress)) * 100%),
-                var(--color-3) calc(var(--progress) * 100%));
+                rgba(255, 255, 255, .4) calc((1 - var(--progress)) * 100%),
+                #fff calc(var(--progress) * 100%));
     }
 }
 
@@ -858,24 +889,19 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
     contain-intrinsic-size: auto 800px;
 
 
-    background: linear-gradient(180deg,
-            color(display-p3 0 0 0.0902) 4.3%,
-            color(display-p3 0 0 0.0902 / 0) 22.57%,
-            color(display-p3 0 0 0.0902 / 0) 77.37%,
-            color(display-p3 0 0 0.0902) 95.64%),
-        url("../../../../../../../../assets/img/backgrounds/bg-1.jpg") center / cover no-repeat,
-        var(--color-bg);
+    background: transparent url("./img/backgrounds/background_news.webp") 0 0 no-repeat;
+    background-size: 100% auto;
 
-    background-blend-mode: normal,
-        lighten,
-        normal;
 
-        .list{
-            --list-gap: 0;
-        }
+
+
+    .list {
+        --list-gap: 0;
+    }
 }
 
 .strate-hybrid_ai {
+    padding-block: 13rem 6rem;
     position: relative;
 
     .strate-content {
@@ -926,19 +952,13 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
 
     }
 
-    background: linear-gradient(180deg,
-        color(display-p3 0 0 0.0902) 4.3%,
-        color(display-p3 0 0 0.0902 / 0) 22.57%,
-        color(display-p3 0 0 0.0902 / 0) 77.37%,
-        color(display-p3 0 0 0.0902) 95.64%),
-    url("../../../../../../../../assets/img/backgrounds/bg-2.jpg") center / cover no-repeat,
-    var(--color-bg);
 
-    background-blend-mode: normal,
-    lighten,
-    normal;
+    background: transparent url(../../../../../../../../assets/img/backgrounds/background_hybrid.webp) 0 0 no-repeat;
+    background-size: 100% auto;
 }
+
 .strate-key_people {
+    margin-top: 8.4rem;
     --layout: [full-start] var(--ctr-offset) [fluid col-1] 1fr [col-1-end col-2] 1fr [col-2-end col-3] 2fr [col-3-end fluid-end] var(--ctr-offset) [full-end];
 
     &.viewed .images img {
@@ -952,6 +972,33 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
         align-items: center;
         gap: 0;
         grid-row: 1;
+        z-index: 1;
+
+        > *{
+            grid-row: 1;
+        }
+        .bg {
+            display: grid;
+            justify-content: start;
+            align-content: start;
+            margin-left: -8rem;
+
+            .icon {
+                grid-area: 1/1;
+            }
+
+            .icon-star-stroke{
+                justify-self: end;
+                align-self: end;
+            }
+
+             .icon-pattern.small{
+                justify-self: end;
+
+            }
+
+            grid-column:1/-1;
+        }
 
         .eyebrow {
             grid-column: col-1;
@@ -974,11 +1021,12 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
         display: grid;
         justify-content: end;
         margin-right: 5rem;
-        position:sticky;
+        position: sticky;
         top: 15rem;
         grid-row: 1;
+        z-index: 2;
 
-        img{
+        img {
             grid-area: 1 / 1;
             width: 30.6rem;
             height: 34.3rem;
@@ -998,7 +1046,7 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
         grid-column: full;
         gap: 0;
         margin-top: 6.6rem;
-        margin-bottom: 12rem;
+        margin-bottom: 16rem;
     }
 }
 
@@ -1095,18 +1143,20 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
 
 .strate-platform {
     --nb-platforms: 4;
-    height: calc(100vh * var(--nb-platforms));
+    height: calc(60vh * var(--nb-platforms));
     background-color: rgba(255, 255, 255, 0.10);
 
     .sticky {
         position: sticky;
         height: 100vh;
         top: 0;
-        grid-column: fluid;
+        grid-column: full;
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         align-items: center;
         gap: var(--gap);
+        background: transparent url("../../../../../../../../assets/img/backgrounds/backgound_platform.webp") center / cover no-repeat;
+        padding-inline: var(--ctr-offset)
     }
 
     .strate-content {
@@ -1152,26 +1202,22 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
         }
 
         .platform {
+            --perone: 0;
             position: relative;
             padding: 1.6rem 2.4rem;
             border-radius: var(--radius);
             border: 1px solid rgba(190, 190, 190, 0.25);
-            border: 1px solid color(display-p3 0.7451 0.7451 0.7451 / 0.25);
+            background: linear-gradient(71deg, rgba(255, 255, 255, 0) 72.88%, rgb(255 255 255 / calc(var(--perone) * 10%)) 100%),
+            rgb(255 255 255 / calc(var(--perone) * 10%));
 
             img {
                 width: 100%;
                 height: auto;
             }
-
-            background: linear-gradient(71deg, rgba(255, 255, 255, 0.20) 72.88%, rgba(255, 255, 255, 0.10) 100%),
-            rgba(255, 255, 255, 0.10);
-            background: linear-gradient(71deg, color(display-p3 1 1 1 / 0.00) 72.88%, color(display-p3 1 1 1 / 0.10) 100%),
-            color(display-p3 1 1 1 / 0.10);
         }
 
         .platform-content {
             --height: 0;
-            --perone: 0;
             overflow: hidden;
             height: var(--height);
         }
@@ -1183,17 +1229,21 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
         .label {
             display: flex;
             align-items: center;
-
             height: 3.3rem;
-            translate: 4rem;
+            translate: calc(5rem - (5rem * var(--perone)));
+
+            strong {
+                color: var(--color-1)
+            }
         }
 
         .number {
             position: absolute;
             top: 1.6rem;
             left: 2.4rem;
-            background-color: var(--color-1);
-            color: var(--color-bg);
+            background-color: rgb(from var(--color-1) r g b / calc(var(--perone) * 100%));
+            border: 1px solid var(--color-1);
+            color: color-mix(in srgb, #fff, var(--color-bg) calc(var(--perone) * 100%));
             width: 3.3rem;
             height: 3.3rem;
             border-radius: 50%;
@@ -1202,12 +1252,8 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
             align-items: center;
             font-size: 1.4rem;
             line-height: 1.4rem;
-
         }
     }
-
-    background: transparent url("../../../../../../../../assets/img/backgrounds/backgound_platform.webp") center / cover no-repeat;
-
 }
 
 .strate-showcase {
@@ -1216,10 +1262,6 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
             color(display-p3 1 1 1 / 0) 0%,
             color(display-p3 1 1 1 / 0.45) 50%,
             color(display-p3 1 1 1 / 0) 100%);
-
-    &.viewed .medias .col {
-        will-change: transform;
-    }
 
     .sticky {
         position: sticky;
@@ -1236,41 +1278,43 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
             var(--showcase-line) 50% 0 / 1px 100vh no-repeat,
             var(--showcase-line) 66.666% 0 / 1px 100vh no-repeat,
             var(--showcase-line) 83.333% 0 / 1px 100vh no-repeat,
-            var(--showcase-line) 100% 0 / 1px 100vh no-repeat;
+            var(--showcase-line) 100% 0 / 1px 100vh no-repeat,
+            url("./img/backgrounds/backgound_showcase.webp") center / cover no-repeat;
+    }
 
-        .strate-header {
-            position: relative;
-            grid-column: 3/5;
-            grid-row: 1;
-            justify-self: center;
-            text-align: center;
-            align-items: center;
-            justify-content: center;
-            align-self: stretch;
-        }
-
-        .bg {
-            grid-column: 1/-1;
-            grid-row: 1;
-            justify-self: center;
-            width: 562px;
-            height: 562px;
-            transform: rotate(-90deg);
-            fill: rgba(255, 255, 255, 0.26);
-            fill: color(display-p3 1 1 1 / 0.26);
-            filter: blur(186px);
-        }
+    .strate-header {
+        position: relative;
+        grid-column: 3/5;
+        grid-row: 1;
+        justify-self: center;
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+        align-self: stretch;
     }
 
 
+
+    .eyebrow{
+        flex-direction: column;
+        gap:1.5rem;
+    }
+
     .medias {
         margin-top: -100vh;
-     
         display: grid;
         grid-template-columns: repeat(6, 1fr);
 
         .col {
             display: grid;
+            transform: translate3d(0, 0, 0);
+            will-change: transform;
+            backface-visibility: hidden;
+        }
+
+        .item {
+            overflow: hidden;
+            contain: paint;
         }
 
         .col-0 {
@@ -1292,7 +1336,7 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
         .col-1 {
             .item {
                 &:nth-child(1) {
-                    margin-top: 82rem;
+                    margin-top: 98rem;
                 }
 
                 &:nth-child(2) {
@@ -1331,19 +1375,26 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
     }
 
     video {
+        display: block;
         width: 100%;
+        height: auto;
         aspect-ratio: 16/9;
+        -o-object-fit: cover;
+           object-fit: cover;
     }
 
     img {
+        display: block;
         width: 100%;
         height: auto;
+        -o-object-fit: cover;
+           object-fit: cover;
     }
 
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .strate-showcase.viewed .medias .col {
+    .strate-showcase .medias .col {
         will-change: auto;
     }
 }
@@ -1386,6 +1437,10 @@ background: linear-gradient(302deg, color(display-p3 1 1 1 / 0.00) 72.88%, color
         grid-column: ctr;
         --nb: 2;
         --offset: 10rem;
+    }
+
+    .slider-timeline{
+        margin-top: 7rem;
     }
 }
 html.lenis,html.lenis body{height:auto}.lenis:not(.lenis-autoToggle).lenis-stopped{overflow:clip}.lenis [data-lenis-prevent],.lenis [data-lenis-prevent-wheel],.lenis [data-lenis-prevent-touch],.lenis [data-lenis-prevent-vertical],.lenis [data-lenis-prevent-horizontal]{overscroll-behavior:contain}.lenis.lenis-smooth iframe{pointer-events:none}.lenis.lenis-autoToggle{transition-property:overflow;transition-duration:1ms;transition-behavior:allow-discrete}

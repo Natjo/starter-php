@@ -23,7 +23,7 @@ $framesCount = 46;
         </nav>
 
         <small>©Richard 2026</small>
-    </div>
 
-    <?php component::icon("lonsdale_partners", 1320, 85, "lonsdale_partners"); ?>
+        <?php component::icon("lonsdale_partners", 1320, 85, "lonsdale_partners"); ?>
+    </div>
 </footer>

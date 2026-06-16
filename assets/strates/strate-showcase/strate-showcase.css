@@ -5,10 +5,6 @@
             color(display-p3 1 1 1 / 0.45) 50%,
             color(display-p3 1 1 1 / 0) 100%);
 
-    &.viewed .medias .col {
-        will-change: transform;
-    }
-
     .sticky {
         position: sticky;
         top: 0;
@@ -24,41 +20,43 @@
             var(--showcase-line) 50% 0 / 1px 100vh no-repeat,
             var(--showcase-line) 66.666% 0 / 1px 100vh no-repeat,
             var(--showcase-line) 83.333% 0 / 1px 100vh no-repeat,
-            var(--showcase-line) 100% 0 / 1px 100vh no-repeat;
+            var(--showcase-line) 100% 0 / 1px 100vh no-repeat,
+            url("../../img/backgrounds/backgound_showcase.webp") center / cover no-repeat;
+    }
 
-        .strate-header {
-            position: relative;
-            grid-column: 3/5;
-            grid-row: 1;
-            justify-self: center;
-            text-align: center;
-            align-items: center;
-            justify-content: center;
-            align-self: stretch;
-        }
-
-        .bg {
-            grid-column: 1/-1;
-            grid-row: 1;
-            justify-self: center;
-            width: 562px;
-            height: 562px;
-            transform: rotate(-90deg);
-            fill: rgba(255, 255, 255, 0.26);
-            fill: color(display-p3 1 1 1 / 0.26);
-            filter: blur(186px);
-        }
+    .strate-header {
+        position: relative;
+        grid-column: 3/5;
+        grid-row: 1;
+        justify-self: center;
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+        align-self: stretch;
     }
 
 
+
+    .eyebrow{
+        flex-direction: column;
+        gap:1.5rem;
+    }
+
     .medias {
         margin-top: -100vh;
-     
         display: grid;
         grid-template-columns: repeat(6, 1fr);
 
         .col {
             display: grid;
+            transform: translate3d(0, 0, 0);
+            will-change: transform;
+            backface-visibility: hidden;
+        }
+
+        .item {
+            overflow: hidden;
+            contain: paint;
         }
 
         .col-0 {
@@ -80,7 +78,7 @@
         .col-1 {
             .item {
                 &:nth-child(1) {
-                    margin-top: 82rem;
+                    margin-top: 98rem;
                 }
 
                 &:nth-child(2) {
@@ -119,19 +117,24 @@
     }
 
     video {
+        display: block;
         width: 100%;
+        height: auto;
         aspect-ratio: 16/9;
+        object-fit: cover;
     }
 
     img {
+        display: block;
         width: 100%;
         height: auto;
+        object-fit: cover;
     }
 
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .strate-showcase.viewed .medias .col {
+    .strate-showcase .medias .col {
         will-change: auto;
     }
 }

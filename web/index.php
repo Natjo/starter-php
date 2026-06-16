@@ -115,7 +115,9 @@
         ]
     ]);
     ?>
-
+    <?php
+    strate("separator");
+    ?>
     <?php
     strate("toolkit",  [
         "options" => [
@@ -220,7 +222,7 @@
                 "text" => "<p>A 2-hour interactive session covering prompt engineering, tool selection, and ethical AI use for creative teams.</p>",
                 "link" => [
                     "title" => "",
-                    "url" => "",
+                    "url" => "/",
                     "target" => "_blank",
                 ]
             ],
@@ -254,8 +256,8 @@
                     "target" => "_blank",
                 ]
             ],
-           
-           
+
+
         ]
     ]);
     ?>
@@ -301,6 +303,17 @@
                     "url" => "",
                     "target" => "_blank",
                 ]
+            ],
+            [
+                "source" => "New Verge",
+                "date" => "Mars 2026",
+                "title" => "GPT-5 brings multimodal reasoning to creative workflows",
+                "text" => "<p>OpenAI's latest model can now reason across text, images, and audio simultaneously<br>—opening new possibilities for integrated creative briefs.</p>",
+                "link" => [
+                    "title" => "",
+                    "url" => "/",
+                    "target" => "_blank",
+                ]
             ]
         ]
     ]);
@@ -319,28 +332,40 @@
                 "name" => "Sophie Marchand",
                 "function" => "Senior Prompt Engineer",
                 "from" => "AI Strategy & Governance",
-                "shares" => ["linkedin", "email"],
+                "shares" => [
+                    "linkedin" => "/",
+                    "email" => "test@test.com"
+                ],
                 "image" => THEME_UPLOADS . "people-1.jpg"
             ],
             [
                 "name" => "Thomas Durand",
                 "function" => "Senior Prompt Engineer",
                 "from" => "AI Strategy & Governance",
-                "shares" => ["linkedin", "email"],
+                "shares" => [
+                    "linkedin" => "/",
+                    "email" => "test@test.com"
+                ],
                 "image" => THEME_UPLOADS . "people-2.jpg"
             ],
             [
                 "name" => "Léa fontaine",
                 "function" => "Senior Prompt Engineer",
                 "from" => "AI Strategy & Governance",
-                "shares" => ["linkedin", "email"],
+                "shares" => [
+                    "linkedin" => "/",
+                    "email" => "test@test.com"
+                ],
                 "image" => THEME_UPLOADS . "people-3.png"
             ],
             [
                 "name" => "Marc Lefèvre",
                 "function" => "Senior Prompt Engineer",
                 "from" => "AI Strategy & Governance",
-                "shares" => ["linkedin", "email"],
+                "shares" => [
+                    "linkedin" => "/",
+                    "email" => "test@test.com"
+                ],
                 "image" => THEME_UPLOADS . "people-4.png"
             ],
             [
@@ -354,7 +379,10 @@
                 "name" => "Antoine Morel",
                 "function" => "Senior Prompt Engineer",
                 "from" => "AI Strategy & Governance",
-                "shares" => ["linkedin", "email"],
+                "shares" => [
+                    "linkedin" => "/",
+                    "email" => "test@test.com"
+                ],
                 "image" => THEME_UPLOADS . "people-6.jpg"
             ]
         ],

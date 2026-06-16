@@ -38,7 +38,32 @@ $normalizeUrl = static function (mixed $url): string {
 
     $url = trim($url);
 
-    return filter_var($url, FILTER_VALIDATE_URL) ? $url : "";
+    if (!filter_var($url, FILTER_VALIDATE_URL)) {
+        return "";
+    }
+
+    $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
+
+    return in_array($scheme, ["http", "https", "mailto"], true) ? $url : "";
+};
+
+$normalizeEmailUrl = static function (mixed $value) use ($normalizeUrl): string {
+    if (!is_string($value) || trim($value) === "") {
+        return "";
+    }
+
+    $value = trim($value);
+    $url = $normalizeUrl($value);
+    if ($url !== "") {
+        return $url;
+    }
+
+    $email = str_replace("#", "@", $value);
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        return "";
+    }
+
+    return "mailto:" . $email;
 };
 
 $currentUrl = static function () use ($normalizeUrl): string {
@@ -67,9 +92,6 @@ $currentUrl = static function () use ($normalizeUrl): string {
 };
 
 $url = $normalizeUrl($args["url"] ?? "") ?: $currentUrl();
-if ($url === "") {
-    return;
-}
 
 $encodedUrl = rawurlencode($url);
 $encodedMailBody = rawurlencode($url);
@@ -78,7 +100,7 @@ $catalog = [
     "email" => [
         "name" => "email",
         "icon" => "email",
-        "url" => "mailto:?body=" . $encodedMailBody,
+        "url" => $url !== "" ? "mailto:?body=" . $encodedMailBody : "",
         "label" => "Partager l’article par E-mail",
     ],
     "copy" => [
@@ -90,40 +112,75 @@ $catalog = [
     "facebook" => [
         "name" => "facebook",
         "icon" => "facebook",
-        "url" => "https://www.facebook.com/sharer/sharer.php?u=" . $encodedUrl,
+        "url" => $url !== "" ? "https://www.facebook.com/sharer/sharer.php?u=" . $encodedUrl : "",
         "label" => "Partager l’article sur Facebook",
     ],
     "linkedin" => [
         "name" => "linkedin",
         "icon" => "linkedin",
-        "url" => "https://www.linkedin.com/sharing/share-offsite/?url=" . $encodedUrl,
+        "url" => $url !== "" ? "https://www.linkedin.com/sharing/share-offsite/?url=" . $encodedUrl : "",
         "label" => "Partager l’article sur LinkedIn",
     ],
     "x" => [
         "name" => "x",
         "icon" => "x",
-        "url" => "https://www.twitter.com/share?url=" . $encodedUrl,
+        "url" => $url !== "" ? "https://www.twitter.com/share?url=" . $encodedUrl : "",
         "label" => "Partager l’article sur X",
     ],
     "whatsapp" => [
         "name" => "whatsapp",
         "icon" => "whatsapp",
-        "url" => "https://wa.me/?text=" . $encodedUrl,
+        "url" => $url !== "" ? "https://wa.me/?text=" . $encodedUrl : "",
         "label" => "Partager l’article sur Whatsapp",
     ],
 ];
 
-$keys = [];
+$items = [];
 if (is_array($list)) {
-    foreach ($list as $value) {
-        $key = is_string($value) ? trim($value) : (is_array($value) && isset($value["name"]) ? trim((string) $value["name"]) : "");
+    $isAssoc = $list !== [] && array_keys($list) !== range(0, count($list) - 1);
+
+    foreach ($list as $key => $value) {
+        $key = $isAssoc && is_string($key)
+            ? trim($key)
+            : (is_string($value) ? trim($value) : (is_array($value) && isset($value["name"]) ? trim((string) $value["name"]) : ""));
         $key = strtolower($key);
-        if ($key !== "" && isset($catalog[$key])) {
-            $keys[] = $key;
+        if ($key === "" || !isset($catalog[$key])) {
+            continue;
+        }
+
+        $item = $catalog[$key];
+        $customUrl = "";
+        $customLabel = "";
+        $customIcon = "";
+
+        if (is_array($value)) {
+            $customUrl = $key === "email"
+                ? $normalizeEmailUrl($value["url"] ?? $value["email"] ?? "")
+                : $normalizeUrl($value["url"] ?? "");
+            $customLabel = isset($value["label"]) && is_scalar($value["label"]) ? trim((string) $value["label"]) : "";
+            $customIcon = isset($value["icon"]) && is_scalar($value["icon"]) ? trim((string) $value["icon"]) : "";
+        } elseif ($isAssoc && is_string($value) && trim($value) !== "") {
+            $customUrl = $key === "email" ? $normalizeEmailUrl($value) : $normalizeUrl($value);
+        }
+
+        if ($customUrl !== "") {
+            $item["url"] = $customUrl;
+        }
+
+        if ($customLabel !== "") {
+            $item["label"] = $customLabel;
+        }
+
+        if ($customIcon !== "") {
+            $item["icon"] = $customIcon;
+        }
+
+        if (($item["url"] ?? "") !== "") {
+            $items[] = $item;
         }
     }
 }
-if (empty($keys)) {
+if (empty($items)) {
     return;
 }
 ?>
@@ -136,8 +193,7 @@ if (empty($keys)) {
     <?php endif; ?>
 
     <ul>
-        <?php foreach ($keys as $key) :
-            $item = $catalog[$key] ?? null;
+        <?php foreach ($items as $item) :
             if (!is_array($item)) continue;
             $name = (string) ($item["name"] ?? "");
             $icon = (string) ($item["icon"] ?? "");

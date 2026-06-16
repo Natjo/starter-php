@@ -52,8 +52,9 @@
         display: flex;
         flex-direction: column;
         gap: 1.2rem;
-        padding: 3.2rem 2.4rem 3.2rem 3.2rem;
+        padding: 3.2rem 2.4rem 3.2rem 0;
         box-sizing: border-box;
+        transition: padding .3s ease;
     }
 
     .card-header {
@@ -73,6 +74,7 @@
 
     .text {
         line-height: 2.4rem;
+        opacity:.8;
     }
 
     .icon {
@@ -91,6 +93,9 @@
         }
         .source{
              color: var(--color-1)
+        }
+        .card-content{
+            padding-left: 3.2rem;
         }
     }
 }

@@ -1,32 +1,40 @@
-.text-animated{
+.text-animated {
+    --p: 0;
+    --denom: 1;
     --softness: 10;
-    opacity: .5;
+    color: rgba(255, 255, 255, 0.4);
+    /* opacity: .5; */
+
+    &:not(.is-text-animated-ready) :not(.tooltip):not(.tooltip *) {
+        color: inherit;
+    }
 
     &.viewed .char {
         will-change: translate, scale, opacity;
     }
 
     .char {
+       // display: inline-block;
         /* Per-char progress computed from root vars set by JS:
            --p, --denom, --softness, and per-char --i */
         --t: calc(var(--p) * (var(--denom) + var(--softness)));
-        --progress: clamp(0, calc((var(--t) - var(--i)) / var(--softness)), 1);
+        --progress: clamp(0, calc((var(--t) - var(--i, 9999)) / var(--softness)), 1);
 
-        opacity: calc(0.1 + 0.9 * var(--progress));
+        opacity: calc(var(--progress));
     }
-    .char {
+
+    /*.char {
         scale: calc(.9 + var(--progress) * 0.1);
     }
 
     .char {
         translate: calc(-4px + var(--progress) * 4px);
-    }
+    }*/
 
-    /* .char{ filter: blur(calc(6px - var(--progress) * 6px)); }*/
     .char {
         color: color-mix(in srgb,
-                var(--color-4) calc((1 - var(--progress)) * 100%),
-                var(--color-3) calc(var(--progress) * 100%));
+                rgba(255, 255, 255, .4) calc((1 - var(--progress)) * 100%),
+                #fff calc(var(--progress) * 100%));
     }
 }
 

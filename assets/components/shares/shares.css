@@ -9,6 +9,8 @@
 
 .shares button {
     cursor: pointer;
+border: 1px solid var(--Filets-secondaire, rgba(190, 190, 190, 0.25));
+    border-radius: 50%;
 }
 
 .shares .tip {
