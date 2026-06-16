@@ -5,6 +5,9 @@
             color(display-p3 1 1 1 / 0.45) 50%,
             color(display-p3 1 1 1 / 0) 100%);
 
+    &.viewed .medias .col {
+        will-change: transform;
+    }
 
     .sticky {
         position: sticky;
@@ -125,6 +128,12 @@
         height: auto;
     }
 
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .strate-showcase.viewed .medias .col {
+        will-change: auto;
+    }
 }
 
 @media (max-width: 768px) {

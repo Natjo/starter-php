@@ -12,7 +12,7 @@ export default el => {
 
     driver.add(el, [100, 0], e => {
         e.timeline(0, 100, val => {
-            const centered = val - 0.5;
+            const centered = val / 100 - 0.5;
 
             columns.forEach((col, index) => {
                 const speed = speeds[index] ?? 1;
@@ -24,17 +24,8 @@ export default el => {
 
     driver.enable();
 
-    const lenis = window.lenis;
-    const onLenisScroll = instance => driver.onScroll(instance.animatedScroll);
-    lenis?.on("scroll", onLenisScroll);
-
-    driver.onScroll(lenis?.animatedScroll ?? window.scrollY ?? 0);
-
     return () => {
-        lenis?.off("scroll", onLenisScroll);
-        driver.disable();
-        columns.forEach(col => {
-            col.style.transform = "";
-        });
+        driver.destroy();
+        columns.forEach(style.clear);
     };
 };

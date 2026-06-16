@@ -5,7 +5,7 @@
 ## Options
 ```php
 $options = [
-    "id" => "strate-id"
+    "menu-name" => "Solutions"
 ]
 ```
 
@@ -39,48 +39,55 @@ $options = [
             "text" => "<p>Start conversing and building workflows in minutes, no engineering resources required.</p>",
         ],
     ],
-    "platforms" => [
+    "steps" => [
+        "title"=> "Quick Start",
+        "items" => [
         [
             "title" => "Log in at <strong>dust.tt</strong> with your agency credentials",
-            "image" => THEME_UPLOADS . "platform.jpg"
+            "image" => 84
         ],
         [
             "title" => "Browse available assistants or create your own",
-            "image" => THEME_UPLOADS . "platform.jpg"
+            "image" => 84
         ],
         [
             "title" => "Connect relevant data sources (Drive, Notion, Slack)",
-            "image" => THEME_UPLOADS . "platform.jpg"
+            "image" => 84
         ],
         [
             "title" => "Start conversing and building workflows",
-            "image" => THEME_UPLOADS . "platform.jpg"
+            "image" => 84
         ]
     ]
 ]
 ```
 
 ## Acf
-| Nom       | id          | Type de champ   | Obligatoire | administrable |
-| --------- | ----------- | --------------- | ----------: | ------------: |
-| Sur titre | `suptitle`  | `wysiwyg light` |         Oui |           Oui |
-| Titre     | `title`     | `wysiwyg light` |         Oui |           Oui |
-| Items     | `items`     | ``              |         Oui |           Oui |
-| Platfome  | `platforms` | ``              |         Oui |           Oui |
+| Nom       | id         | Type de champ   | Obligatoire | administrable |
+| --------- | ---------- | --------------- | ----------: | ------------: |
+| Sur titre | `suptitle` | `wysiwyg light` |         Oui |           Oui |
+| Titre     | `title`    | `wysiwyg light` |         Oui |           Oui |
+| Items     | `items`    | ``              |         Oui |           Oui |
+| Etape     | `steps`    | ``              |         Oui |           Oui |
 
 
-| $items | id      | Type de champ   | Obligatoire | administrable |
-| ------ | ------- | --------------- | ----------: | ------------: |
-| Icon   | `icon`  | `select`        |         Oui |           Oui |
-| Titre  | `title` | `wysiwyg light` |         Oui |           Oui |
-| Text   | `text`  | `wysiwyg`       |         Oui |           Oui |
+| $items | id      | Type de champ   | Obligatoire | administrable | commentaire |
+| ------ | ------- | --------------- | ----------: | ------------: | ----------: |
+| Icon   | `icon`  | `select`        |         Oui |           Oui |             |
+| Titre  | `title` | `wysiwyg light` |         Oui |           Oui |             |
+| Text   | `text`  | `wysiwyg`       |         Oui |           Oui |             |
 
 
-| $platform | id      | Type de champ   | Obligatoire | administrable |
-| --------- | ------- | --------------- | ----------: | ------------: |
-| Titre     | `title` | `wysiwyg light` |         Oui |           Oui |
-| Image     | `image` | ``              |         Oui |           Oui |
+| $steps | id      | Type de champ             | Obligatoire | administrable | commentaire |
+| ------ | ------- | ------------------------- | ----------: | ------------: | ----------: |
+| Titre  | `title` | `wysiwyg light`           |         Oui |           Oui |             |
+| Etapes | `steps` | `repeteur` - $steps_items |         Oui |           Oui |          id |
 
+
+| $steps_items | id      | Type de champ   | Obligatoire | administrable | commentaire |
+| ------------ | ------- | --------------- | ----------: | ------------: | ----------: |
+| Titre        | `title` | `wysiwyg light` |         Oui |           Oui |             |
+| Image        | `image` | `image`         |         Oui |           Oui |          id |
 
 ##  Rules
 

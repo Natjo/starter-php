@@ -1,6 +1,7 @@
 document.documentElement.classList.add("admin-ready");
 
 const WEB_VITALS_SESSION_KEY = "admin-web-vitals-collecting";
+const ADMIN_NAV_GROUPS_KEY = "admin-nav-groups";
 
 const showAdminToast = (message, type = "success") => {
     if (!message) {
@@ -120,7 +121,7 @@ const activateAdminTab = (trigger) => {
             return;
         }
 
-        const panel = container.querySelector(`#${CSS.escape(panelId)}`);
+        const panel = document.getElementById(panelId);
         if (!(panel instanceof HTMLElement)) {
             return;
         }
@@ -128,6 +129,72 @@ const activateAdminTab = (trigger) => {
         panel.classList.toggle("is-active", isActive);
         panel.hidden = !isActive;
     });
+};
+
+const initAdminNavGroups = () => {
+    const groups = document.querySelectorAll("[data-admin-nav-group]");
+    if (!groups.length) {
+        return;
+    }
+
+    let savedState = {};
+    try {
+        const raw = window.localStorage.getItem(ADMIN_NAV_GROUPS_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        savedState = parsed && typeof parsed === "object" ? parsed : {};
+    } catch (error) {}
+
+    const persist = () => {
+        try {
+            window.localStorage.setItem(ADMIN_NAV_GROUPS_KEY, JSON.stringify(savedState));
+        } catch (error) {}
+    };
+
+    const applyState = (toggle, panel, isOpen) => {
+        toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        panel.hidden = !isOpen;
+    };
+
+    groups.forEach((group) => {
+        if (!(group instanceof HTMLElement)) {
+            return;
+        }
+
+        if (group.dataset.navReady === "true") {
+            return;
+        }
+
+        const toggle = group.querySelector("[data-admin-nav-toggle]");
+        if (!(toggle instanceof HTMLButtonElement)) {
+            return;
+        }
+
+        const panelId = toggle.getAttribute("aria-controls");
+        if (!panelId) {
+            return;
+        }
+
+        const panel = document.getElementById(panelId);
+        if (!(panel instanceof HTMLElement)) {
+            return;
+        }
+
+        const storageKey = panelId;
+        const defaultOpen = group.dataset.defaultOpen === "true";
+        const isOpen = typeof savedState[storageKey] === "boolean" ? savedState[storageKey] : defaultOpen;
+
+        applyState(toggle, panel, isOpen);
+        savedState[storageKey] = isOpen;
+
+        toggle.addEventListener("click", () => {
+            const nextOpen = toggle.getAttribute("aria-expanded") !== "true";
+            applyState(toggle, panel, nextOpen);
+            savedState[storageKey] = nextOpen;
+            persist();
+        });
+    });
+
+    persist();
 };
 
 document.addEventListener("submit", (event) => {
@@ -272,6 +339,7 @@ document.addEventListener("click", (event) => {
 
 syncWebVitalsToggle();
 initAdminToasts();
+initAdminNavGroups();
 
 const initWebpTool = () => {
     const form = document.querySelector("[data-webp-form]");
@@ -536,6 +604,7 @@ initWebpTool();
 const initIconsTool = () => {
     const search = document.querySelector("[data-icons-search]");
     const cards = [...document.querySelectorAll("[data-icon-card]")];
+    const groups = [...document.querySelectorAll("[data-icon-group]")];
     const empty = document.querySelector("[data-icons-empty]");
 
     if (search instanceof HTMLInputElement && cards.length) {
@@ -550,6 +619,11 @@ const initIconsTool = () => {
                 visibleCount += visible ? 1 : 0;
             });
 
+            groups.forEach((group) => {
+                if (!(group instanceof HTMLElement)) return;
+                group.hidden = !group.querySelector("[data-icon-card]:not([hidden])");
+            });
+
             if (empty instanceof HTMLElement) {
                 empty.hidden = visibleCount !== 0;
             }
@@ -560,16 +634,17 @@ const initIconsTool = () => {
         button.addEventListener("click", async () => {
             if (!(button instanceof HTMLButtonElement)) return;
             const iconId = button.dataset.copyIcon || "";
+            const php = `<?php component::icon("${iconId}", 16, 16); ?>`;
 
             try {
-                await navigator.clipboard.writeText(iconId);
+                await navigator.clipboard.writeText(php);
                 const initialLabel = button.textContent;
-                button.textContent = "ID copie";
+                button.textContent = "Copie";
                 window.setTimeout(() => {
                     button.textContent = initialLabel;
                 }, 1400);
             } catch (error) {
-                window.prompt("Copiez l identifiant :", iconId);
+                window.prompt("Copiez le composant PHP :", php);
             }
         });
     });

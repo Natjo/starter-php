@@ -128,9 +128,24 @@ function admin_render_layout(array $view): void
                 </ul>
 
                 <?php foreach ($navGroups as $groupLabel => $navItems) : ?>
-                    <section class="admin-nav-group" aria-label="<?= admin_escape($groupLabel) ?>">
-                        <p class="admin-nav-group-title"><?= admin_escape($groupLabel) ?></p>
-                        <ul class="admin-nav-list">
+                    <?php
+                    $groupSlug = strtolower((string) preg_replace('/[^a-z0-9]+/i', '-', $groupLabel));
+                    $groupSlug = trim($groupSlug, '-');
+                    $groupId = 'admin-nav-group-' . ($groupSlug !== '' ? $groupSlug : 'group');
+                    $hasActiveItem = in_array($activePage, array_keys($navItems), true);
+                    ?>
+                    <section class="admin-nav-group" aria-label="<?= admin_escape($groupLabel) ?>" data-admin-nav-group data-default-open="<?= $hasActiveItem ? 'true' : 'false' ?>">
+                        <button
+                            class="admin-nav-group-toggle"
+                            type="button"
+                            aria-expanded="<?= $hasActiveItem ? 'true' : 'false' ?>"
+                            aria-controls="<?= admin_escape($groupId) ?>"
+                            data-admin-nav-toggle
+                        >
+                            <span class="admin-nav-group-title"><?= admin_escape($groupLabel) ?></span>
+                            <span class="admin-nav-group-icon" aria-hidden="true"></span>
+                        </button>
+                        <ul class="admin-nav-list <?= admin_escape($groupId) ?>" id="<?= admin_escape($groupId) ?>"<?= $hasActiveItem ? '' : ' hidden' ?>>
                             <?php foreach ($navItems as $navKey => $navLabel) : ?>
                                 <li>
                                     <a

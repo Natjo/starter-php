@@ -5,7 +5,7 @@ $args = normalize_args($args ?? null);
 <section <?= options("strate strate-our_foundations", $args) ?> data-module="strates/strate-our_foundations" data-context="@visible true">
     <div class="strate-content">
         <div class="strate-header">
-            <?php component::eyebrow($args); ?>
+            <?php component::eyebrow($args,"hasicon"); ?>
             <?php component::title($args, 2, "title-4 text-animated"); ?>
         </div>
         <?php component::list($args["items"] ?? [], "foundation"); ?>

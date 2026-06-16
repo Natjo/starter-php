@@ -5,7 +5,7 @@
 ## Options
 ```php
 $options = [
-    "id" => "strate-id"
+    "menu-name" => ""
 ]
 ```
 
@@ -16,16 +16,16 @@ $options = [
 
     "title" => "Where human intelligence meets ai power. ", 
     "text" => "By lonsdale.",
-    "video" => ""
+    "video" => 66
 ]
 ```
 
 ## Acf
-| Nom   | id      | Type de champ   | Obligatoire | administrable |
-| ----- | ------- | --------------- | ----------: | ------------: |
-| Titre | `title` | `wysiwyg light` |         Oui |           Oui |
-| Text  | `text`  | `text`          |           - |             - |
-| Vidéo | `video` | `video`         |           - |             - |
+| Nom   | id      | Type de champ   | Obligatoire | administrable | commentaire |
+| ----- | ------- | --------------- | ----------: | ------------: | ----------: |
+| Titre | `title` | `wysiwyg light` |         Oui |           Oui |             |
+| Text  | `text`  | `text`          |           - |           Oui |             |
+| Vidéo | `video` | `fichier`       |           - |           Oui |          id |
 
 
 ##  Rules

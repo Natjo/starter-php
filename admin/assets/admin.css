@@ -102,14 +102,48 @@ textarea {
     border-top: 0;
 }
 
+.admin-nav-group-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0 0.35rem;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.admin-nav-group-toggle:focus-visible {
+    outline: 2px solid rgba(18, 91, 80, 0.35);
+    outline-offset: 4px;
+    border-radius: 10px;
+}
+
 .admin-nav-group-title {
     margin: 0;
-    padding: 0 0.35rem;
     color: var(--admin-accent);
     font-size: 0.78rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+}
+
+.admin-nav-group-icon {
+    flex: 0 0 auto;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    color: var(--admin-accent);
+    transform: rotate(45deg) translateY(-1px);
+    transition: transform 160ms ease;
+}
+
+.admin-nav-group-toggle[aria-expanded="false"] .admin-nav-group-icon {
+    transform: rotate(-45deg) translateY(-1px);
 }
 
 .admin-nav-list {
@@ -118,6 +152,10 @@ textarea {
     margin: 0;
     padding: 0;
     list-style: none;
+}
+
+.admin-nav-group > .admin-nav-list[hidden] {
+    display: none;
 }
 
 .admin-nav-link {
@@ -1166,6 +1204,46 @@ textarea {
     gap: 0.8rem;
 }
 
+.admin-icon-groups {
+    display: grid;
+}
+
+.admin-icon-group {
+    padding-block: 1.4rem;
+    border-top: 1px solid var(--icons-line);
+}
+
+.admin-icon-group:first-child {
+    padding-top: 0;
+    border-top: 0;
+}
+
+.admin-icon-group-singles {
+    padding-bottom: 1.4rem;
+}
+
+.admin-icon-group[hidden] {
+    display: none;
+}
+
+.admin-icon-group-title {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0 0 0.8rem;
+    color: var(--admin-muted);
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+}
+
+.admin-icon-group-title small {
+    font-size: inherit;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
 .admin-icon-card {
     display: grid;
     grid-template-rows: 9rem auto auto;
@@ -1184,14 +1262,7 @@ textarea {
     place-items: center;
     padding: 1.25rem;
     color: #13151b;
-    background-color: #f2f3f5;
-    background-image:
-        linear-gradient(45deg, #e4e6ea 25%, transparent 25%),
-        linear-gradient(-45deg, #e4e6ea 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, #e4e6ea 75%),
-        linear-gradient(-45deg, transparent 75%, #e4e6ea 75%);
-    background-position: 0 0, 0 8px, 8px -8px, -8px 0;
-    background-size: 16px 16px;
+    background: #dfe2e7;
 }
 
 .admin-icon-preview svg {

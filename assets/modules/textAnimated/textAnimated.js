@@ -14,13 +14,10 @@ function textAnimated(el) {
 
     driver.enable();
 
-    const lenis = window.lenis;
-    const onLenisScroll = instance => driver.onScroll(instance.animatedScroll);
-    lenis?.on("scroll", onLenisScroll);
-
     return () => {
-        driver.disable();
-        lenis?.off("scroll", onLenisScroll);
+        driver.destroy();
+        style.clear(title);
+        chars.forEach(style.clear);
         restore();
     };
 }

@@ -7,7 +7,7 @@ $args = normalize_args($args ?? null);
     <div class="sticky">
         <div class="strate-content">
             <div class="strate-header">
-                <?php component::eyebrow($args); ?>
+                <?php component::eyebrow($args, "hasicon"); ?>
                 <?php component::title($args, 2, "title-2"); ?>
             </div>
             <?php component::text($args); ?>
@@ -15,15 +15,16 @@ $args = normalize_args($args ?? null);
             <ul class="list-platforms">
                 <?php foreach ($args["items"] ?? [] as $item) : ?>
                     <li class="item">
-                        <?php component::icon($item["icon"], 12, 12); ?> <span><?= $item["title"]; ?></span>
+                        <?php component::icon($item["icon"], 20, 20); ?> <span><?= $item["title"]; ?></span>
                     </li>
                 <?php endforeach; ?>
             </ul>
 
-            <?php component::btn($args, "btn-1 cta"); ?>
+            <?php component::btn($args, "btn-1 cta", ["blank", 16, 16]); ?>
         </div>
 
         <div class="platforms">
+            <h3><span>Quick start</span><?php component::icon("arrow-down", 16, 16); ?></h3> 
             <?php foreach ($args["platforms"] ?? [] as $index => $platform) : ?>
                 <div class="platform">
                     <div class="number">

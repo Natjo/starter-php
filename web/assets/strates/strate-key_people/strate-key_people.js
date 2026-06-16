@@ -1,8 +1,7 @@
 import { ScrollDriver, style, stagger } from "../../modules/scrollDriver/scrollDriver.js";
 import textAnimated from "../../modules/textAnimated/textAnimated.js";
 export default el => {
-  var _ref, _lenis$animatedScroll;
-  textAnimated(el);
+  const destroyText = textAnimated(el);
   const list = el.querySelector('.list');
   const images = el.querySelector('.images');
   const driver = new ScrollDriver();
@@ -17,12 +16,10 @@ export default el => {
     });
   });
   driver.enable();
-  const lenis = window.lenis;
-  const onLenisScroll = instance => driver.onScroll(instance.animatedScroll);
-  lenis === null || lenis === void 0 || lenis.on("scroll", onLenisScroll);
-  driver.onScroll((_ref = (_lenis$animatedScroll = lenis === null || lenis === void 0 ? void 0 : lenis.animatedScroll) !== null && _lenis$animatedScroll !== void 0 ? _lenis$animatedScroll : window.scrollY) !== null && _ref !== void 0 ? _ref : 0);
   return () => {
-    lenis === null || lenis === void 0 || lenis.off("scroll", onLenisScroll);
-    driver.disable();
+    destroyText === null || destroyText === void 0 || destroyText();
+    driver.destroy();
+    style.clear(list);
+    style.clear(images);
   };
 };

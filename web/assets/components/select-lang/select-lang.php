@@ -73,8 +73,7 @@ $uid = "select-lang-" . $select_lang_count;
         aria-label="<?= esc_attr($label) ?>"
     >
         <span class="select-lang-current"><?= esc_html($current_item["label"]) ?></span>
-        <span class="select-lang-chevron" aria-hidden="true"></span>
-        <?php component::icon("caret", 20,20) ?>
+        <?php component::icon("caret", 11,7,"select-lang-chevron") ?>
     </button>
 
     <ul class="select-lang-list" id="<?= esc_attr($uid) ?>" aria-label="<?= esc_attr($label) ?>" hidden>

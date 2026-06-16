@@ -1,6 +1,8 @@
 .strate-ai_news {
     --list-columns: 1;
     padding-block: 10rem 6rem;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 800px;
 
 
     background: linear-gradient(180deg,

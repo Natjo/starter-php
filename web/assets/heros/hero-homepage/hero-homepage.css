@@ -7,14 +7,33 @@
         grid-row: 1;
         grid-column: fluid;
         z-index: 1;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: end;
+        gap: 3rem;
+        padding-bottom: 12rem;
+    }
+
+    .title {
+        grid-row: 2;
+        grid-column: 1;
+    }
+
+    .intro {
+        grid-row: 3;
+        grid-column: 1;
+        font-size: 1.8rem;
+        opacity:.8;
+        line-height: 3rem;
+        padding-block: 1rem;
     }
 
     .hybrid_ai {
-        grid-column: fluid;
-        grid-row: 1;
+        grid-row: 3;
+        grid-column: 2;
         justify-self: end;
-        align-self: end;
-        z-index: 1;
+        align-self: center;
+
     }
 
     .slideshow {
@@ -28,5 +47,4 @@
         height: 100vh;
     }
 }
-
 /*# sourceMappingURL=hero-homepage.css.map */

@@ -3,7 +3,7 @@ import textAnimated from "@modules/textAnimated";
 
 export default el => {
 
-    textAnimated(el);
+    const destroyText = textAnimated(el);
 
     const list = el.querySelector('.list');
     const images = el.querySelector('.images');
@@ -18,13 +18,10 @@ export default el => {
 
     driver.enable();
 
-    const lenis = window.lenis;
-    const onLenisScroll = instance => driver.onScroll(instance.animatedScroll);
-    lenis?.on("scroll", onLenisScroll);
-    driver.onScroll(lenis?.animatedScroll ?? window.scrollY ?? 0);
-
     return () => {
-        lenis?.off("scroll", onLenisScroll);
-        driver.disable();
+        destroyText?.();
+        driver.destroy();
+        style.clear(list);
+        style.clear(images);
     };
 }

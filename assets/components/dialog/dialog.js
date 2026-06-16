@@ -105,6 +105,7 @@ class Dialog {
             try { fn(); } catch (_) { /* noop */ }
         });
         this._cleanups = [];
+        if (this.dialog) delete this.dialog.__dialogInstance;
     }
 
     _disableFocusTrap() {
@@ -262,4 +263,5 @@ export default el => {
     if (el.__dialogInstance) return;
 
     el.__dialogInstance = new Dialog(el);
+    return () => el.__dialogInstance?.destroy?.();
 };

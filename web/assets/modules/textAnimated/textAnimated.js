@@ -13,12 +13,10 @@ function textAnimated(el) {
     e.timeline(0, 100, val => stagger(chars, val));
   });
   driver.enable();
-  const lenis = window.lenis;
-  const onLenisScroll = instance => driver.onScroll(instance.animatedScroll);
-  lenis === null || lenis === void 0 || lenis.on("scroll", onLenisScroll);
   return () => {
-    driver.disable();
-    lenis === null || lenis === void 0 || lenis.off("scroll", onLenisScroll);
+    driver.destroy();
+    style.clear(title);
+    chars.forEach(style.clear);
     restore();
   };
 }

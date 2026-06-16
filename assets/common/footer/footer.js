@@ -120,40 +120,39 @@ export default el => {
     let raf = null;
 
     const tick = () => {
+        raf = null;
         progress += (target - progress) * 0.18;
 
         if (Math.abs(target - progress) < 0.0005) progress = target;
 
         draw(progress * (count - 1));
 
-        raf = requestAnimationFrame(tick);
+        if (progress !== target) raf = requestAnimationFrame(tick);
+    };
+
+    const requestTick = () => {
+        if (raf == null) raf = requestAnimationFrame(tick);
     };
 
     driver.add(el, "bottom-bottom", e => {
         e.timeline(80, 100, val => {
-            target = clamp(val);
+            target = clamp(val / 100);
+            requestTick();
         });
     });
 
     driver.enable();
     resize();
-    raf = requestAnimationFrame(tick);
+    requestTick();
 
     window.addEventListener("resize", resize);
 
-    const lenis = window.lenis;
-    const onLenisScroll = instance => driver.onScroll(instance.animatedScroll);
-    lenis?.on("scroll", onLenisScroll);
-
-    driver.onScroll(lenis?.animatedScroll ?? window.scrollY ?? 0);
-
     return () => {
         disposed = true;
-        lenis?.off("scroll", onLenisScroll);
         window.removeEventListener("resize", resize);
-        driver.disable();
+        driver.destroy();
 
-        if (raf) cancelAnimationFrame(raf);
+        if (raf != null) cancelAnimationFrame(raf);
 
         images.forEach(img => img?.close?.());
     };

@@ -1,5 +1,7 @@
 .strate-learn {
     padding-block: 13rem 6rem;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 800px;
 
 
     .list {

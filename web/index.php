@@ -27,7 +27,7 @@
         "options" => [
             "id" => "our_foundations",
         ],
-        "suptitle" => "✦ Our foundation : the hybrid AI <sup>TM</sup> charter",
+        "suptitle" => "Our foundation : the hybrid AI <sup>TM</sup> charter",
         "title" => "Creative value with AI safely, creatively, competively.<br>Six principles that guide how Lonsdale uses AI to outpace creativity, bot replace it.",
         "items" => [
             [
@@ -69,11 +69,11 @@
         "options" => [
             "id" => "platform",
         ],
-        "suptitle" => "+ Platform",
+        "suptitle" => "Platform",
         "title" => "Dust",
         "text" => "<p>Dust is our central AI platform for building and deploying intelligent assistants. Access custom agents, connect your data sources, and supercharge your creative process.</p>",
         "link" => [
-            "title" => "Acees dust",
+            "title" => "Access dust",
             "url" => "#",
             "target" => "_blank",
         ],

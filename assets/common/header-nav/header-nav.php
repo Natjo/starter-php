@@ -57,7 +57,7 @@ $current = trim(parse_url($_SERVER["REQUEST_URI"] ?? "/", PHP_URL_PATH), "/");
         <?php endforeach; ?>
     </nav>
 
-    <?php component::btn("Access Dust", "btn-1", ["blank", 16, 16]); ?>
+    <?php component::btn("Access Dust", "btn-1 cta", ["blank", 16, 16]); ?>
 
     <button class="btn-nav" type="button" aria-expanded="false" aria-controls="nav">
         Menu

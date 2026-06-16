@@ -3,6 +3,10 @@ export default function selectLang(element) {
   const list = element.querySelector('.select-lang-list');
   if (!(trigger instanceof HTMLButtonElement) || !(list instanceof HTMLElement)) return;
   const links = [...list.querySelectorAll('a.select-lang-option')];
+  const controller = new AbortController();
+  const listenerOptions = {
+    signal: controller.signal
+  };
   const close = (restoreFocus = false) => {
     trigger.setAttribute('aria-expanded', 'false');
     list.hidden = true;
@@ -30,7 +34,7 @@ export default function selectLang(element) {
     } else {
       close();
     }
-  });
+  }, listenerOptions);
   trigger.addEventListener('keydown', event => {
     if (event.key === 'ArrowDown') {
       event.preventDefault();
@@ -39,7 +43,7 @@ export default function selectLang(element) {
       event.preventDefault();
       open('last');
     }
-  });
+  }, listenerOptions);
   list.addEventListener('keydown', event => {
     const currentIndex = links.indexOf(document.activeElement);
     if (event.key === 'Escape') {
@@ -62,13 +66,17 @@ export default function selectLang(element) {
       event.preventDefault();
       (_links$at2 = links.at(-1)) === null || _links$at2 === void 0 || _links$at2.focus();
     }
-  });
+  }, listenerOptions);
   document.addEventListener('pointerdown', event => {
     if (!element.contains(event.target)) close();
-  });
+  }, listenerOptions);
   element.addEventListener('focusout', () => {
     window.requestAnimationFrame(() => {
       if (!element.contains(document.activeElement)) close();
     });
-  });
+  }, listenerOptions);
+  return () => {
+    controller.abort();
+    close();
+  };
 }

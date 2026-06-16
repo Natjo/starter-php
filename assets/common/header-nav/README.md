@@ -3,18 +3,14 @@
 
 
 ## Options
-```php
-$options = [
-    "id" => "strate-id"
-]
-```
+
 
 ## Data Contract
 ```php
 [
     ...$options,
     
-    "nav" => "",
+    "nav" => [],
     "link" => [
         "title" => "Acees dust",
         "url" => "#",
@@ -24,10 +20,10 @@ $options = [
 ```
 
 ## Acf
-| Nom  | id            | Type de champ | Obligatoire | administrable |       remarque |
-| ---- | ------------- | ------------- | ----------: | ------------: | -------------: |
-| Nav  | `menu-header` | ``            |         Oui |           Oui | Menu wordpress |
-| Lien | `link`        | ``            |         Oui |           Oui |      Lien Dust |
+| Nom  | id     | Type de champ | Obligatoire | administrable |             remarque |
+| ---- | ------ | ------------- | ----------: | ------------: | -------------------: |
+| Nav  | `nav`  | -             |         Oui |           Oui | nav qui se construit en fonction de l'option de strate `menu-name`|
+| Lien | `link` | `link`        |         Oui |           Oui |            Lien Dust |
 
 
 

@@ -14,6 +14,12 @@
     .btn-nav {
         display: none
     }
+    .cta{
+        margin-left: auto;
+    }
+    .header-nav-logo{
+        margin-right: auto;
+    }
 
     #nav {
         display: flex;

@@ -85,7 +85,7 @@ export default function shares(root) {
     if (!(root instanceof HTMLElement)) return;
     if (root.__sharesInstance) return;
 
-    root.addEventListener("click", async (event) => {
+    const onClick = async event => {
         const target = event.target instanceof Element ? event.target : null;
         const button = target?.closest("button[data-type][data-url]");
         if (!button || !root.contains(button)) return;
@@ -102,7 +102,13 @@ export default function shares(root) {
         }
 
         openShareWindow(url);
-    });
+    };
 
+    root.addEventListener("click", onClick);
     root.__sharesInstance = true;
+
+    return () => {
+        root.removeEventListener("click", onClick);
+        delete root.__sharesInstance;
+    };
 }

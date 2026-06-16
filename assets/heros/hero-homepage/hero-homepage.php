@@ -7,10 +7,9 @@ $slides = $args["images"] ?? $args["items"] ?? [];
     <div class="hero-content">
         <?php component::eyebrow($args); ?>
         <?php component::title($args, 1, "title-1"); ?>
-        <?php component::text($args, "intro"); ?>
+        <?php component::text($args, "intro"); ?>  
+        <?php component::icon("hybrid_ai", 240, 55, "hybrid_ai") ?>
     </div>
 
     <?php component::slideshow($slides); ?>
-
-    <?php component::icon("hybrid_ai", 240, 55, "hybrid_ai") ?>
 </header>

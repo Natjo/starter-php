@@ -131,10 +131,98 @@ function createStyleCache() {
     },
     scale(el, value) {
       set(lastScale, el, "scale", value);
+    },
+    clear(el) {
+      if (!el) return;
+      el.style.transform = "";
+      el.style.clipPath = "";
+      el.style.opacity = "";
+      el.style.scale = "";
+      el.style.color = "";
+      lastTransform.delete(el);
+      lastClipPath.delete(el);
+      lastOpacity.delete(el);
+      lastScale.delete(el);
+      lastColor.delete(el);
+      const vars = lastVars.get(el);
+      vars === null || vars === void 0 || vars.forEach((_, name) => el.style.removeProperty(name));
+      lastVars.delete(el);
     }
   };
 }
 const style = createStyleCache();
+const activeDrivers = new Set();
+const observedSections = new Map();
+let scrollSource = null;
+let layoutObserver = null;
+let resizeRaf = null;
+const currentScrollY = () => {
+  var _ref, _window$lenis$animate, _window$lenis;
+  return (_ref = (_window$lenis$animate = (_window$lenis = window.lenis) === null || _window$lenis === void 0 ? void 0 : _window$lenis.animatedScroll) !== null && _window$lenis$animate !== void 0 ? _window$lenis$animate : window.scrollY) !== null && _ref !== void 0 ? _ref : 0;
+};
+const notifyDrivers = scrollY => {
+  for (const driver of activeDrivers) {
+    driver.onScroll(scrollY);
+  }
+};
+const onNativeScroll = () => notifyDrivers(window.scrollY || 0);
+const onWindowResize = () => {
+  if (resizeRaf != null) return;
+  resizeRaf = requestAnimationFrame(() => {
+    resizeRaf = null;
+    for (const driver of activeDrivers) {
+      driver._handleResize();
+    }
+  });
+};
+const onLenisScroll = instance => {
+  var _instance$animatedScr;
+  return notifyDrivers((_instance$animatedScr = instance === null || instance === void 0 ? void 0 : instance.animatedScroll) !== null && _instance$animatedScr !== void 0 ? _instance$animatedScr : currentScrollY());
+};
+const intersectionObserver = new IntersectionObserver(entries => {
+  for (const entry of entries) {
+    var _record$driver;
+    const record = observedSections.get(entry.target);
+    record === null || record === void 0 || (_record$driver = record.driver) === null || _record$driver === void 0 || _record$driver._handleIntersection(record.section, entry.isIntersecting);
+  }
+}, {
+  rootMargin: "100px 0px 100px 0px",
+  threshold: 0
+});
+const connectSharedObservers = () => {
+  var _window$lenis2;
+  if (activeDrivers.size !== 1) return;
+  window.addEventListener("resize", onWindowResize, {
+    passive: true
+  });
+  if ((_window$lenis2 = window.lenis) !== null && _window$lenis2 !== void 0 && _window$lenis2.on) {
+    scrollSource = window.lenis;
+    scrollSource.on("scroll", onLenisScroll);
+  } else {
+    scrollSource = window;
+    window.addEventListener("scroll", onNativeScroll, {
+      passive: true
+    });
+  }
+  if ("ResizeObserver" in window && document.body) {
+    layoutObserver = new ResizeObserver(onWindowResize);
+    layoutObserver.observe(document.body);
+  }
+};
+const disconnectSharedObservers = () => {
+  var _scrollSource, _scrollSource$off, _layoutObserver;
+  if (activeDrivers.size) return;
+  window.removeEventListener("resize", onWindowResize);
+  window.removeEventListener("scroll", onNativeScroll);
+  (_scrollSource = scrollSource) === null || _scrollSource === void 0 || (_scrollSource$off = _scrollSource.off) === null || _scrollSource$off === void 0 || _scrollSource$off.call(_scrollSource, "scroll", onLenisScroll);
+  scrollSource = null;
+  (_layoutObserver = layoutObserver) === null || _layoutObserver === void 0 || _layoutObserver.disconnect();
+  layoutObserver = null;
+  if (resizeRaf != null) {
+    cancelAnimationFrame(resizeRaf);
+    resizeRaf = null;
+  }
+};
 class ScrollDriver {
   constructor() {
     this._wh = window.innerHeight;
@@ -143,89 +231,96 @@ class ScrollDriver {
     this._latestScrollY = window.scrollY || 0;
     this._rafId = null;
     this._activeSections = new Set();
-    this._io = new IntersectionObserver(entries => {
-      let needsUpdate = false;
-      for (const entry of entries) {
-        const s = this._sectionsByEl.get(entry.target);
-        if (!s) continue;
-        entry.isIntersecting ? s.el.classList.add("viewed") : s.el.classList.remove("viewed");
-        if (entry.isIntersecting) {
-          if (!this._activeSections.has(s)) {
-            this._activeSections.add(s);
-            needsUpdate = true;
-          }
-        } else {
-          if (this._activeSections.has(s)) {
-            if (this._enabled) {
-              try {
-                s._update(this._latestScrollY);
-              } catch (_unused) {}
-            }
-            this._activeSections.delete(s);
-            needsUpdate = true;
-          }
-        }
-        if (entry.isIntersecting) needsUpdate = true;
-      }
-      if (this._enabled && needsUpdate) this._schedule();
-    }, {
-      rootMargin: "100px 0px 100px 0px",
-      threshold: 0
-    });
-    this._sectionsByEl = new Map();
-    this._onResize = () => {
+    this._handleResize = () => {
       this._wh = window.innerHeight;
       for (const s of this._sections) s._measure(this._wh);
+      this._syncActiveSections();
       this._schedule();
     };
-    this._onScroll = () => {
-      this.onScroll(window.scrollY || 0);
-    };
+  }
+  _handleIntersection(section, isIntersecting) {
+    section.el.classList.toggle("viewed", isIntersecting);
+    if (isIntersecting) {
+      this._activeSections.add(section);
+    } else if (this._activeSections.has(section)) {
+      if (this._enabled) {
+        try {
+          section._update(this._latestScrollY);
+        } catch (_unused) {}
+      }
+      this._activeSections.delete(section);
+    }
+    if (this._enabled) this._schedule();
   }
   onScroll(scrollY) {
     const y = Number(scrollY);
     this._latestScrollY = Number.isFinite(y) ? y : 0;
     this._schedule();
   }
+  refresh() {
+    this._handleResize();
+    this.onScroll(currentScrollY());
+  }
   _schedule() {
     if (this._rafId != null) return;
     this._rafId = requestAnimationFrame(() => {
       this._rafId = null;
       const y = this._latestScrollY;
-      const list = this._activeSections.size ? this._activeSections : this._sections;
-      for (const s of list) s._update(y);
+      for (const s of this._activeSections) s._update(y);
     });
+  }
+  _syncActiveSections() {
+    const margin = 100;
+    for (const s of this._sections) {
+      const rect = s.el.getBoundingClientRect();
+      const isActive = rect.bottom >= -margin && rect.top <= this._wh + margin;
+      s.el.classList.toggle("viewed", isActive);
+      if (isActive) {
+        this._activeSections.add(s);
+      } else {
+        this._activeSections.delete(s);
+      }
+    }
   }
   add(el, type = "top-bottom", animation) {
     if (!el) return null;
     const s = new SectionSection(el, type, animation, () => this._wh);
     this._sections.push(s);
-    this._sectionsByEl.set(el, s);
-    this._io.observe(el);
+    observedSections.set(el, {
+      driver: this,
+      section: s
+    });
+    intersectionObserver.observe(el);
     s._measure(this._wh);
     return s;
   }
   enable() {
     if (this._enabled) return;
     this._enabled = true;
-    window.addEventListener("resize", this._onResize, {
-      passive: true
-    });
-    window.addEventListener("scroll", this._onScroll, {
-      passive: true
-    });
-    this._onResize();
-    this._onScroll();
+    activeDrivers.add(this);
+    connectSharedObservers();
+    this._handleResize();
+    this.onScroll(currentScrollY());
   }
   disable() {
     if (!this._enabled) return;
     this._enabled = false;
-    window.removeEventListener("resize", this._onResize);
-    window.removeEventListener("scroll", this._onScroll);
+    activeDrivers.delete(this);
+    disconnectSharedObservers();
     if (this._rafId != null) {
       cancelAnimationFrame(this._rafId);
       this._rafId = null;
     }
+  }
+  destroy() {
+    this.disable();
+    for (const s of this._sections) {
+      intersectionObserver.unobserve(s.el);
+      observedSections.delete(s.el);
+      s.el.classList.remove("viewed");
+    }
+    this._activeSections.clear();
+    this._sections.length = 0;
   }
 }
 class SectionSection {
@@ -312,7 +407,7 @@ class SectionSection {
     this._animation(this);
   }
   snap(els, onCurrentOrHandlers, onPrevOrOpts) {
-    var _ref, _handlers$key, _this$_snapStates$get, _handlers$span;
+    var _ref2, _handlers$key, _this$_snapStates$get, _handlers$span;
     const hasHandlers = !!onCurrentOrHandlers && typeof onCurrentOrHandlers === "object";
     const handlers = hasHandlers ? onCurrentOrHandlers : null;
     const onCurrent = hasHandlers ? handlers === null || handlers === void 0 ? void 0 : handlers.current : onCurrentOrHandlers;
@@ -331,7 +426,7 @@ class SectionSection {
     const stepsAll = Math.max(1, totalCount - 1);
     const sliceAll = span / stepsAll;
     if (!this._snapStates) this._snapStates = new Map();
-    const snapKey = (_ref = (_handlers$key = handlers === null || handlers === void 0 ? void 0 : handlers.key) !== null && _handlers$key !== void 0 ? _handlers$key : els) !== null && _ref !== void 0 ? _ref : onCurrent;
+    const snapKey = (_ref2 = (_handlers$key = handlers === null || handlers === void 0 ? void 0 : handlers.key) !== null && _handlers$key !== void 0 ? _handlers$key : els) !== null && _ref2 !== void 0 ? _ref2 : onCurrent;
     const prevState = (_this$_snapStates$get = this._snapStates.get(snapKey)) !== null && _this$_snapStates$get !== void 0 ? _this$_snapStates$get : {
       inRange: null,
       activeI: null,
@@ -477,10 +572,10 @@ class SectionSection {
     this._lastTimelineRawValue = rawOut;
     const gate = this._getGateBoundary();
     if (!gate.ok) {
-      if (gate.boundary != null) onscroll(num0(gate.boundary) / 100);
+      if (gate.boundary != null) onscroll(num0(this._lastTimelineValue) * 100);
       return;
     }
-    onscroll(out);
+    onscroll(out * 100);
   }
   timelineInOut(inStart, inEnd, outStart, outEnd, onscroll) {
     const a = Number(inStart);
@@ -500,16 +595,16 @@ class SectionSection {
     this._lastTimelineRawValue = num0(out);
     const gate = this._getGateBoundary();
     if (!gate.ok) {
-      if (gate.boundary != null) onscroll(num0(gate.boundary) / 100);
+      if (gate.boundary != null) onscroll(num0(this._lastTimelineValue) * 100);
       return;
     }
-    onscroll(num0(this._lastTimelineValue));
+    onscroll(num0(this._lastTimelineValue) * 100);
   }
   toggle(threshold, onChange) {
-    var _ref2, _this$_lastTimelineRa;
+    var _ref3, _this$_lastTimelineRa;
     let t = Number(threshold);
     if (Number.isFinite(t) && t > 1) t = t / 100;
-    const current = (_ref2 = (_this$_lastTimelineRa = this._lastTimelineRawValue) !== null && _this$_lastTimelineRa !== void 0 ? _this$_lastTimelineRa : this._lastTimelineValue) !== null && _ref2 !== void 0 ? _ref2 : this._percent / 100;
+    const current = (_ref3 = (_this$_lastTimelineRa = this._lastTimelineRawValue) !== null && _this$_lastTimelineRa !== void 0 ? _this$_lastTimelineRa : this._lastTimelineValue) !== null && _ref3 !== void 0 ? _ref3 : this._percent / 100;
     const now = Number(current) >= t;
     const key = String(t);
     const prev = this._triggerPrevByKey.get(key);
@@ -519,10 +614,10 @@ class SectionSection {
     }
   }
   trigger(threshold, onFire) {
-    var _ref3, _this$_lastTimelineRa2;
+    var _ref4, _this$_lastTimelineRa2;
     let t = Number(threshold);
     if (Number.isFinite(t) && t > 1) t = t / 100;
-    const current = (_ref3 = (_this$_lastTimelineRa2 = this._lastTimelineRawValue) !== null && _this$_lastTimelineRa2 !== void 0 ? _this$_lastTimelineRa2 : this._lastTimelineValue) !== null && _ref3 !== void 0 ? _ref3 : this._percent / 100;
+    const current = (_ref4 = (_this$_lastTimelineRa2 = this._lastTimelineRawValue) !== null && _this$_lastTimelineRa2 !== void 0 ? _this$_lastTimelineRa2 : this._lastTimelineValue) !== null && _ref4 !== void 0 ? _ref4 : this._percent / 100;
     const now = Number(current) >= t;
     if (!now) return;
     const key = String(t);
@@ -587,7 +682,7 @@ function clamp01(x) {
   return Math.min(1, Math.max(0, n));
 }
 function progressChars(items, val, opts = {}) {
-  var _opts$rootEl, _opts$rootEl2, _ref4, _ref5, _opts$rootEl3, _list$, _list$$closest, _list$2;
+  var _opts$rootEl, _opts$rootEl2, _ref5, _ref6, _opts$rootEl3, _list$, _list$$closest, _list$2;
   const list = Array.isArray(items) ? items : Array.from(items || []);
   const raw = Number(val);
   const progress = clamp01(raw >= 0 && raw <= 1 ? raw : raw / 100);
@@ -603,7 +698,7 @@ function progressChars(items, val, opts = {}) {
     softness = 10;
   }
   softness = Math.max(0.0001, softness);
-  const roots = opts.rootEl && !((_opts$rootEl = opts.rootEl) !== null && _opts$rootEl !== void 0 && _opts$rootEl.tagName) && typeof ((_opts$rootEl2 = opts.rootEl) === null || _opts$rootEl2 === void 0 ? void 0 : _opts$rootEl2.length) === "number" ? Array.from(opts.rootEl || []).filter(Boolean) : [(_ref4 = (_ref5 = (_opts$rootEl3 = opts.rootEl) !== null && _opts$rootEl3 !== void 0 ? _opts$rootEl3 : (_list$ = list[0]) === null || _list$ === void 0 || (_list$$closest = _list$.closest) === null || _list$$closest === void 0 ? void 0 : _list$$closest.call(_list$, "p")) !== null && _ref5 !== void 0 ? _ref5 : (_list$2 = list[0]) === null || _list$2 === void 0 ? void 0 : _list$2.parentElement) !== null && _ref4 !== void 0 ? _ref4 : list[0]].filter(Boolean);
+  const roots = opts.rootEl && !((_opts$rootEl = opts.rootEl) !== null && _opts$rootEl !== void 0 && _opts$rootEl.tagName) && typeof ((_opts$rootEl2 = opts.rootEl) === null || _opts$rootEl2 === void 0 ? void 0 : _opts$rootEl2.length) === "number" ? Array.from(opts.rootEl || []).filter(Boolean) : [(_ref5 = (_ref6 = (_opts$rootEl3 = opts.rootEl) !== null && _opts$rootEl3 !== void 0 ? _opts$rootEl3 : (_list$ = list[0]) === null || _list$ === void 0 || (_list$$closest = _list$.closest) === null || _list$$closest === void 0 ? void 0 : _list$$closest.call(_list$, "p")) !== null && _ref6 !== void 0 ? _ref6 : (_list$2 = list[0]) === null || _list$2 === void 0 ? void 0 : _list$2.parentElement) !== null && _ref5 !== void 0 ? _ref5 : list[0]].filter(Boolean);
   if (!progressChars._initedRoot) progressChars._initedRoot = new WeakMap();
   if (!progressChars._initedItem) progressChars._initedItem = new WeakSet();
   const initedRoot = progressChars._initedRoot;

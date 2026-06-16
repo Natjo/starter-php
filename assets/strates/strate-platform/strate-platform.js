@@ -21,13 +21,14 @@ export default el => {
         maxHeights = items.map(item => item.inner?.offsetHeight || 0);
     };
 
-    const reapply = () => driver.onScroll(window.lenis?.animatedScroll ?? window.scrollY ?? 0);
+    const reapply = () => driver.refresh();
 
     driver.add(el, "top-bottom", e => {
         e.timeline(0, 100, val => {
+            const progress = val / 100;
             const seg = 1 / segments;
-            const segIndex = Math.min(segments - 1, Math.floor(val / seg));
-            const t = easeOut(clamp((val - segIndex * seg) / seg));
+            const segIndex = Math.min(segments - 1, Math.floor(progress / seg));
+            const t = easeOut(clamp((progress - segIndex * seg) / seg));
 
             items.forEach((item, index) => {
                 let height = 0;
@@ -35,6 +36,11 @@ export default el => {
                 else if (index === segIndex + 1) height = t * maxHeights[index];
 
                 style.var(item.content, `${height}px`, "--height");
+
+                let perone = 0;
+                if (index === segIndex) perone = 1 - t;
+                else if (index === segIndex + 1) perone = t;
+                style.var(item.content, perone, "--perone");
             });
         });
     });
@@ -50,16 +56,12 @@ export default el => {
     });
     items.forEach(item => item.inner && ro.observe(item.inner));
 
-    const lenis = window.lenis;
-    const onLenisScroll = instance => driver.onScroll(instance.animatedScroll);
-    lenis?.on("scroll", onLenisScroll);
-
     reapply();
 
     return () => {
-        lenis?.off("scroll", onLenisScroll);
-        driver.disable();
+        driver.destroy();
         ro.disconnect();
-        items.forEach(item => item.content?.style.removeProperty("--height"));
+        style.clear(el);
+        items.forEach(item => style.clear(item.content));
     };
 };

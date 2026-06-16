@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once STARTER_ROOT . '/method.php';
+
 $uploadsDir = WEB_UPLOADS_ROOT;
 $assetsDir = WEB_ASSETS_ROOT;
 $sizesFile = STARTER_ROOT . '/image-sizes.json';
@@ -218,25 +220,21 @@ if (!function_exists('image_defaults')) {
 if (!function_exists('image_config')) {
     function image_config(string $file): array
     {
+        $json = [];
         if (!is_file($file)) {
-            return ['defaults' => default_image_options(), 'sizes' => []];
+            $defaults = default_image_options();
+        } else {
+            $json = json_decode((string) file_get_contents($file), true);
+            $json = is_array($json) ? $json : [];
+            $defaults = image_options(is_array($json['_defaults'] ?? null) ? $json['_defaults'] : []);
         }
 
-        $json = json_decode((string) file_get_contents($file), true);
-        if (!is_array($json)) {
-            return ['defaults' => default_image_options(), 'sizes' => []];
-        }
-
-        $defaults = image_options(is_array($json['_defaults'] ?? null) ? $json['_defaults'] : []);
+        $registeredSizes = function_exists('starter_registered_image_sizes')
+            ? starter_registered_image_sizes()
+            : [];
         $sizes = [];
-        foreach ($json as $name => $config) {
-            if ($name === '_defaults') {
-                continue;
-            }
-
-            $values = is_array($config) && array_is_list($config)
-                ? ['width' => $config[0] ?? 0, 'height' => $config[1] ?? 0]
-                : (is_array($config) ? $config : []);
+        foreach ($registeredSizes as $name => $config) {
+            $values = is_array($config) ? $config : [];
 
             $width = (int) ($values['width'] ?? 0);
             $height = (int) ($values['height'] ?? 0);
@@ -295,38 +293,6 @@ if (!function_exists('save_image_settings')) {
                 'sharpen' => 0.2,
             ]),
         ];
-
-        $names = is_array($post['name'] ?? null) ? $post['name'] : [];
-        $widths = is_array($post['width'] ?? null) ? $post['width'] : [];
-        $heights = is_array($post['height'] ?? null) ? $post['height'] : [];
-        $fits = is_array($post['fit'] ?? null) ? $post['fit'] : [];
-        $positions = is_array($post['position'] ?? null) ? $post['position'] : [];
-        $sharpens = is_array($post['sharpen'] ?? null) ? $post['sharpen'] : [];
-
-        foreach ($names as $index => $name) {
-            $name = preg_replace('/[^A-Za-z0-9_-]/', '', (string) $name);
-            $width = (int) ($widths[$index] ?? 0);
-            $height = (int) ($heights[$index] ?? 0);
-
-            if ($name === '' || $width <= 0 || $height <= 0) {
-                continue;
-            }
-
-            $options = image_options([
-                'fit' => $fits[$index] ?? 'cover',
-                'position' => $positions[$index] ?? 'center',
-                'quality' => $settings['_defaults']['quality'],
-                'sharpen' => $sharpens[$index] ?? $settings['_defaults']['sharpen'],
-            ]);
-
-            $settings[$name] = [
-                'width' => $width,
-                'height' => $height,
-                'fit' => $options['fit'],
-                'position' => $options['position'],
-                'sharpen' => $options['sharpen'],
-            ];
-        }
 
         file_put_contents($file, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     }
@@ -810,8 +776,6 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 
 $config = image_config($sizesFile);
 $defaults = $config['defaults'];
-$sizes = $config['sizes'];
-$sizes[''] = array_replace($defaults, ['width' => '', 'height' => '']);
 $webpStatus = admin_webp_status($uploadsDir, $manifestFile, $allowedExtensions);
 $cssBundleManifest = admin_css_bundle_manifest($assetsDir);
 $cssBundles = is_array($cssBundleManifest['bundles'] ?? null) ? $cssBundleManifest['bundles'] : [];
@@ -916,59 +880,14 @@ ob_start();
 
     <form class="admin-form" method="post">
         <fieldset class="admin-fieldset">
-            <legend>Defaults</legend>
+            <legend>Compression WebP</legend>
 
             <div class="admin-field-grid">
                 <label class="admin-label">
-                    WebP quality
                     <input class="admin-input" type="number" name="default_quality" min="1" max="100" value="<?= (int) $defaults['quality'] ?>">
-                </label>
-
-                <label class="admin-label">
-                    Filter
-                    <input class="admin-input" type="text" value="lanczos" readonly>
                 </label>
             </div>
         </fieldset>
-
-        <div class="admin-table-wrap">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Width</th>
-                        <th>Height</th>
-                        <th>Fit</th>
-                        <th>Position</th>
-                        <th>Sharpen</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($sizes as $name => $size) : ?>
-                        <tr>
-                            <td><input class="admin-input" name="name[]" value="<?= admin_escape((string) $name) ?>"></td>
-                            <td><input class="admin-input" type="number" name="width[]" min="1" value="<?= admin_escape((string) $size['width']) ?>"></td>
-                            <td><input class="admin-input" type="number" name="height[]" min="1" value="<?= admin_escape((string) $size['height']) ?>"></td>
-                            <td>
-                                <select class="admin-select" name="fit[]">
-                                    <?php foreach (['cover', 'contain'] as $fit) : ?>
-                                        <option value="<?= $fit ?>"<?= $size['fit'] === $fit ? ' selected' : '' ?>><?= $fit ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </td>
-                            <td>
-                                <select class="admin-select" name="position[]">
-                                    <?php foreach (array_keys(image_gravity_map()) as $position) : ?>
-                                        <option value="<?= admin_escape($position) ?>"<?= $size['position'] === $position ? ' selected' : '' ?>><?= admin_escape($position) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </td>
-                            <td><input class="admin-input" type="number" name="sharpen[]" min="0" max="10" step="0.1" value="<?= admin_escape((string) $size['sharpen']) ?>"></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
 
         <div class="admin-actions">
             <button class="admin-button" type="submit" name="action" value="save_settings">Save settings</button>

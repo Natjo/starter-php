@@ -5,7 +5,6 @@ Scroll-driven animation helpers for this project (no GSAP required).
 
 ```js
 import { ScrollDriver, style, stagger, cubicBezier } from "../../modules/scrollAnimate.js";
-import { bindLenis } from "../../modules/bindLenis.js";
 
 export default (el, ctx) => {
     const sectionAnimate = new ScrollDriver();
@@ -16,12 +15,10 @@ export default (el, ctx) => {
         });
     });
 
-    const unbind = bindLenis(sectionAnimate, ctx);
     sectionAnimate.enable();
 
     return () => {
-        unbind?.();
-        sectionAnimate.disable();
+        sectionAnimate.destroy();
     };
 };
 ```
@@ -29,9 +26,6 @@ export default (el, ctx) => {
 - **`style`**: cached style-writer helpers (`translate`, `inset`, `opacity`, `var`, …)
 - **`stagger`**: callable helper to drive “progress across many items”
 - **`cubicBezier`**: easing function factory for JS eases
-
->Lenis binding is intentionally in a separate module:<br>
-> **`bindLenis(sectionAnimate, ctx)`** in `assets/modules/bindLenis.js`
 
 ## 1. ScrollDriver
 
@@ -56,14 +50,20 @@ export default (el, ctx) => {
 
 ### sectionAnimate.onScroll(scrollY)
 
-Use this when a custom scroll driver (Lenis) owns scroll position. It schedules a RAF update.
+Schedules a RAF update for an explicit scroll position. Most modules do not need
+to call it because `ScrollDriver` automatically uses Lenis when available,
+otherwise native scroll.
 
-### sectionAnimate.enable() / disable()
+### sectionAnimate.refresh()
 
-Attaches/removes native `scroll` + `resize` listeners.
+Re-measures sections and reapplies the current scroll position. Use it after a
+module changes its own layout.
 
-If you’re using Lenis, keep `enable()` (for resize + IO behavior) and forward scroll via `bindLenis()`.
+### sectionAnimate.enable() / disable() / destroy()
 
+`enable()` registers the driver with the shared scroll/resize controller.
+`disable()` pauses it. `destroy()` additionally disconnects observers, removes
+`.viewed`, and releases registered sections.
 
 
 ## The `e` helper (passed to `animation(e)`)

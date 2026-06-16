@@ -35,7 +35,10 @@ export default (el) => {
         });
     };
 
+    const controller = new AbortController();
     items.forEach(item => {
-        item.button.addEventListener("click", () => toggle(item));
+        item.button.addEventListener("click", () => toggle(item), { signal: controller.signal });
     });
+
+    return () => controller.abort();
 };

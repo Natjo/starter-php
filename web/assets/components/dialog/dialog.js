@@ -87,6 +87,7 @@ class Dialog {
       } catch (_) {}
     });
     this._cleanups = [];
+    if (this.dialog) delete this.dialog.__dialogInstance;
   }
   _disableFocusTrap() {
     this._trapCleanups.forEach(fn => {
@@ -254,4 +255,8 @@ export default el => {
   if (!(el instanceof HTMLDialogElement)) return;
   if (el.__dialogInstance) return;
   el.__dialogInstance = new Dialog(el);
+  return () => {
+    var _el$__dialogInstance, _el$__dialogInstance$;
+    return (_el$__dialogInstance = el.__dialogInstance) === null || _el$__dialogInstance === void 0 || (_el$__dialogInstance$ = _el$__dialogInstance.destroy) === null || _el$__dialogInstance$ === void 0 ? void 0 : _el$__dialogInstance$.call(_el$__dialogInstance);
+  };
 };

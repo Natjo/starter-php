@@ -1,13 +1,8 @@
 # Footer
 
 
-
 ## Options
-```php
-$options = [
-    "id" => "strate-id"
-]
-```
+
 
 ## Data Contract
 ```php

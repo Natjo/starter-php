@@ -5,7 +5,7 @@
 ## Options
 ```php
 $options = [
-    "id" => "strate-id"
+    "menu-name" => "Showcase"
 ]
 ```
 
@@ -18,61 +18,70 @@ $options = [
     "title" => "Made by human powered <strong>by AI</strong>.",
     "items" => [
         [
-            [
-                "image" => THEME_UPLOADS . "showcase-2.jpg",
-            ],
-            [
-                "image" => THEME_UPLOADS . "showcase-5.jpg",
-            ],
-            [
-                "image" => THEME_UPLOADS . "showcase-3.jpg",
-            ],
+            "items" => [
+                [
+                    "image" => 33
+                ],
+                [
+                    "image" => 33
+                ],
+                [
+                    "image" => 33
+                ],
+            ]
 
         ],
         [
-            [
-                "image" => THEME_UPLOADS . "showcase-1.jpg",
-            ],
-            [
-                "image" => THEME_UPLOADS . "showcase-4.jpg",
-            ],
+            "items" => [
+                [
+                    "image" => 33
+                ],
+                [
+                    "image" =>33
+                ],
+            ]
         ],
         [
-            [
-                "image" => THEME_UPLOADS . "showcase-4.jpg",
-            ],
-            [
-                "image" => THEME_UPLOADS . "showcase-6.jpg",
-            ],
+            "items" => [
+                [
+                    "image" => 33
+                ],
+                [
+                    "image" => 33
+                ],
+            ]
         ],
-
         [
-            [
-                "isVideo" => true,
-                "video" => THEME_UPLOADS . "showcase-1.mp4"
-            ],
-            [
-                "image" => THEME_UPLOADS . "showcase-2.jpg",
-            ],
-            [
-                "image" => THEME_UPLOADS . "showcase-5.jpg",
-            ],
+            "items" => [
+                [
+                    "isVideo" => true,
+                    "video" => 36
+                ],
+                [
+                    "image" => 33
+                ],
+                [
+                    "image" => 33
+                ],
+            ]
         ]
     ]
 ]
 ```
 
 ## Acf
-| Nom | id  | Type de champ | Obligatoire | administrable | remarque |
-| --- | --- | ------------- | ----------: | ------------: ||
-| Sur titre | `suptitle` | `wysiwyg light` |         Oui |           Oui ||
-| Titre     | `title`    | `wysiwyg light` |         Oui |           Oui ||
-| Images    | `items`    | ``              |         Oui |           Oui | Il faut 4 colonnes|
+| Nom       | id         | Type de champ            | Obligatoire | administrable |        commentaire |
+| --------- | ---------- | ------------------------ | ----------: | ------------: | -----------------: |
+| Sur titre | `suptitle` | `wysiwyg light`          |         Oui |           Oui |                    |
+| Titre     | `title`    | `wysiwyg light`          |         Oui |           Oui |                    |
+| Colonnes  | `items`    | `repeteur`  - $items_col |         Oui |           Oui | Il faut 4 colonnes |
 
 
-| $items | id      | Type de champ | Obligatoire | administrable |
-| ------ | ------- | ------------- | ----------: | ------------: |
-| Image  | `image` | `image`       |         Oui |           Oui |
+| $items_col    | id        | Type de champ             | Obligatoire | administrable | commentaire |
+| ------------- | --------- | ------------------------- | ----------: | ------------: | ----------: |
+| Est une video | `isVideo` | `vrai/faux`  - $items_row |         Oui |           Oui |             |
+| Image         | `image`   | `image`                   |         Oui |           Oui |          id |
+| Video         | `video`   | `fichier`                 |         Oui |           Oui |          id |
 
 
 

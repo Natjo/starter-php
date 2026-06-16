@@ -5,7 +5,7 @@
 ## Options
 ```php
 $options = [
-    "id" => "strate-id"
+    "menu-name" => "Toolkit"
 ]
 ```
 
@@ -19,46 +19,60 @@ $options = [
     "items" => [
         [
             "suptitle" => "Image generation",
-            "icon" => "midjourney",
+            "icon" => 56,
             "title" => "Midjourney",
             "text" => "<p>Create high-fidelity visuals, mood boards, and concept art. Use detailed prompts with style references for brand-consistent results.</p>",
-            "usage" => "<p>Access via Discord. Start prompts with /imagine. Use --ar for aspect ratios, --style for aesthetics.</p>"
+            "usage" => [
+                "title" => "How to use",
+                "text" => "<p>Access via Discord. Start prompts with /imagine. Use --ar for aspect ratios, --style for aesthetics.</p>"
+            ]
+          
         ],
         [
             "suptitle" => "Text & strategy",
-            "icon" => "chatgpt",
+           "icon" => 56,
             "title" => "ChatGPT",
             "text" => "<p>Create high-fidelity visuals, mood boards, and concept art. Use detailed prompts with style references for brand-consistent results.</p>",
-            "usage" => "<p>Access via Discord. Start prompts with /imagine. Use --ar for aspect ratios, --style for aesthetics.</p>"
+              "usage" => [
+                "title" => "How to use",
+                "text" => "<p>Access via Discord. Start prompts with /imagine. Use --ar for aspect ratios, --style for aesthetics.</p>"
+            ]
         ],
         [
             "suptitle" => "Image generation",
-            "icon" => "chatgpt",
+            "icon" => 56,
             "title" => "DALL·E 3",
             "text" => "<p>Create high-fidelity visuals, mood boards, and concept art. Use detailed prompts with style references for brand-consistent results.</p>",
-            "usage" => "<p>Access via Discord. Start prompts with /imagine. Use --ar for aspect ratios, --style for aesthetics.</p>"
+                 "usage" => [
+                "title" => "How to use",
+                "text" => "<p>Access via Discord. Start prompts with /imagine. Use --ar for aspect ratios, --style for aesthetics.</p>"
+            ]
         ]
     ] 
 ]
 ```
 
 ## Acf
-| Nom | id  | Type de champ | Obligatoire | administrable | remarque |
-| --- | --- | ------------- | ----------: | ------------: |------------: |
-| Sur titre | `suptitle` | `wysiwyg light` |         Oui |           Oui ||
-| Titre     | `title`    | `wysiwyg light` |         Oui |           Oui ||
-| Items    | `items`    | ``              |         Oui |           Oui ||
+| Nom       | id         | Type de champ        | Obligatoire | administrable | remarque |
+| --------- | ---------- | -------------------- | ----------: | ------------: | -------: |
+| Sur titre | `suptitle` | `wysiwyg light`      |         Oui |           Oui |          |
+| Titre     | `title`    | `wysiwyg light`      |         Oui |           Oui |          |
+| Items     | `items`    | `repeteur`  - $items |         Oui |           Oui |          |
 
 
-| $items | id  | Type de champ | Obligatoire | administrable | remarque |
-| ------ | --- | ------------- | ----------: | ------------: |------------: |
-| Sur titre | `image` | `wysiwyg light` |         Oui |           Oui ||
-| Icon      | ``      | ``              |         Oui |           Oui | list d'icon |
-| Title     | `image` | `wysiwyg light` |         Oui |           Oui ||
-| Text      | `image` | `wysiwyg`       |         Oui |           Oui ||
-| Usage     | `image` | `wysiwyg`       |         Oui |           Oui ||
+| $items    | id         | Type de champ      | Obligatoire | administrable |    remarque |
+| --------- | ---------- | ------------------ | ----------: | ------------: | ----------: |
+| Sur titre | `suptitle` | `wysiwyg light`    |         Oui |           Oui |             |
+| Icon      | `icon`     | `image`            |         Oui |           Oui | list d'icon |
+| Title     | `title`    | `text`             |         Oui |           Oui |             |
+| Text      | `text`     | `wysiwyg`          |         Oui |           Oui |             |
+| Usage     | `usage`    | `groupe`  - $usage |         Oui |           Oui |             |
 
 
+| $usage | id      | Type de champ  | Obligatoire | administrable | remarque |
+| ------ | ------- | -------------- | ----------: | ------------: | -------: |
+| Titre  | `title` | `text`         |         Oui |           Oui |          |
+| Texte  | `text`  | `zone de text` |         Oui |           Oui |          |
 
 ##  Rules
 

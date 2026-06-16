@@ -1,6 +1,10 @@
 .strate-key_people {
     --layout: [full-start] var(--ctr-offset) [fluid col-1] 1fr [col-1-end col-2] 1fr [col-2-end col-3] 2fr [col-3-end fluid-end] var(--ctr-offset) [full-end];
 
+    &.viewed .images img {
+        will-change: opacity;
+    }
+
     .strate-header {
         grid-column: fluid;
         display: grid;
@@ -54,5 +58,11 @@
         gap: 0;
         margin-top: 6.6rem;
         margin-bottom: 12rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .strate-key_people.viewed .images img {
+        will-change: auto;
     }
 }

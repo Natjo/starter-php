@@ -261,6 +261,8 @@ try {
 }
 
 $symbols = [];
+$symbolGroups = [];
+$singleSymbols = [];
 $spriteDefinitions = '';
 
 if (isset($spriteDocument)) {
@@ -272,21 +274,84 @@ if (isset($spriteDocument)) {
         $symbols[] = [
             'id' => $symbol->getAttribute('id'),
             'viewBox' => $symbol->getAttribute('viewBox'),
+            'size' => (static function (string $viewBox): array {
+                $values = preg_split('/[\s,]+/', trim($viewBox), -1, PREG_SPLIT_NO_EMPTY);
+
+                if (count($values) !== 4 || !is_numeric($values[2]) || !is_numeric($values[3])) {
+                    return [
+                        'label' => 'Taille inconnue',
+                        'width' => PHP_FLOAT_MAX,
+                        'height' => PHP_FLOAT_MAX,
+                    ];
+                }
+
+                return [
+                    'label' => sprintf('%sx%spx', $values[2], $values[3]),
+                    'width' => (float) $values[2],
+                    'height' => (float) $values[3],
+                ];
+            })($symbol->getAttribute('viewBox')),
         ];
         $spriteDefinitions .= $spriteDocument->saveXML($symbol);
     }
 
-    usort($symbols, static fn(array $a, array $b): int => strcasecmp($a['id'], $b['id']));
+    foreach ($symbols as $icon) {
+        $groupKey = $icon['size']['label'];
+
+        if (!isset($symbolGroups[$groupKey])) {
+            $symbolGroups[$groupKey] = [
+                'label' => $icon['size']['label'],
+                'width' => $icon['size']['width'],
+                'height' => $icon['size']['height'],
+                'icons' => [],
+            ];
+        }
+
+        $symbolGroups[$groupKey]['icons'][] = $icon;
+    }
+
+    $symbolGroups = array_values($symbolGroups);
+    usort($symbolGroups, static function (array $a, array $b): int {
+        $widthComparison = $a['width'] <=> $b['width'];
+
+        return $widthComparison !== 0
+            ? $widthComparison
+            : ($a['height'] <=> $b['height']);
+    });
+
+    foreach ($symbolGroups as &$group) {
+        usort($group['icons'], static fn(array $a, array $b): int => strcasecmp($a['id'], $b['id']));
+    }
+    unset($group);
+
+    foreach ($symbolGroups as $key => $group) {
+        if (count($group['icons']) === 1) {
+            $singleSymbols[] = $group['icons'][0];
+            unset($symbolGroups[$key]);
+        }
+    }
+
+    $symbolGroups = array_values($symbolGroups);
+    usort($singleSymbols, static function (array $a, array $b): int {
+        $widthComparison = $a['size']['width'] <=> $b['size']['width'];
+        if ($widthComparison !== 0) {
+            return $widthComparison;
+        }
+
+        $heightComparison = $a['size']['height'] <=> $b['size']['height'];
+
+        return $heightComparison !== 0
+            ? $heightComparison
+            : strcasecmp($a['id'], $b['id']);
+    });
 }
+
+ob_start();
 ?>
 
 <section class="admin-icons">
     <header class="admin-icons-header">
-        <div>
-            <p class="admin-eyebrow">Outils</p>
-            <h1>Icons</h1>
-            <p>Gerez les symboles de <code>assets/img/icons.svg</code>.</p>
-        </div>
+        <p>Gerez les symboles de <code>assets/img/icons.svg</code>.</p>
         <span class="admin-icons-count"><?= count($symbols) ?> icone<?= count($symbols) > 1 ? 's' : '' ?></span>
     </header>
 
@@ -311,29 +376,65 @@ if (isset($spriteDocument)) {
                 </label>
             </div>
 
-            <div class="admin-icons-grid" data-icons-grid>
-                <?php foreach ($symbols as $icon): ?>
-                    <article class="admin-icon-card" data-icon-card data-icon-id="<?= htmlspecialchars(strtolower($icon['id'])) ?>">
-                        <div class="admin-icon-preview">
-                            <svg aria-hidden="true" focusable="false">
-                                <use href="#<?= htmlspecialchars($icon['id']) ?>"></use>
-                            </svg>
+            <div class="admin-icon-groups" data-icons-grid>
+                <?php if ($singleSymbols !== []): ?>
+                    <section class="admin-icon-group admin-icon-group-singles" data-icon-group>
+                        <div class="admin-icons-grid">
+                            <?php foreach ($singleSymbols as $icon): ?>
+                                <article class="admin-icon-card" data-icon-card data-icon-id="<?= htmlspecialchars(strtolower($icon['id'])) ?>">
+                                    <div class="admin-icon-preview">
+                                        <svg aria-hidden="true" focusable="false">
+                                            <use href="#<?= htmlspecialchars($icon['id']) ?>"></use>
+                                        </svg>
+                                    </div>
+                                    <div class="admin-icon-meta">
+                                        <code><?= htmlspecialchars($icon['id']) ?></code>
+                                        <small>Size : <?= htmlspecialchars($icon['size']['label']) ?></small>
+                                    </div>
+                                    <div class="admin-icon-actions">
+                                        <button type="button" class="admin-button is-secondary" data-copy-icon="<?= htmlspecialchars($icon['id']) ?>">Copier</button>
+                                        <form method="post" data-icon-delete-form data-icon-name="<?= htmlspecialchars($icon['id']) ?>">
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="icon_id" value="<?= htmlspecialchars($icon['id']) ?>">
+                                            <button type="submit" class="admin-button is-danger">Supprimer</button>
+                                        </form>
+                                    </div>
+                                </article>
+                            <?php endforeach; ?>
                         </div>
-                        <div class="admin-icon-meta">
-                            <code><?= htmlspecialchars($icon['id']) ?></code>
-                            <?php if ($icon['viewBox'] !== ''): ?>
-                                <small><?= htmlspecialchars($icon['viewBox']) ?></small>
-                            <?php endif; ?>
+                    </section>
+                <?php endif; ?>
+
+                <?php foreach ($symbolGroups as $group): ?>
+                    <section class="admin-icon-group" data-icon-group>
+                        <h2 class="admin-icon-group-title">
+                            Size : <?= htmlspecialchars($group['label']) ?>
+                            <small><?= count($group['icons']) ?> icone<?= count($group['icons']) > 1 ? 's' : '' ?></small>
+                        </h2>
+
+                        <div class="admin-icons-grid">
+                            <?php foreach ($group['icons'] as $icon): ?>
+                                <article class="admin-icon-card" data-icon-card data-icon-id="<?= htmlspecialchars(strtolower($icon['id'])) ?>">
+                                    <div class="admin-icon-preview">
+                                        <svg aria-hidden="true" focusable="false">
+                                            <use href="#<?= htmlspecialchars($icon['id']) ?>"></use>
+                                        </svg>
+                                    </div>
+                                    <div class="admin-icon-meta">
+                                        <code><?= htmlspecialchars($icon['id']) ?></code>
+                                    </div>
+                                    <div class="admin-icon-actions">
+                                        <button type="button" class="admin-button is-secondary" data-copy-icon="<?= htmlspecialchars($icon['id']) ?>">Copier</button>
+                                        <form method="post" data-icon-delete-form data-icon-name="<?= htmlspecialchars($icon['id']) ?>">
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="icon_id" value="<?= htmlspecialchars($icon['id']) ?>">
+                                            <button type="submit" class="admin-button is-danger">Supprimer</button>
+                                        </form>
+                                    </div>
+                                </article>
+                            <?php endforeach; ?>
                         </div>
-                        <div class="admin-icon-actions">
-                            <button type="button" class="admin-button is-secondary" data-copy-icon="<?= htmlspecialchars($icon['id']) ?>">Copier l ID</button>
-                            <form method="post" data-icon-delete-form data-icon-name="<?= htmlspecialchars($icon['id']) ?>">
-                                <input type="hidden" name="action" value="delete">
-                                <input type="hidden" name="icon_id" value="<?= htmlspecialchars($icon['id']) ?>">
-                                <button type="submit" class="admin-button is-danger">Supprimer</button>
-                            </form>
-                        </div>
-                    </article>
+                    </section>
                 <?php endforeach; ?>
             </div>
 
@@ -365,3 +466,11 @@ if (isset($spriteDocument)) {
         </aside>
     </div>
 </section>
+<?php
+
+return [
+    'title' => 'Admin - Icons',
+    'heading' => 'Icons',
+    'intro' => 'Visualiser, ajouter et supprimer les symboles du sprite SVG.',
+    'content' => (string) ob_get_clean(),
+];

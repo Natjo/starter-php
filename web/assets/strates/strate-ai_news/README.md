@@ -6,7 +6,7 @@ Cette strate sert à remontée les news fraiches sur l'AI dans les sites spécia
 ## Options
 ```php
 $options = [
-    "id" => "strate-id"
+    "menu-name" => "News"
 ]
 ```
 
@@ -34,12 +34,21 @@ $options = [
 ```
 
 ## Acf
-| Nom       | id         | Type de champ   | Obligatoire | administrable |
-| --------- | ---------- | --------------- | ----------: | ------------: |
-| Sur titre | `suptitle` | `wysiwyg light` |         Oui |           Oui |
-| Titre     | `title`    | `wysiwyg light` |         Oui |           Oui |
-| Items     | `items`    | -               |           - |             - |
+| Nom       | id         | Type de champ   | Obligatoire | administrable | comentaires |
+| --------- | ---------- | --------------- | ----------: | ------------: | ----------: |
+| Sur titre | `suptitle` | `wysiwyg light` |         Oui |           Oui |             |
+| Titre     | `title`    | `wysiwyg light` |         Oui |           Oui |             |
+| Items     | `items`    | -               |           - |             - |             |
 
+
+| $items   | id         | Type de champ | Obligatoire | administrable |                              comentaires |
+| -------- | ---------- | ------------- | ----------: | ------------: | ---------------------------------------: |
+| Source   | `source`   | `text`        |           - |             - |                                          |
+| Date     | `date`     | `date`        |           - |             - |                     format: 14 juin 2026 |
+| Datetime | `datetime` | `date`        |           - |             - | format: 2026-06-14 pour la balise <time> |
+| Title    | `title`    | `text`        |           - |             - |                                          |
+| Text     | `text`     | `text`        |           - |             - |                                text brut |
+| Lien     | `link`     | `link`        |           - |             - |                                text brut |
 
 ##  Rules
 

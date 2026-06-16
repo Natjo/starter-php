@@ -125,5 +125,15 @@ function admin_specification_section_from_route(string $route): string
 
 function admin_asset_url(string $file): string
 {
-    return admin_base_url() . '/assets/' . ltrim($file, '/');
+    $relative = ltrim($file, '/');
+    $url = admin_base_url() . '/assets/' . $relative;
+    $path = dirname(__DIR__) . '/assets/' . $relative;
+
+    if (!is_file($path)) {
+        return $url;
+    }
+
+    $version = filemtime($path);
+
+    return $version === false ? $url : $url . '?v=' . rawurlencode((string) $version);
 }

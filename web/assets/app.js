@@ -1175,6 +1175,7 @@ function HeaderNav() {
 // assets/modules/hydration/hydration.js
 var moduleVersions = define_MODULE_VERSIONS_default;
 var moduleCache = /* @__PURE__ */ new Map();
+var moduleStates = /* @__PURE__ */ new WeakMap();
 var versionedModulePath = (modulePath) => {
   const version2 = moduleVersions[modulePath.replace(/^\.\//, "")];
   return version2 ? `${modulePath}?v=${version2}` : modulePath;
@@ -1214,24 +1215,43 @@ var importModule = async (moduleName) => {
   }
   throw lastError;
 };
-var hydrateModule = (el) => {
-  if (el.dataset.moduleHydrated === "true") return;
+var cleanupFromResult = (result) => {
+  if (typeof result === "function") return result;
+  if (typeof result?.destroy === "function") return () => result.destroy();
+  if (typeof result?.remove === "function") return () => result.remove();
+  return null;
+};
+var cleanupModule = (el) => {
+  const state = moduleStates.get(el);
+  state?.cleanup?.();
+  moduleStates.delete(el);
+  delete el.dataset.moduleHydrated;
+  delete el.dataset.moduleHydrating;
+};
+var hydrateModule = async (el) => {
+  if (el.dataset.moduleHydrated === "true" || el.dataset.moduleHydrating === "true") return;
   const moduleName = el.dataset.module;
   if (!moduleName) return;
-  importModule(moduleName).then((module) => {
+  el.dataset.moduleHydrating = "true";
+  try {
+    const module = await importModule(moduleName);
     const hydrate = module.default;
-    if (typeof hydrate === "function") {
-      hydrate(el);
-      el.dataset.moduleHydrated = "true";
+    if (typeof hydrate !== "function") return;
+    const cleanup = cleanupFromResult(hydrate(el));
+    if (!el.isConnected) {
+      cleanup?.();
+      return;
     }
-  }).catch((error) => {
+    moduleStates.set(el, { cleanup });
+    el.dataset.moduleHydrated = "true";
+  } catch (error) {
     console.error(`Module introuvable : ${moduleName}`, error);
-  });
+  } finally {
+    delete el.dataset.moduleHydrating;
+  }
 };
 var shouldHydrateOnVisible = (el) => /\B@visible\s+true\b/.test(el.dataset.context || "");
 function ModulesHydration() {
-  const modules = document.querySelectorAll("[data-module]");
-  if (modules.length === 0) return;
   const visibleObserver = "IntersectionObserver" in window ? new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (!entry.isIntersecting) return;
@@ -1239,7 +1259,8 @@ function ModulesHydration() {
       hydrateModule(entry.target);
     });
   }, { rootMargin: "200px 0px" }) : null;
-  modules.forEach((el) => {
+  const observeModule = (el) => {
+    if (!(el instanceof HTMLElement)) return;
     if (shouldHydrateOnVisible(el)) {
       if (visibleObserver) {
         visibleObserver.observe(el);
@@ -1247,7 +1268,34 @@ function ModulesHydration() {
       }
     }
     hydrateModule(el);
+  };
+  const modulesIn = (node) => {
+    if (!(node instanceof Element)) return [];
+    return [
+      ...node.matches("[data-module]") ? [node] : [],
+      ...node.querySelectorAll("[data-module]")
+    ];
+  };
+  document.querySelectorAll("[data-module]").forEach(observeModule);
+  const domObserver = new MutationObserver((records) => {
+    records.forEach((record) => {
+      record.removedNodes.forEach((node) => {
+        modulesIn(node).forEach((el) => {
+          visibleObserver?.unobserve(el);
+          cleanupModule(el);
+        });
+      });
+      record.addedNodes.forEach((node) => {
+        modulesIn(node).forEach(observeModule);
+      });
+    });
   });
+  domObserver.observe(document.body, { childList: true, subtree: true });
+  return () => {
+    domObserver.disconnect();
+    visibleObserver?.disconnect();
+    document.querySelectorAll("[data-module]").forEach(cleanupModule);
+  };
 }
 
 // assets/app.js
