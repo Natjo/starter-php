@@ -156,131 +156,66 @@ function createStyleCache() {
             // If you prefer wider support, set scale via transform string instead.
             set(lastScale, el, "scale", value);
         },
-        clear(el) {
-            if (!el) return;
-
-            el.style.transform = "";
-            el.style.clipPath = "";
-            el.style.opacity = "";
-            el.style.scale = "";
-            el.style.color = "";
-
-            lastTransform.delete(el);
-            lastClipPath.delete(el);
-            lastOpacity.delete(el);
-            lastScale.delete(el);
-            lastColor.delete(el);
-
-            const vars = lastVars.get(el);
-            vars?.forEach((_, name) => el.style.removeProperty(name));
-            lastVars.delete(el);
-        },
     };
 }
 
 // Shared cache instance (WeakMaps won't leak after unmount / PJAX swaps).
 const style = createStyleCache();
-const activeDrivers = new Set();
-const observedSections = new Map();
-let scrollSource = null;
-let layoutObserver = null;
-let resizeRaf = null;
-
-const currentScrollY = () => window.lenis?.animatedScroll ?? window.scrollY ?? 0;
-
-const notifyDrivers = scrollY => {
-    for (const driver of activeDrivers) {
-        driver.onScroll(scrollY);
-    }
-};
-
-const onNativeScroll = () => notifyDrivers(window.scrollY || 0);
-const onWindowResize = () => {
-    if (resizeRaf != null) return;
-
-    resizeRaf = requestAnimationFrame(() => {
-        resizeRaf = null;
-        for (const driver of activeDrivers) {
-            driver._handleResize();
-        }
-    });
-};
-const onLenisScroll = instance => notifyDrivers(instance?.animatedScroll ?? currentScrollY());
-const intersectionObserver = new IntersectionObserver(
-    entries => {
-        for (const entry of entries) {
-            const record = observedSections.get(entry.target);
-            record?.driver?._handleIntersection(record.section, entry.isIntersecting);
-        }
-    },
-    { rootMargin: "100px 0px 100px 0px", threshold: 0 }
-);
-
-const connectSharedObservers = () => {
-    if (activeDrivers.size !== 1) return;
-
-    window.addEventListener("resize", onWindowResize, { passive: true });
-
-    if (window.lenis?.on) {
-        scrollSource = window.lenis;
-        scrollSource.on("scroll", onLenisScroll);
-    } else {
-        scrollSource = window;
-        window.addEventListener("scroll", onNativeScroll, { passive: true });
-    }
-
-    if ("ResizeObserver" in window && document.body) {
-        layoutObserver = new ResizeObserver(onWindowResize);
-        layoutObserver.observe(document.body);
-    }
-};
-
-const disconnectSharedObservers = () => {
-    if (activeDrivers.size) return;
-
-    window.removeEventListener("resize", onWindowResize);
-    window.removeEventListener("scroll", onNativeScroll);
-    scrollSource?.off?.("scroll", onLenisScroll);
-    scrollSource = null;
-    layoutObserver?.disconnect();
-    layoutObserver = null;
-    if (resizeRaf != null) {
-        cancelAnimationFrame(resizeRaf);
-        resizeRaf = null;
-    }
-};
 
 class ScrollDriver {
     constructor() {
         this._wh = window.innerHeight;
         this._sections = [];
         this._enabled = false;
-        this._latestScrollY = currentScrollY();
+        this._latestScrollY = window.scrollY || 0;
         this._rafId = null;
         this._activeSections = new Set();
 
-        this._handleResize = () => {
+        this._io = new IntersectionObserver(
+            (entries) => {
+                let needsUpdate = false;
+                for (const entry of entries) {
+                    const s = this._sectionsByEl.get(entry.target);
+                    if (!s) continue;
+                    entry.isIntersecting ? s.el.classList.add("viewed") : s.el.classList.remove("viewed");
+
+                    // Track which sections are near the viewport to avoid updating everything on scroll.
+                    if (entry.isIntersecting) {
+                        if (!this._activeSections.has(s)) {
+                            this._activeSections.add(s);
+                            needsUpdate = true;
+                        }
+                    } else {
+                        if (this._activeSections.has(s)) {
+                            // One last update on leave to apply a final boundary (0/100) state if needed.
+                            if (this._enabled) {
+                                try { s._update(this._latestScrollY); } catch { }
+                            }
+                            this._activeSections.delete(s);
+                            needsUpdate = true;
+                        }
+                    }
+
+                    // If an element just entered the viewport, run at least one update
+                    // even if the user hasn't scrolled yet.
+                    if (entry.isIntersecting) needsUpdate = true;
+                }
+                if (this._enabled && needsUpdate) this._schedule();
+            },
+            { rootMargin: "100px 0px 100px 0px", threshold: 0 }
+        );
+
+        this._sectionsByEl = new Map();
+
+        this._onResize = () => {
             this._wh = window.innerHeight;
-            this._latestScrollY = currentScrollY();
             for (const s of this._sections) s._measure(this._wh);
-            this._syncActiveSections();
             this._schedule();
         };
-    }
 
-    _handleIntersection(section, isIntersecting) {
-        this._latestScrollY = currentScrollY();
-        section.el.classList.toggle("viewed", isIntersecting);
-
-        if (isIntersecting) {
-            this._activeSections.add(section);
-        } else if (this._activeSections.has(section)) {
-            this._activeSections.delete(section);
-        }
-
-        // The next scroll/resize tick will update active sections. Updating from
-        // IntersectionObserver itself can race Lenis wheel smoothing and produce
-        // a transient boundary value.
+        this._onScroll = () => {
+            this.onScroll(window.scrollY || 0);
+        };
     }
 
     // Public: allows external scroll drivers (e.g. Lenis).
@@ -290,42 +225,22 @@ class ScrollDriver {
         this._schedule();
     }
 
-    refresh() {
-        this._handleResize();
-        this.onScroll(currentScrollY());
-    }
-
     _schedule() {
         if (this._rafId != null) return;
         this._rafId = requestAnimationFrame(() => {
             this._rafId = null;
             const y = this._latestScrollY;
-            for (const s of this._activeSections) s._update(y);
+            const list = this._activeSections.size ? this._activeSections : this._sections;
+            for (const s of list) s._update(y);
         });
-    }
-
-    _syncActiveSections() {
-        const margin = 100;
-
-        for (const s of this._sections) {
-            const rect = s.el.getBoundingClientRect();
-            const isActive = rect.bottom >= -margin && rect.top <= this._wh + margin;
-
-            s.el.classList.toggle("viewed", isActive);
-            if (isActive) {
-                this._activeSections.add(s);
-            } else {
-                this._activeSections.delete(s);
-            }
-        }
     }
 
     add(el, type = "top-bottom", animation) {
         if (!el) return null;
         const s = new SectionSection(el, type, animation, () => this._wh);
         this._sections.push(s);
-        observedSections.set(el, { driver: this, section: s });
-        intersectionObserver.observe(el);
+        this._sectionsByEl.set(el, s);
+        this._io.observe(el);
         s._measure(this._wh);
         return s;
     }
@@ -333,34 +248,21 @@ class ScrollDriver {
     enable() {
         if (this._enabled) return;
         this._enabled = true;
-        activeDrivers.add(this);
-        connectSharedObservers();
-        this._handleResize();
-        this.onScroll(currentScrollY());
+        window.addEventListener("resize", this._onResize, { passive: true });
+        window.addEventListener("scroll", this._onScroll, { passive: true });
+        this._onResize();
+        this._onScroll();
     }
 
     disable() {
         if (!this._enabled) return;
         this._enabled = false;
-        activeDrivers.delete(this);
-        disconnectSharedObservers();
+        window.removeEventListener("resize", this._onResize);
+        window.removeEventListener("scroll", this._onScroll);
         if (this._rafId != null) {
             cancelAnimationFrame(this._rafId);
             this._rafId = null;
         }
-    }
-
-    destroy() {
-        this.disable();
-
-        for (const s of this._sections) {
-            intersectionObserver.unobserve(s.el);
-            observedSections.delete(s.el);
-            s.el.classList.remove("viewed");
-        }
-
-        this._activeSections.clear();
-        this._sections.length = 0;
     }
 }
 
@@ -647,9 +549,6 @@ class SectionSection {
         }
     }
 
-    /**
-     * Calls `onscroll` with a clamped value from 0 to 100.
-     */
     timeline(start, end, onscroll) {
         const s = Number(start);
         const e = Number(end);
@@ -664,17 +563,17 @@ class SectionSection {
         this._lastTimelineRawValue = rawOut;
         const gate = this._getGateBoundary();
         if (!gate.ok) {
-            if (gate.boundary != null) onscroll(num0(this._lastTimelineValue) * 100);
+            if (gate.boundary != null) onscroll(num0(gate.boundary) / 100);
             return;
         }
-        onscroll(out * 100);
+        onscroll(out);
     }
 
     /**
      * In/Out timeline helper:
-     * - 0 -> 100 during [inStart, inEnd]
-     * - stays 100 between (inEnd .. outStart)
-     * - 100 -> 0 during [outStart, outEnd]
+     * - 0 -> 1 during [inStart, inEnd]
+     * - stays 1 between (inEnd .. outStart)
+     * - 1 -> 0 during [outStart, outEnd]
      * - 0 outside
      *
      * @example
@@ -699,17 +598,17 @@ class SectionSection {
             out = 1 - (p - c) / denom;
         }
 
-        // Reuse the same gating behavior as timeline() and emit one last 0/100 boundary.
+        // Reuse the same gating behavior as timeline() (and still emit one last 0/1).
         // We store raw as "virtual timeline" value for compatibility with toggle/trigger logic.
         this._lastTimelineValue = num0(Math.max(0, Math.min(1, out)));
         this._lastTimelineRawValue = num0(out);
 
         const gate = this._getGateBoundary();
         if (!gate.ok) {
-            if (gate.boundary != null) onscroll(num0(this._lastTimelineValue) * 100);
+            if (gate.boundary != null) onscroll(num0(gate.boundary) / 100);
             return;
         }
-        onscroll(num0(this._lastTimelineValue) * 100);
+        onscroll(num0(this._lastTimelineValue));
     }
 
     /**

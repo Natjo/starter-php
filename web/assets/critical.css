@@ -661,7 +661,7 @@ body {
     color: #fff;
     box-sizing: border-box;
    
-    padding: 1.6rem 2.4rem;
+    padding: 1.5rem 2.4rem;
     display: inline-flex;
     align-items: center;
     gap: .8rem;
@@ -744,6 +744,7 @@ body {
     #nav {
         display: flex;
         gap: 4rem;
+        font-weight: 300;
     }
 }
 

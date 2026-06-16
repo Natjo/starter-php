@@ -34,6 +34,8 @@
         align-self: stretch;
     }
 
+
+
     .footer-content {
         grid-column: full;
         grid-row: 1;
@@ -61,19 +63,27 @@
     }
 
     nav {
-        margin-bottom: 1.8rem;
+        margin-bottom: 1.4rem;
+        font-size: 1.6rem;
+        font-weight: 300;
 
         ul {
             display: flex;
             flex-direction: column;
-            gap: 1.8rem;
+            gap: 1.4rem;
         }
+
     }
-
-
-    .footer-content {
-        animation: parallax 1s linear both;
-        animation-timeline: view();
-        animation-range: entry 0% exit 0%;
+    small {
+        font-size: 1.6rem;
+        opacity: 0.7;
+        font-weight: 300;
+    }
+    @supports (animation-timeline: view()) {
+        .footer-content {
+            animation: parallax 1s linear both;
+            animation-timeline: view();
+            animation-range: entry 0% exit 0%;
+        }
     }
 }

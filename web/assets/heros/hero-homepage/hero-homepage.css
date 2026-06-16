@@ -28,6 +28,7 @@
         opacity: .8;
         line-height: 3rem;
         padding-block: 1rem;
+        font-weight: 300;
     }
 
     .hybrid_ai {
@@ -50,17 +51,12 @@
     }
 
 
-
-
     @supports (animation-timeline: view()) {
-        @media (prefers-reduced-motion: no-preference) {
-            .hero-content {
-                animation: parallax1 1s linear both;
-                animation-timeline: view();
-                animation-range: entry 0% exit 100%;
-            }
+        .hero-content {
+            animation: parallax1 1s linear both;
+            animation-timeline: view();
+            animation-range: entry 0% exit 100%;
         }
     }
-
 }
 /*# sourceMappingURL=hero-homepage.css.map */

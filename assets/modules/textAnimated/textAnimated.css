@@ -1,20 +1,19 @@
 .text-animated {
-    --p: 0;
-    --denom: 1;
     --softness: 10;
-    color: rgba(255, 255, 255, 0.4);
-    /* opacity: .5; */
+    color: #fff;
+    contain: paint;
 
-    &:not(.is-text-animated-ready) :not(.tooltip):not(.tooltip *) {
-        color: inherit;
-    }
 
     &.viewed .char {
         will-change: translate, scale, opacity;
     }
 
+    span {
+        display: inline-block;
+    }
+
     .char {
-       // display: inline-block;
+        // display: inline-block;
         /* Per-char progress computed from root vars set by JS:
            --p, --denom, --softness, and per-char --i */
         --t: calc(var(--p) * (var(--denom) + var(--softness)));
@@ -34,7 +33,7 @@
     .char {
         color: color-mix(in srgb,
                 rgba(255, 255, 255, .4) calc((1 - var(--progress)) * 100%),
-                #fff calc(var(--progress) * 100%));
+                currentColor calc(var(--progress) * 100%));
     }
 }
 
